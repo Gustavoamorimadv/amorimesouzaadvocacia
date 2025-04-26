@@ -2,28 +2,38 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Amorim & Souza Advocacia</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: 'Roboto', sans-serif;
       margin: 0;
-      background-color: #f4f4f4;
+      font-family: 'Poppins', sans-serif;
       color: #333;
-      background-image: url('AMORIM & SOUZA.png'); /* imagem de fundo */
-      background-repeat: no-repeat;
-      background-position: center;
-      background-attachment: fixed;
-      background-size: 40%;
-      opacity: 0.98;
+      background: #f9f9f9 url('AMORIM & SOUZA.png') no-repeat center center fixed;
+      background-size: 50%;
+      background-blend-mode: lighten;
+      min-height: 100vh;
     }
     header {
-      background-color: #003366;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: #003366cc;
+      backdrop-filter: blur(8px);
       color: white;
-      padding: 40px 20px;
+      padding: 15px 0;
       text-align: center;
-      position: relative;
+      z-index: 1000;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
     header h1 a {
       color: white;
@@ -31,87 +41,85 @@
       transition: color 0.3s;
     }
     header h1 a:hover {
-      color: #cccccc;
+      color: #cce0ff;
     }
-    header img.icon {
-      vertical-align: middle;
-      margin-right: 10px;
-      width: 50px;
-      height: auto;
-    }
-    header p {
-      margin-top: 10px;
-      font-size: 18px;
+    header img {
+      width: 32px;
+      height: 32px;
     }
     nav {
+      margin-top: 80px;
       background: #002244;
       text-align: center;
+      padding: 10px 0;
     }
     nav a {
-      display: inline-block;
-      padding: 15px 20px;
       color: white;
+      margin: 0 15px;
       text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s;
     }
     nav a:hover {
-      background: #004080;
+      color: #66b2ff;
     }
     section {
       padding: 80px 20px;
       text-align: center;
-      background-color: rgba(255, 255, 255, 0.8);
-      margin: 20px;
-      border-radius: 10px;
     }
     h2 {
-      font-size: 28px;
       color: #003366;
+      margin-bottom: 20px;
     }
     .area-boxes {
       display: flex;
-      justify-content: center;
       flex-wrap: wrap;
-      gap: 30px;
-      margin-top: 40px;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 30px;
     }
     .box {
       background: white;
-      border-radius: 8px;
+      border-radius: 12px;
       padding: 30px;
-      width: 280px;
-      text-align: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 300px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      transition: transform 0.3s;
       text-decoration: none;
       color: inherit;
-      transition: transform 0.2s ease;
     }
     .box:hover {
-      transform: translateY(-5px);
+      transform: translateY(-10px);
     }
     .box img {
-      width: 50px;
+      width: 60px;
       margin-bottom: 15px;
     }
     footer {
+      margin-top: 50px;
       background: #003366;
       color: white;
       text-align: center;
-      padding: 30px 20px;
-      margin-top: 40px;
+      padding: 20px;
+      font-size: 14px;
     }
     footer a {
-      color: white;
+      color: #66b2ff;
+      text-decoration: none;
+    }
+    footer a:hover {
       text-decoration: underline;
     }
   </style>
 </head>
 <body>
+
   <header>
     <h1>
-      <img src="https://img.icons8.com/ios-filled/50/ffffff/scales.png" class="icon" alt="Balança de Justiça">
+      <img src="https://img.icons8.com/ios-filled/50/ffffff/scales.png" alt="Balança de Justiça">
       <a href="index.html">Amorim & Souza Advocacia</a>
     </h1>
-    <p>Excelência e ética em primeiro lugar</p>
+    <p style="font-size:14px; margin-top:5px;">Excelência e ética em primeiro lugar</p>
   </header>
 
   <nav>
@@ -122,19 +130,19 @@
 
   <section id="sobre">
     <h2>Sobre o Escritório</h2>
-    <p>O escritório Amorim & Souza atua com dedicação e seriedade nas áreas de Direito Civil e Empresarial, buscando sempre as melhores soluções jurídicas para seus clientes.</p>
+    <p>Atuamos com dedicação e seriedade nas áreas de Direito Civil e Empresarial, sempre buscando excelência nas soluções jurídicas para nossos clientes.</p>
   </section>
 
   <section id="areas">
     <h2>Áreas de Atuação</h2>
     <div class="area-boxes">
       <a class="box" href="civil.html">
-        <img src="https://img.icons8.com/ios-filled/50/003366/contract.png"/>
+        <img src="https://img.icons8.com/ios-filled/50/003366/contract.png" alt="Contrato">
         <h3>Direito Civil</h3>
         <p>Contratos, responsabilidade civil, família e sucessões.</p>
       </a>
       <a class="box" href="empresarial.html">
-        <img src="https://img.icons8.com/ios-filled/50/003366/briefcase.png"/>
+        <img src="https://img.icons8.com/ios-filled/50/003366/briefcase.png" alt="Empresarial">
         <h3>Direito Empresarial</h3>
         <p>Consultoria, contratos empresariais e contencioso empresarial.</p>
       </a>
@@ -144,5 +152,6 @@
   <footer>
     <p>&copy; 2025 Amorim & Souza Advocacia. Todos os direitos reservados.<br>CNPJ: 60.546.044/0001-43</p>
   </footer>
+
 </body>
 </html>

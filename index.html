@@ -18,21 +18,13 @@
       padding: 40px 20px;
       text-align: center;
     }
-    header a.logo {
+    header h1 a {
       color: white;
       text-decoration: none;
-      font-size: 36px;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      transition: transform 0.3s ease;
+      transition: color 0.3s;
     }
-    header a.logo:hover {
-      transform: scale(1.05);
-    }
-    header a.logo img {
-      width: 40px;
-      height: 40px;
+    header h1 a:hover {
+      color: #cccccc;
     }
     header p {
       margin-top: 10px;
@@ -47,7 +39,6 @@
       padding: 15px 20px;
       color: white;
       text-decoration: none;
-      transition: background 0.3s ease;
     }
     nav a:hover {
       background: #004080;
@@ -99,10 +90,10 @@
 </head>
 <body>
   <header>
-    <a href="index.html" class="logo">
-      <img src="https://img.icons8.com/ios-filled/50/ffffff/scales.png" alt="Balança Justiça">
-      Amorim & Souza Advocacia
-    </a>
+    <h1>
+      <img src="https://img.icons8.com/ios-filled/50/ffffff/scales.png" alt="Balança de Justiça" style="vertical-align: middle; margin-right: 10px;">
+      <a href="index.html">Amorim & Souza Advocacia</a>
+    </h1>
     <p>Excelência e ética em primeiro lugar</p>
   </header>
 
@@ -121,12 +112,12 @@
     <h2>Áreas de Atuação</h2>
     <div class="area-boxes">
       <a class="box" href="civil.html">
-        <img src="https://img.icons8.com/ios-filled/50/003366/contract.png" alt="Direito Civil"/>
+        <img src="https://img.icons8.com/ios-filled/50/003366/contract.png"/>
         <h3>Direito Civil</h3>
         <p>Contratos, responsabilidade civil, família e sucessões.</p>
       </a>
       <a class="box" href="empresarial.html">
-        <img src="https://img.icons8.com/ios-filled/50/003366/briefcase.png" alt="Direito Empresarial"/>
+        <img src="https://img.icons8.com/ios-filled/50/003366/briefcase.png"/>
         <h3>Direito Empresarial</h3>
         <p>Consultoria, contratos empresariais e contencioso empresarial.</p>
       </a>
@@ -134,7 +125,7 @@
   </section>
 
   <footer>
-    <p>&copy; 2025 Amorim & Souza Advocacia. Todos os direitos reservados.</p>
+    <p>&copy; 2025 Amorim & Souza Advocacia. Todos os direitos reservados.<br>CNPJ: 60.546.044/0001-43</p>
   </footer>
 </body>
 </html>

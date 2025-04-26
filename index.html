@@ -18,19 +18,21 @@
       padding: 40px 20px;
       text-align: center;
     }
-    header h1 {
-      margin: 0;
-      font-size: 36px;
-    }
-    header h1 a {
+    header a.logo {
       color: white;
       text-decoration: none;
-      transition: color 0.3s, transform 0.3s;
-      display: inline-block;
+      font-size: 36px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: transform 0.3s ease;
     }
-    header h1 a:hover {
-      color: #cce0ff;
+    header a.logo:hover {
       transform: scale(1.05);
+    }
+    header a.logo img {
+      width: 40px;
+      height: 40px;
     }
     header p {
       margin-top: 10px;
@@ -45,6 +47,7 @@
       padding: 15px 20px;
       color: white;
       text-decoration: none;
+      transition: background 0.3s ease;
     }
     nav a:hover {
       background: #004080;
@@ -96,7 +99,10 @@
 </head>
 <body>
   <header>
-    <h1><a href="index.html">Amorim & Souza Advocacia</a></h1>
+    <a href="index.html" class="logo">
+      <img src="https://img.icons8.com/ios-filled/50/ffffff/scales.png" alt="Balança Justiça">
+      Amorim & Souza Advocacia
+    </a>
     <p>Excelência e ética em primeiro lugar</p>
   </header>
 
@@ -115,12 +121,12 @@
     <h2>Áreas de Atuação</h2>
     <div class="area-boxes">
       <a class="box" href="civil.html">
-        <img src="https://img.icons8.com/ios-filled/50/003366/contract.png"/>
+        <img src="https://img.icons8.com/ios-filled/50/003366/contract.png" alt="Direito Civil"/>
         <h3>Direito Civil</h3>
         <p>Contratos, responsabilidade civil, família e sucessões.</p>
       </a>
       <a class="box" href="empresarial.html">
-        <img src="https://img.icons8.com/ios-filled/50/003366/briefcase.png"/>
+        <img src="https://img.icons8.com/ios-filled/50/003366/briefcase.png" alt="Direito Empresarial"/>
         <h3>Direito Empresarial</h3>
         <p>Consultoria, contratos empresariais e contencioso empresarial.</p>
       </a>

@@ -2,92 +2,95 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Amorim & Souza Advocacia</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
+      font-family: 'Roboto', sans-serif;
       margin: 0;
-      font-family: 'Poppins', sans-serif;
+      background-color: #f4f4f4;
       color: #333;
-      background: #f9f9f9 url('AMORIM & SOUZA.png') no-repeat center center fixed;
-      background-size: 50%;
-      background-blend-mode: lighten;
-      min-height: 100vh;
     }
     header {
-      position: fixed;
-      top: 0;
-      width: 100%;
-      background: #003366cc;
-      backdrop-filter: blur(8px);
+      background: url('AMORIM & SOUZA.png') no-repeat center center/cover;
       color: white;
-      padding: 15px 0;
+      padding: 100px 20px;
       text-align: center;
-      z-index: 1000;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      position: relative;
     }
-    header h1 {
-      margin: 0;
-      font-size: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
+    header::after {
+      content: "";
+      background: rgba(0, 0, 0, 0.5);
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+    }
+    header h1, header p {
+      position: relative;
+      z-index: 1;
     }
     header h1 a {
       color: white;
       text-decoration: none;
+      font-size: 40px;
       transition: color 0.3s;
     }
     header h1 a:hover {
-      color: #cce0ff;
+      color: #cccccc;
     }
     header img {
-      width: 32px;
-      height: 32px;
-    }
-    /* Espaço extra por causa do header fixo */
-    .spacer {
-      height: 100px;
+      vertical-align: middle;
+      margin-right: 10px;
     }
     nav {
       background: #002244;
       text-align: center;
-      padding: 10px 0;
+      padding: 15px 0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
     nav a {
-      color: white;
+      display: inline-block;
       margin: 0 15px;
+      color: white;
       text-decoration: none;
-      font-weight: 500;
-      transition: all 0.3s;
+      font-weight: bold;
+      transition: color 0.3s;
     }
     nav a:hover {
-      color: #66b2ff;
+      color: #dddddd;
     }
     section {
       padding: 80px 20px;
       text-align: center;
     }
     h2 {
+      font-size: 32px;
       color: #003366;
       margin-bottom: 20px;
     }
+    p {
+      font-size: 18px;
+      max-width: 800px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+    }
     .area-boxes {
       display: flex;
-      flex-wrap: wrap;
       justify-content: center;
+      flex-wrap: wrap;
       gap: 40px;
-      margin-top: 30px;
+      margin-top: 40px;
     }
     .box {
       background: white;
       border-radius: 12px;
       padding: 30px;
       width: 300px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-      transition: transform 0.3s;
+      text-align: center;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
       text-decoration: none;
       color: inherit;
     }
@@ -99,33 +102,28 @@
       margin-bottom: 15px;
     }
     footer {
-      margin-top: 50px;
       background: #003366;
       color: white;
       text-align: center;
-      padding: 20px;
+      padding: 40px 20px;
       font-size: 14px;
+      margin-top: 60px;
     }
     footer a {
-      color: #66b2ff;
-      text-decoration: none;
-    }
-    footer a:hover {
+      color: white;
       text-decoration: underline;
     }
   </style>
 </head>
-<body>
 
+<body>
   <header>
     <h1>
       <img src="https://img.icons8.com/ios-filled/50/ffffff/scales.png" alt="Balança de Justiça">
       <a href="index.html">Amorim & Souza Advocacia</a>
     </h1>
-    <p style="font-size:14px; margin-top:5px;">Excelência e ética em primeiro lugar</p>
+    <p>Excelência e ética em primeiro lugar</p>
   </header>
-
-  <div class="spacer"></div> <!-- Aqui adiciona o espaço -->
 
   <nav>
     <a href="sobre.html">Sobre</a>
@@ -135,19 +133,24 @@
 
   <section id="sobre">
     <h2>Sobre o Escritório</h2>
-    <p>Atuamos com dedicação e seriedade nas áreas de Direito Civil e Empresarial, sempre buscando excelência nas soluções jurídicas para nossos clientes.</p>
+    <p>O escritório Amorim & Souza atua com dedicação e seriedade nas áreas de Direito Civil e Empresarial, buscando sempre as melhores soluções jurídicas para seus clientes, com foco em resultados e ética profissional.</p>
+  </section>
+
+  <section id="valores">
+    <h2>Valores do Escritório</h2>
+    <p>Nosso trabalho é baseado em excelência, ética, comprometimento e respeito absoluto aos interesses dos nossos clientes, sempre buscando inovação e eficiência na prestação dos serviços jurídicos.</p>
   </section>
 
   <section id="areas">
     <h2>Áreas de Atuação</h2>
     <div class="area-boxes">
       <a class="box" href="civil.html">
-        <img src="https://img.icons8.com/ios-filled/50/003366/contract.png" alt="Contrato">
+        <img src="https://img.icons8.com/ios-filled/50/003366/contract.png" alt="Direito Civil">
         <h3>Direito Civil</h3>
         <p>Contratos, responsabilidade civil, família e sucessões.</p>
       </a>
       <a class="box" href="empresarial.html">
-        <img src="https://img.icons8.com/ios-filled/50/003366/briefcase.png" alt="Empresarial">
+        <img src="https://img.icons8.com/ios-filled/50/003366/briefcase.png" alt="Direito Empresarial">
         <h3>Direito Empresarial</h3>
         <p>Consultoria, contratos empresariais e contencioso empresarial.</p>
       </a>
@@ -155,8 +158,8 @@
   </section>
 
   <footer>
-    <p>&copy; 2025 Amorim & Souza Advocacia. Todos os direitos reservados.<br>CNPJ: 60.546.044/0001-43</p>
+    <p>&copy; 2025 Amorim & Souza Advocacia. Todos os direitos reservados.<br>
+    CNPJ: 60.546.044/0001-43</p>
   </footer>
-
 </body>
 </html>

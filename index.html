@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AMORIM & SOUZA ADVOCACIA</title>
+  <title>Amorim & Souza Advocacia</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <style>
     * {
@@ -13,7 +13,7 @@
     }
     body {
       font-family: 'Roboto', sans-serif;
-      background-color: #ffffff;
+      background: #ffffff;
       color: #333;
     }
     header {
@@ -23,7 +23,7 @@
       background-repeat: no-repeat;
       color: white;
       padding: 120px 20px 80px;
-      text-align: left;
+      text-align: center;
       position: relative;
     }
     header::after {
@@ -42,10 +42,11 @@
       color: white;
       text-decoration: none;
       font-size: 2.8em;
+      font-family: 'Roboto', sans-serif;
+      transition: color 0.3s, transform 0.3s;
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      transition: color 0.3s, transform 0.3s;
     }
     header h1 a:hover {
       color: #ccc;
@@ -84,10 +85,6 @@
       color: #003366;
       margin-bottom: 20px;
     }
-    p {
-      font-size: 18px;
-      margin-bottom: 15px;
-    }
     .area-boxes {
       display: flex;
       justify-content: center;
@@ -101,6 +98,7 @@
       padding: 30px;
       width: 300px;
       box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      text-align: center;
       text-decoration: none;
       color: inherit;
       transition: transform 0.3s, box-shadow 0.3s;
@@ -130,7 +128,7 @@
   <header>
     <h1>
       <img src="https://img.icons8.com/ios-filled/50/ffffff/scales.png" alt="Balança da Justiça">
-      <a href="index.html">Amorim & Souza Advocacia</a>
+      <a href="/index.html">Amorim & Souza Advocacia</a>
     </h1>
     <p>Excelência e ética em primeiro lugar</p>
   </header>
@@ -150,14 +148,24 @@
     <h2>Áreas de Atuação</h2>
     <div class="area-boxes">
       <a class="box" href="civil.html">
-        <img src="https://img.icons8.com/ios-filled/50/003366/contract.png" alt="Contrato">
+        <img src="https://img.icons8.com/ios-filled/50/003366/contract.png"/>
         <h3>Direito Civil</h3>
         <p>Contratos, responsabilidade civil, família e sucessões.</p>
       </a>
       <a class="box" href="empresarial.html">
-        <img src="https://img.icons8.com/ios-filled/50/003366/briefcase.png" alt="Empresarial">
+        <img src="https://img.icons8.com/ios-filled/50/003366/briefcase.png"/>
         <h3>Direito Empresarial</h3>
         <p>Consultoria, contratos empresariais e contencioso empresarial.</p>
+      </a>
+      <a class="box" href="tributario.html">
+        <img src="https://img.icons8.com/ios-filled/50/003366/money.png"/>
+        <h3>Direito Tributário e Fiscal</h3>
+        <p>Planejamento tributário, contencioso fiscal e consultoria especializada.</p>
+      </a>
+      <a class="box" href="previdenciario.html">
+        <img src="https://img.icons8.com/ios-filled/50/003366/retirement.png"/>
+        <h3>Direito Previdenciário</h3>
+        <p>Aposentadorias, pensões, revisões e benefícios do INSS.</p>
       </a>
     </div>
   </section>

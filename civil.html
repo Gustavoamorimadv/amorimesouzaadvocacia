@@ -4,37 +4,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Direito Civil - Amorim & Souza Advocacia</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
   <style>
-    /* [Mesmos estilos da index.html] */
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Roboto', sans-serif; background: #fff; color: #333; }
-    header {
-      background-image: url('https://images.unsplash.com/photo-1531545514256-b1400bc00f31?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80');
-      background-size: cover; background-position: center;
-      color: white; padding: 100px 20px 60px; text-align: center; position: relative;
-    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Roboto', sans-serif; background: #ffffff; color: #333; }
+    header { background-image: url('https://images.squarespace-cdn.com/content/v1/581c7148be6594d155f50234/1581617132961-PNOIJYH2ZYILG6JP9XRV/macroarq_arquitetura_interiores_corporativo_projeto_escritorio_advocacia_hall_entrada_piso_elevado_carpete_madeira_cumaru_divisoria_serralheria_vidro_funcional_clean.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat; color: white; padding: 120px 20px 80px; text-align: center; position: relative; }
+    header::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3); z-index: 1; }
     header h1, header p { position: relative; z-index: 2; }
-    header h1 a {
-      color: white; text-decoration: none; font-size: 2.5em;
-      display: inline-flex; align-items: center; gap: 10px;
-      transition: color 0.3s, transform 0.3s;
-    }
+    header h1 a { color: white; text-decoration: none; font-size: 2.8em; font-family: 'Montserrat', sans-serif; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; transition: color 0.3s, transform 0.3s; display: inline-flex; align-items: center; gap: 10px; }
     header h1 a:hover { color: #ccc; transform: scale(1.05); }
-    header img { width: 40px; }
+    header img { width: 45px; }
+    header p { margin-top: 12px; font-size: 18px; }
     nav { background: #002244; text-align: center; position: sticky; top: 0; z-index: 999; }
-    nav a {
-      display: inline-block; padding: 15px 20px; color: white; text-decoration: none;
-      transition: background 0.3s;
-    }
+    nav a { display: inline-block; padding: 15px 20px; color: white; text-decoration: none; transition: background 0.3s; }
     nav a:hover { background: #004080; }
     section { padding: 100px 20px; text-align: center; }
-    h2 { font-size: 32px; color: #003366; margin-bottom: 20px; }
-    p { font-size: 18px; margin-bottom: 10px; }
-    footer {
-      background: #003366; color: white; text-align: center;
-      padding: 40px 20px; font-size: 14px;
-    }
+    h2 { font-size: 32px; color: #003366; margin-bottom: 30px; }
+    p { max-width: 800px; margin: 0 auto; line-height: 1.6; font-size: 18px; }
+    footer { background: #003366; color: white; text-align: center; padding: 50px 20px; font-size: 14px; margin-top: 100px; }
     footer a { color: white; text-decoration: underline; }
   </style>
 </head>
@@ -42,21 +30,22 @@
   <header>
     <h1>
       <img src="https://img.icons8.com/ios-filled/50/ffffff/scales.png" alt="Balança da Justiça">
-      <a href="index.html">Amorim & Souza Advocacia</a>
+      <a href="/index.html">AMORIM & SOUZA ADVOCACIA</a>
     </h1>
     <p>Excelência e ética em primeiro lugar</p>
   </header>
 
   <nav>
+    <a href="index.html">Início</a>
     <a href="sobre.html">Sobre</a>
-    <a href="index.html#areas">Áreas de Atuação</a>
     <a href="contato.html">Contato</a>
+    <a href="enderecos.html">Endereços</a>
+    <a href="acompanhamento.html">Acompanhamento Processual</a>
   </nav>
 
   <section>
     <h2>Direito Civil</h2>
-    <p>Atuamos em contratos, responsabilidade civil, direito de família, sucessões e muito mais.</p>
-    <p>Nosso objetivo é proteger seus direitos e encontrar soluções eficazes para cada caso.</p>
+    <p>Atuamos em causas envolvendo contratos, responsabilidade civil, direito de família e sucessões, sempre priorizando soluções rápidas e eficientes para nossos clientes.</p>
   </section>
 
   <footer>

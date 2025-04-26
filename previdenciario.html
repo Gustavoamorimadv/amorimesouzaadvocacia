@@ -6,31 +6,127 @@
   <title>Direito Previdenciário - Amorim & Souza Advocacia</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <style>
+    /* Estilos iguais ao index.html */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
     body {
       font-family: 'Roboto', sans-serif;
-      padding: 40px;
       background: #ffffff;
       color: #333;
     }
-    h1 {
-      color: #003366;
+    header {
+      background-image: url('https://images.squarespace-cdn.com/content/v1/581c7148be6594d155f50234/1581617132961-PNOIJYH2ZYILG6JP9XRV/macroarq_arquitetura_interiores_corporativo_projeto_escritorio_advocacia_hall_entrada_piso_elevado_carpete_madeira_cumaru_divisoria_serralheria_vidro_funcional_clean.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      color: white;
+      padding: 120px 20px 80px;
+      text-align: center;
+      position: relative;
+    }
+    header::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 1;
+    }
+    header h1, header p {
+      position: relative;
+      z-index: 2;
+    }
+    header h1 a {
+      color: white;
+      text-decoration: none;
+      font-size: 2.8em;
+      font-family: 'Roboto', sans-serif;
+      transition: color 0.3s, transform 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    header h1 a:hover {
+      color: #ccc;
+      transform: scale(1.05);
+    }
+    header img {
+      width: 45px;
+    }
+    header p {
+      margin-top: 12px;
+      font-size: 18px;
+    }
+    nav {
+      background: #002244;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+    }
+    nav a {
+      display: inline-block;
+      padding: 15px 20px;
+      color: white;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+    nav a:hover {
+      background: #004080;
+    }
+    section {
+      padding: 100px 20px;
+      max-width: 900px;
+      margin: auto;
+      text-align: center;
+    }
+    h2 {
       font-size: 32px;
+      color: #003366;
       margin-bottom: 20px;
     }
     p {
       font-size: 18px;
       line-height: 1.6;
     }
-    a {
-      color: #003366;
+    footer {
+      background: #003366;
+      color: white;
+      text-align: center;
+      padding: 40px 20px;
+      font-size: 14px;
+    }
+    footer a {
+      color: white;
       text-decoration: underline;
     }
   </style>
 </head>
 <body>
-  <h1>Direito Previdenciário</h1>
-  <p>O escritório Amorim & Souza Advocacia oferece suporte completo em Direito Previdenciário, auxiliando seus clientes na concessão de aposentadorias, pensões, revisões de benefícios e processos administrativos e judiciais perante o INSS.</p>
-  <br>
-  <a href="index.html">← Voltar para a página inicial</a>
+  <header>
+    <h1>
+      <img src="https://img.icons8.com/ios-filled/50/ffffff/scales.png" alt="Balança da Justiça">
+      <a href="index.html">Amorim & Souza Advocacia</a>
+    </h1>
+    <p>Excelência e ética em primeiro lugar</p>
+  </header>
+
+  <nav>
+    <a href="index.html#sobre">Sobre</a>
+    <a href="index.html#areas">Áreas de Atuação</a>
+    <a href="contato.html">Contato</a>
+  </nav>
+
+  <section>
+    <h2>Direito Previdenciário</h2>
+    <p>Atuamos na orientação e na defesa dos direitos previdenciários dos nossos clientes, com ênfase na obtenção de aposentadorias, pensões, auxílio-doença, benefícios assistenciais e revisões de benefícios. Nossa equipe presta suporte completo tanto na esfera administrativa quanto judicial contra o INSS.</p>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 Amorim & Souza Advocacia. Todos os direitos reservados.<br>CNPJ: 60.546.044/0001-43</p>
+  </footer>
 </body>
 </html>

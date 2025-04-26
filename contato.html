@@ -4,129 +4,61 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contato - Amorim & Souza Advocacia</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      font-family: 'Roboto', sans-serif;
-      background-color: #ffffff;
-      color: #333;
-    }
-    header {
-      background-image: url('https://imagens.ebc.com.br/lKLSXumojyU0E7wzDBe5SCDyi9Q=/1170x700/smart/https://agenciabrasil.ebc.com.br/sites/default/files/thumbnails/image/_dsc3484_0.jpg?itok=My4n5SS1');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      color: white;
-      padding: 100px 20px 60px;
-      text-align: center;
-    }
-    header h1, header p {
-      position: relative;
-      z-index: 2;
-    }
-    header h1 a {
-      color: white;
-      text-decoration: none;
-      font-size: 2.5em;
-      transition: color 0.3s, transform 0.3s;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-    }
-    header h1 a:hover {
-      color: #ccc;
-      transform: scale(1.05);
-    }
-    header img {
-      width: 40px;
-    }
-    header p {
-      margin-top: 10px;
-      font-size: 18px;
-    }
-    nav {
-      background: #002244;
-      text-align: center;
-      position: sticky;
-      top: 0;
-      z-index: 999;
-    }
-    nav a {
-      display: inline-block;
-      padding: 15px 20px;
-      color: white;
-      text-decoration: none;
-      transition: background 0.3s;
-    }
-    nav a:hover {
-      background: #004080;
-    }
-    section {
-      padding: 100px 20px;
-      text-align: center;
-    }
-    h2 {
-      font-size: 32px;
-      color: #003366;
-      margin-bottom: 20px;
-    }
-    p {
-      font-size: 18px;
-      margin-bottom: 15px;
-    }
-    .contact-info {
-      margin-top: 40px;
-      font-size: 18px;
-      line-height: 1.8;
-    }
-    .contact-info strong {
-      color: #003366;
-    }
-    footer {
-      background: #003366;
-      color: white;
-      text-align: center;
-      padding: 40px 20px;
-      font-size: 14px;
-    }
-    footer a {
-      color: white;
-      text-decoration: underline;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Roboto', sans-serif; background: #ffffff; color: #333; }
+    header { background-image: url('https://images.squarespace-cdn.com/content/v1/581c7148be6594d155f50234/1581617132961-PNOIJYH2ZYILG6JP9XRV/macroarq_arquitetura_interiores_corporativo_projeto_escritorio_advocacia_hall_entrada_piso_elevado_carpete_madeira_cumaru_divisoria_serralheria_vidro_funcional_clean.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat; color: white; padding: 120px 20px 80px; text-align: center; position: relative; }
+    header::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3); z-index: 1; }
+    header h1, header p { position: relative; z-index: 2; }
+    header h1 a { color: white; text-decoration: none; font-size: 2.8em; font-family: 'Montserrat', sans-serif; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; transition: color 0.3s, transform 0.3s; display: inline-flex; align-items: center; gap: 10px; }
+    header h1 a:hover { color: #ccc; transform: scale(1.05); }
+    header img { width: 45px; }
+    header p { margin-top: 12px; font-size: 18px; }
+    nav { background: #002244; text-align: center; position: sticky; top: 0; z-index: 999; }
+    nav a { display: inline-block; padding: 15px 20px; color: white; text-decoration: none; transition: background 0.3s; }
+    nav a:hover { background: #004080; }
+    section { padding: 80px 20px; text-align: center; }
+    h2 { font-size: 32px; color: #003366; margin-bottom: 30px; }
+    form { max-width: 600px; margin: 0 auto; background: #f2f2f2; padding: 40px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    input, textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
+    button { background: #003366; color: white; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; transition: background 0.3s; }
+    button:hover { background: #0055aa; }
+    footer { background: #003366; color: white; text-align: center; padding: 50px 20px; font-size: 14px; margin-top: 40px; }
+    footer a { color: white; text-decoration: underline; }
   </style>
 </head>
 <body>
+
   <header>
     <h1>
       <img src="https://img.icons8.com/ios-filled/50/ffffff/scales.png" alt="Balança da Justiça">
-      <a href="index.html">Amorim & Souza Advocacia</a>
+      <a href="index.html">AMORIM & SOUZA ADVOCACIA</a>
     </h1>
     <p>Excelência e ética em primeiro lugar</p>
   </header>
 
   <nav>
+    <a href="index.html">Início</a>
     <a href="sobre.html">Sobre</a>
-    <a href="index.html#areas">Áreas de Atuação</a>
     <a href="contato.html">Contato</a>
+    <a href="enderecos.html">Endereços</a>
   </nav>
 
-  <section id="contato">
-    <h2>Contato</h2>
-    <p>Entre em contato conosco pelos canais abaixo. Será um prazer atendê-lo(a).</p>
-    <div class="contact-info">
-      <p><strong>Telefone:</strong> (21) 97225-2087</p>
-      <p><strong>Email:</strong> contato@amorimesouzaadvocacia.com</p>
-      <p><strong>Instagram:</strong> <a href="https://instagram.com/amorimesouzaadvocacia" target="_blank">@amorimesouzaadvocacia</a></p>
-    </div>
+  <section>
+    <h2>Entre em Contato</h2>
+    <form action="#" method="post">
+      <input type="text" name="nome" placeholder="Seu nome" required>
+      <input type="email" name="email" placeholder="Seu e-mail" required>
+      <textarea name="mensagem" rows="6" placeholder="Sua mensagem" required></textarea>
+      <button type="submit">Enviar</button>
+    </form>
   </section>
 
   <footer>
     <p>&copy; 2025 Amorim & Souza Advocacia. Todos os direitos reservados.<br>CNPJ: 60.546.044/0001-43</p>
   </footer>
+
 </body>
 </html>

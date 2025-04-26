@@ -3,9 +3,111 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contato | Amorim & Souza Advocacia</title>
+  <title>Contato - Amorim & Souza Advocacia</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #ffffff;
+      color: #333;
+    }
+    header {
+      background-image: url('https://images.unsplash.com/photo-1604079624927-1b7a5fcea4a0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80'); /* MESA DE ESCRITÓRIO COM TELEFONE */
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      color: white;
+      padding: 100px 20px 60px;
+      text-align: center;
+      position: relative;
+    }
+    header::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.3); /* Leve escurecimento */
+      z-index: 1;
+    }
+    header h1, header p {
+      position: relative;
+      z-index: 2;
+    }
+    header h1 a {
+      color: white;
+      text-decoration: none;
+      font-size: 2.5em;
+      transition: color 0.3s, transform 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    header h1 a:hover {
+      color: #ccc;
+      transform: scale(1.05);
+    }
+    header img {
+      width: 40px;
+    }
+    header p {
+      margin-top: 10px;
+      font-size: 18px;
+    }
+    nav {
+      background: #002244;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+    }
+    nav a {
+      display: inline-block;
+      padding: 15px 20px;
+      color: white;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+    nav a:hover {
+      background: #004080;
+    }
+    section {
+      padding: 100px 20px;
+      text-align: center;
+    }
+    h2 {
+      font-size: 32px;
+      color: #003366;
+      margin-bottom: 20px;
+    }
+    p {
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+    .contact-info {
+      margin-top: 40px;
+      font-size: 18px;
+      line-height: 1.8;
+    }
+    .contact-info strong {
+      color: #003366;
+    }
+    footer {
+      background: #003366;
+      color: white;
+      text-align: center;
+      padding: 40px 20px;
+      font-size: 14px;
+    }
+    footer a {
+      color: white;
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -22,12 +124,15 @@
     <a href="contato.html">Contato</a>
   </nav>
 
-  <section>
+  <section id="contato">
     <h2>Contato</h2>
-    <p>Telefone: (21) 97225-2087</p>
-    <p>Email: contato@amorimesouzaadvocacia.com</p>
-    <p>Endereço: Av. das Américas, nº 3333 - Rio de Janeiro/RJ</p>
-    <p>Instagram: <a href="https://instagram.com/amorimesouzaadvocacia" target="_blank">@amorimesouzaadvocacia</a></p>
+    <p>Entre em contato conosco pelos canais abaixo. Será um prazer atendê-lo(a).</p>
+    <div class="contact-info">
+      <p><strong>Telefone:</strong> (21) 97225-2087</p>
+      <p><strong>Email:</strong> contato@amorimesouzaadvocacia.com</p>
+      <p><strong>Endereço:</strong> Av. das Américas, nº 3333</p>
+      <p><strong>Instagram:</strong> <a href="https://instagram.com/amorimesouzaadvocacia" target="_blank">@amorimesouzaadvocacia</a></p>
+    </div>
   </section>
 
   <footer>

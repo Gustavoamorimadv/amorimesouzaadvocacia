@@ -3,112 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contato - Amorim & Souza Advocacia</title>
+  <title>Sobre - Amorim & Souza Advocacia</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      font-family: 'Roboto', sans-serif;
-      background-color: #ffffff;
-      color: #333;
-    }
+    /* [Mesmos estilos da index.html] */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Roboto', sans-serif; background: #fff; color: #333; }
     header {
       background-image: url('https://images.unsplash.com/photo-1531545514256-b1400bc00f31?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      color: white;
-      padding: 100px 20px 60px;
-      text-align: center;
+      background-size: cover; background-position: center;
+      color: white; padding: 100px 20px 60px; text-align: center; position: relative;
     }
-    header h1, header p {
-      position: relative;
-      z-index: 2;
-    }
+    header h1, header p { position: relative; z-index: 2; }
     header h1 a {
-      color: white;
-      text-decoration: none;
-      font-size: 2.5em;
+      color: white; text-decoration: none; font-size: 2.5em;
+      display: inline-flex; align-items: center; gap: 10px;
       transition: color 0.3s, transform 0.3s;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
     }
-    header h1 a:hover {
-      color: #ccc;
-      transform: scale(1.05);
-    }
-    header img {
-      width: 40px;
-    }
-    header p {
-      margin-top: 10px;
-      font-size: 18px;
-    }
-    nav {
-      background: #002244;
-      text-align: center;
-      position: sticky;
-      top: 0;
-      z-index: 999;
-    }
+    header h1 a:hover { color: #ccc; transform: scale(1.05); }
+    header img { width: 40px; }
+    nav { background: #002244; text-align: center; position: sticky; top: 0; z-index: 999; }
     nav a {
-      display: inline-block;
-      padding: 15px 20px;
-      color: white;
-      text-decoration: none;
+      display: inline-block; padding: 15px 20px; color: white; text-decoration: none;
       transition: background 0.3s;
     }
-    nav a:hover {
-      background: #004080;
-    }
-    section {
-      padding: 100px 20px;
-      text-align: center;
-    }
-    h2 {
-      font-size: 32px;
-      color: #003366;
-      margin-bottom: 20px;
-    }
-    p {
-      font-size: 18px;
-      margin-bottom: 15px;
-    }
-    .contact-info {
-      margin-top: 40px;
-      font-size: 18px;
-      line-height: 1.8;
-    }
-    .contact-info strong {
-      color: #003366;
-    }
+    nav a:hover { background: #004080; }
+    section { padding: 100px 20px; text-align: center; }
+    h2 { font-size: 32px; color: #003366; margin-bottom: 20px; }
     footer {
-      background: #003366;
-      color: white;
-      text-align: center;
-      padding: 40px 20px;
-      font-size: 14px;
+      background: #003366; color: white; text-align: center;
+      padding: 40px 20px; font-size: 14px;
     }
-    footer a {
-      color: white;
-      text-decoration: underline;
-    }
+    footer a { color: white; text-decoration: underline; }
   </style>
 </head>
 <body>
   <header>
-    <header style="background-image: url('https://images.unsplash.com/photo-1581091012184-7ab2cf1f0f5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80'); background-size: cover; background-position: center; background-repeat: no-repeat; color: white; padding: 100px 20px 60px; text-align: center;">
-  <h1>
-    <img src="https://img.icons8.com/ios-filled/50/ffffff/scales.png" alt="Balança da Justiça">
-    <a href="index.html">Amorim & Souza Advocacia</a>
-  </h1>
-  <p>Excelência e ética em primeiro lugar</p>
-</header>
+    <h1>
+      <img src="https://img.icons8.com/ios-filled/50/ffffff/scales.png" alt="Balança da Justiça">
+      <a href="index.html">Amorim & Souza Advocacia</a>
+    </h1>
+    <p>Excelência e ética em primeiro lugar</p>
+  </header>
 
   <nav>
     <a href="sobre.html">Sobre</a>
@@ -116,15 +52,10 @@
     <a href="contato.html">Contato</a>
   </nav>
 
-  <section id="contato">
-    <h2>Contato</h2>
-    <p>Entre em contato conosco pelos canais abaixo. Será um prazer atendê-lo(a).</p>
-    <div class="contact-info">
-      <p><strong>Telefone:</strong> (21) 97225-2087</p>
-      <p><strong>Email:</strong> contato@amorimesouzaadvocacia.com</p>
-      <p><strong>Endereço:</strong> Av. das Américas, nº 3333</p>
-      <p><strong>Instagram:</strong> <a href="https://instagram.com/amorimesouzaadvocacia" target="_blank">@amorimesouzaadvocacia</a></p>
-    </div>
+  <section>
+    <h2>Sobre o Escritório</h2>
+    <p>O Amorim & Souza Advocacia é referência em ética, seriedade e competência. Atuamos nas áreas de Direito Civil e Empresarial, oferecendo soluções jurídicas eficientes e inovadoras.</p>
+    <p>Nosso compromisso é sempre priorizar os interesses dos nossos clientes com máxima dedicação.</p>
   </section>
 
   <footer>

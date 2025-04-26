@@ -11,11 +11,17 @@
       margin: 0;
       background-color: #f4f4f4;
       color: #333;
+      background-image: url('https://img.icons8.com/ios-filled/200/cccccc/scales.png');
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-attachment: fixed;
+      background-size: 300px;
+      opacity: 0.9;
     }
     header {
       background-color: #003366;
       color: white;
-      padding: 60px 20px;
+      padding: 40px 20px;
       text-align: center;
     }
     header h1 a {
@@ -28,7 +34,7 @@
     }
     header p {
       margin-top: 10px;
-      font-size: 20px;
+      font-size: 18px;
     }
     nav {
       background: #002244;
@@ -36,10 +42,10 @@
     }
     nav a {
       display: inline-block;
-      padding: 20px 25px;
+      padding: 15px 20px;
       color: white;
       text-decoration: none;
-      font-size: 18px;
+      transition: background 0.3s;
     }
     nav a:hover {
       background: #004080;
@@ -47,49 +53,43 @@
     section {
       padding: 80px 20px;
       text-align: center;
+      min-height: 600px;
     }
     h2 {
-      font-size: 32px;
+      font-size: 28px;
       color: #003366;
-      margin-bottom: 20px;
-    }
-    p {
-      max-width: 800px;
-      margin: 0 auto 20px auto;
-      line-height: 1.8;
-      font-size: 18px;
     }
     .area-boxes {
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
-      gap: 40px;
-      margin-top: 50px;
+      gap: 30px;
+      margin-top: 40px;
     }
     .box {
       background: white;
       border-radius: 8px;
-      padding: 40px 30px;
-      width: 300px;
+      padding: 30px;
+      width: 280px;
       text-align: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       text-decoration: none;
       color: inherit;
       transition: transform 0.2s ease;
     }
     .box:hover {
-      transform: translateY(-8px);
+      transform: translateY(-5px);
     }
     .box img {
-      width: 60px;
-      margin-bottom: 20px;
+      width: 50px;
+      margin-bottom: 15px;
     }
     footer {
       background: #003366;
       color: white;
       text-align: center;
-      padding: 40px 20px;
-      font-size: 16px;
+      padding: 30px 20px;
+      font-size: 14px;
     }
     footer a {
       color: white;
@@ -114,9 +114,7 @@
 
   <section id="sobre">
     <h2>Sobre o Escritório</h2>
-    <p>O escritório Amorim & Souza atua com dedicação, ética e excelência, prestando assessoria jurídica de alta qualidade em diversas áreas do Direito.</p>
-    <p>Nosso compromisso é oferecer atendimento personalizado, com foco na solução prática e eficiente para nossos clientes, pautando sempre pela ética profissional e pela defesa dos seus direitos.</p>
-    <p>Estamos localizados no coração da cidade, com uma estrutura moderna e uma equipe altamente qualificada pronta para atender às suas necessidades jurídicas.</p>
+    <p>O escritório Amorim & Souza atua com dedicação e seriedade nas áreas de Direito Civil e Empresarial, buscando sempre as melhores soluções jurídicas para seus clientes.</p>
   </section>
 
   <section id="areas">
@@ -125,25 +123,18 @@
       <a class="box" href="civil.html">
         <img src="https://img.icons8.com/ios-filled/50/003366/contract.png"/>
         <h3>Direito Civil</h3>
-        <p>Atuamos em contratos, responsabilidade civil, família e sucessões, sempre com foco na proteção de direitos individuais e patrimoniais.</p>
+        <p>Contratos, responsabilidade civil, família e sucessões.</p>
       </a>
       <a class="box" href="empresarial.html">
         <img src="https://img.icons8.com/ios-filled/50/003366/briefcase.png"/>
         <h3>Direito Empresarial</h3>
-        <p>Oferecemos suporte jurídico completo para empresas, desde a constituição até questões contratuais e litígios empresariais.</p>
+        <p>Consultoria, contratos empresariais e contencioso empresarial.</p>
       </a>
     </div>
   </section>
 
-  <section style="padding: 100px 20px; background-color: #e6e6e6;">
-    <h2>Nossos Valores</h2>
-    <p>Prezamos pela ética, transparência e compromisso com a justiça. Cada cliente é tratado de forma única e especial, com estratégias jurídicas adequadas às suas necessidades específicas.</p>
-    <p>Buscamos sempre as melhores soluções com responsabilidade e dedicação, trabalhando para que nossos clientes se sintam seguros e bem amparados.</p>
-  </section>
-
   <footer>
-    <p>&copy; 2025 Amorim & Souza Advocacia. Todos os direitos reservados.<br>
-    CNPJ: 60.546.044/0001-43</p>
+    <p>&copy; 2025 Amorim & Souza Advocacia. Todos os direitos reservados.<br>CNPJ: 60.546.044/0001-43</p>
   </footer>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Amorim & Souza Advocacia</title>
+  <title>Contato - Amorim & Souza Advocacia</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <style>
     * {
@@ -13,26 +13,17 @@
     }
     body {
       font-family: 'Roboto', sans-serif;
-      background: #ffffff; /* branco total, sem cinza */
+      background-color: #ffffff;
       color: #333;
     }
     header {
-      background-image: url('https://images.unsplash.com/photo-1524758631624-e2822e304c36?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80');
+      background-image: url('https://images.squarespace-cdn.com/content/v1/581c7148be6594d155f50234/1581617132961-PNOIJYH2ZYILG6JP9XRV/macroarq_arquitetura_interiores_corporativo_projeto_escritorio_advocacia_hall_entrada_piso_elevado_carpete_madeira_cumaru_divisoria_serralheria_vidro_funcional_clean.jpg');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
       color: white;
-      padding: 120px 20px 80px;
+      padding: 100px 20px 60px;
       text-align: center;
-      position: relative;
-    }
-    header::after {
-      content: "";
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.3); /* um leve escurecimento pra dar contraste */
-      z-index: 1;
     }
     header h1, header p {
       position: relative;
@@ -41,8 +32,7 @@
     header h1 a {
       color: white;
       text-decoration: none;
-      font-size: 2.8em;
-      font-family: 'Roboto', sans-serif;
+      font-size: 2.5em;
       transition: color 0.3s, transform 0.3s;
       display: inline-flex;
       align-items: center;
@@ -53,10 +43,10 @@
       transform: scale(1.05);
     }
     header img {
-      width: 45px;
+      width: 40px;
     }
     header p {
-      margin-top: 12px;
+      margin-top: 10px;
       font-size: 18px;
     }
     nav {
@@ -85,31 +75,17 @@
       color: #003366;
       margin-bottom: 20px;
     }
-    .area-boxes {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 30px;
+    p {
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+    .contact-info {
       margin-top: 40px;
+      font-size: 18px;
+      line-height: 1.8;
     }
-    .box {
-      background: white;
-      border-radius: 12px;
-      padding: 30px;
-      width: 300px;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-      text-align: center;
-      text-decoration: none;
-      color: inherit;
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-    .box:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-    }
-    .box img {
-      width: 60px;
-      margin-bottom: 20px;
+    .contact-info strong {
+      color: #003366;
     }
     footer {
       background: #003366;
@@ -135,28 +111,18 @@
 
   <nav>
     <a href="sobre.html">Sobre</a>
-    <a href="#areas">Áreas de Atuação</a>
+    <a href="index.html#areas">Áreas de Atuação</a>
     <a href="contato.html">Contato</a>
   </nav>
 
-  <section id="sobre">
-    <h2>Sobre o Escritório</h2>
-    <p>O escritório Amorim & Souza atua com dedicação e seriedade nas áreas de Direito Civil e Empresarial, buscando sempre as melhores soluções jurídicas para seus clientes.</p>
-  </section>
-
-  <section id="areas">
-    <h2>Áreas de Atuação</h2>
-    <div class="area-boxes">
-      <a class="box" href="civil.html">
-        <img src="https://img.icons8.com/ios-filled/50/003366/contract.png"/>
-        <h3>Direito Civil</h3>
-        <p>Contratos, responsabilidade civil, família e sucessões.</p>
-      </a>
-      <a class="box" href="empresarial.html">
-        <img src="https://img.icons8.com/ios-filled/50/003366/briefcase.png"/>
-        <h3>Direito Empresarial</h3>
-        <p>Consultoria, contratos empresariais e contencioso empresarial.</p>
-      </a>
+  <section id="contato">
+    <h2>Contato</h2>
+    <p>Entre em contato conosco pelos canais abaixo. Será um prazer atendê-lo(a).</p>
+    <div class="contact-info">
+      <p><strong>Telefone:</strong> (21) 97225-2087</p>
+      <p><strong>Email:</strong> contato@amorimesouzaadvocacia.com</p>
+      <p><strong>Endereço:</strong> Av. das Américas, nº 3333</p>
+      <p><strong>Instagram:</strong> <a href="https://instagram.com/amorimesouzaadvocacia" target="_blank">@amorimesouzaadvocacia</a></p>
     </div>
   </section>
 

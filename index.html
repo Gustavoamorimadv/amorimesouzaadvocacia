@@ -6,60 +6,71 @@
   <title>Amorim & Souza Advocacia</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
       font-family: 'Roboto', sans-serif;
       margin: 0;
       background-color: #f4f4f4;
       color: #333;
-      padding-top: 180px; /* ajustado conforme header menor */
     }
+
     header {
       background: url('AMORIM & SOUZA.png') no-repeat center center/cover;
       color: white;
-      padding: 50px 20px;
+      padding: 30px 20px;
       text-align: center;
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
-      height: 180px;
+      height: 140px;
       z-index: 1000;
     }
+
     header::after {
       content: "";
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0.4);
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
       z-index: 1;
     }
+
     header h1, header p {
       position: relative;
       z-index: 2;
       margin: 0;
     }
+
     header h1 {
-      font-size: 28px;
+      font-size: 26px;
     }
+
     header h1 a {
       color: white;
       text-decoration: none;
       transition: color 0.3s;
     }
+
     header h1 a:hover {
       color: #cccccc;
     }
+
     header img {
       vertical-align: middle;
       margin-right: 10px;
     }
+
     nav {
       background: #002244;
       text-align: center;
       padding: 15px 0;
       position: sticky;
-      top: 180px; /* abaixo do header */
+      top: 140px;
       z-index: 999;
     }
+
     nav a {
       display: inline-block;
       margin: 0 15px;
@@ -68,24 +79,33 @@
       font-weight: bold;
       transition: color 0.3s;
     }
+
     nav a:hover {
       color: #dddddd;
     }
+
+    main {
+      padding-top: 180px;
+    }
+
     section {
       padding: 80px 20px;
       text-align: center;
     }
+
     h2 {
       font-size: 32px;
       color: #003366;
       margin-bottom: 20px;
     }
+
     p {
       font-size: 18px;
       max-width: 800px;
       margin: 0 auto 40px;
       line-height: 1.6;
     }
+
     .area-boxes {
       display: flex;
       justify-content: center;
@@ -93,6 +113,7 @@
       gap: 40px;
       margin-top: 40px;
     }
+
     .box {
       background: white;
       border-radius: 12px;
@@ -104,13 +125,16 @@
       text-decoration: none;
       color: inherit;
     }
+
     .box:hover {
       transform: translateY(-10px);
     }
+
     .box img {
       width: 60px;
       margin-bottom: 15px;
     }
+
     footer {
       background: #003366;
       color: white;
@@ -119,6 +143,7 @@
       font-size: 14px;
       margin-top: 60px;
     }
+
     footer a {
       color: white;
       text-decoration: underline;
@@ -141,31 +166,33 @@
     <a href="contato.html">Contato</a>
   </nav>
 
-  <section id="sobre">
-    <h2>Sobre o Escritório</h2>
-    <p>O escritório Amorim & Souza atua com dedicação e seriedade nas áreas de Direito Civil e Empresarial, buscando sempre as melhores soluções jurídicas para seus clientes, com foco em resultados e ética profissional.</p>
-  </section>
+  <main>
+    <section id="sobre">
+      <h2>Sobre o Escritório</h2>
+      <p>O escritório Amorim & Souza atua com dedicação e seriedade nas áreas de Direito Civil e Empresarial, buscando sempre as melhores soluções jurídicas para seus clientes, com foco em resultados e ética profissional.</p>
+    </section>
 
-  <section id="valores">
-    <h2>Valores do Escritório</h2>
-    <p>Nosso trabalho é baseado em excelência, ética, comprometimento e respeito absoluto aos interesses dos nossos clientes, sempre buscando inovação e eficiência na prestação dos serviços jurídicos.</p>
-  </section>
+    <section id="valores">
+      <h2>Valores do Escritório</h2>
+      <p>Nosso trabalho é baseado em excelência, ética, comprometimento e respeito absoluto aos interesses dos nossos clientes, sempre buscando inovação e eficiência na prestação dos serviços jurídicos.</p>
+    </section>
 
-  <section id="areas">
-    <h2>Áreas de Atuação</h2>
-    <div class="area-boxes">
-      <a class="box" href="civil.html">
-        <img src="https://img.icons8.com/ios-filled/50/003366/contract.png" alt="Direito Civil">
-        <h3>Direito Civil</h3>
-        <p>Contratos, responsabilidade civil, família e sucessões.</p>
-      </a>
-      <a class="box" href="empresarial.html">
-        <img src="https://img.icons8.com/ios-filled/50/003366/briefcase.png" alt="Direito Empresarial">
-        <h3>Direito Empresarial</h3>
-        <p>Consultoria, contratos empresariais e contencioso empresarial.</p>
-      </a>
-    </div>
-  </section>
+    <section id="areas">
+      <h2>Áreas de Atuação</h2>
+      <div class="area-boxes">
+        <a class="box" href="civil.html">
+          <img src="https://img.icons8.com/ios-filled/50/003366/contract.png" alt="Direito Civil">
+          <h3>Direito Civil</h3>
+          <p>Contratos, responsabilidade civil, família e sucessões.</p>
+        </a>
+        <a class="box" href="empresarial.html">
+          <img src="https://img.icons8.com/ios-filled/50/003366/briefcase.png" alt="Direito Empresarial">
+          <h3>Direito Empresarial</h3>
+          <p>Consultoria, contratos empresariais e contencioso empresarial.</p>
+        </a>
+      </div>
+    </section>
+  </main>
 
   <footer>
     <p>&copy; 2025 Amorim & Souza Advocacia. Todos os direitos reservados.<br>CNPJ: 60.546.044/0001-43</p>

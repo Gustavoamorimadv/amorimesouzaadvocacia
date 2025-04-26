@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Amorim & Souza Advocacia</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <style>
@@ -11,18 +11,18 @@
       margin: 0;
       background-color: #f4f4f4;
       color: #333;
-      padding-top: 250px; /* Espaço para o header fixo */
+      padding-top: 180px; /* ajustado conforme header menor */
     }
     header {
       background: url('AMORIM & SOUZA.png') no-repeat center center/cover;
       color: white;
-      padding: 100px 20px;
+      padding: 50px 20px;
       text-align: center;
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
-      height: 250px;
+      height: 180px;
       z-index: 1000;
     }
     header::after {
@@ -35,11 +35,14 @@
     header h1, header p {
       position: relative;
       z-index: 2;
+      margin: 0;
+    }
+    header h1 {
+      font-size: 28px;
     }
     header h1 a {
       color: white;
       text-decoration: none;
-      font-size: 40px;
       transition: color 0.3s;
     }
     header h1 a:hover {
@@ -54,7 +57,7 @@
       text-align: center;
       padding: 15px 0;
       position: sticky;
-      top: 250px; /* Depois do header */
+      top: 180px; /* abaixo do header */
       z-index: 999;
     }
     nav a {
@@ -122,11 +125,11 @@
     }
   </style>
 </head>
-
 <body>
+
   <header>
     <h1>
-      <img src="https://img.icons8.com/ios-filled/50/ffffff/scales.png" alt="Balança de Justiça">
+      <img src="https://img.icons8.com/ios-filled/30/ffffff/scales.png" alt="Balança de Justiça">
       <a href="index.html">Amorim & Souza Advocacia</a>
     </h1>
     <p>Excelência e ética em primeiro lugar</p>
@@ -165,8 +168,8 @@
   </section>
 
   <footer>
-    <p>&copy; 2025 Amorim & Souza Advocacia. Todos os direitos reservados.<br>
-    CNPJ: 60.546.044/0001-43</p>
+    <p>&copy; 2025 Amorim & Souza Advocacia. Todos os direitos reservados.<br>CNPJ: 60.546.044/0001-43</p>
   </footer>
+
 </body>
 </html>

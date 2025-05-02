@@ -25,6 +25,8 @@
     input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; }
     button { width: 100%; padding: 12px; background: #003366; color: white; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: background 0.3s; }
     button:hover { background: #0055aa; }
+    .resultado { max-width: 600px; margin: 30px auto; text-align: left; }
+    .card { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 0 5px #ccc; margin-bottom: 15px; }
     footer { background: #003366; color: white; text-align: center; padding: 50px 20px; font-size: 14px; margin-top: 100px; }
     footer a { color: white; text-decoration: underline; }
   </style>
@@ -48,15 +50,75 @@
 
   <section>
     <h2>Acompanhamento Processual</h2>
-    <form action="#" method="POST">
-      <input type="text" name="nome" placeholder="Nome Completo" required>
-      <input type="text" name="cpf" placeholder="CPF" required>
+    <form onsubmit="event.preventDefault(); buscarProcesso();">
+      <input type="text" id="numeroProcesso" placeholder="Número do processo (formato CNJ)" required>
       <button type="submit">Consultar</button>
     </form>
+
+    <div id="resultado" class="resultado"></div>
   </section>
 
   <footer>
     <p>&copy; 2025 Amorim & Souza Advocacia. Todos os direitos reservados.<br>CNPJ: 60.546.044/0001-43</p>
   </footer>
+
+  <script>
+    async function buscarProcesso() {
+      const numero = document.getElementById("numeroProcesso").value;
+      const resultado = document.getElementById("resultado");
+      resultado.innerHTML = "Buscando...";
+
+      try {
+        const response = await fetch("https://api-publica.datajud.cnj.jus.br/api_publica_tjrj/_search", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            query: {
+              match: {
+                numeroProcesso: numero
+              }
+            }
+          })
+        });
+
+        const data = await response.json();
+
+        if (!data.hits || data.hits.hits.length === 0) {
+          resultado.innerHTML = "<p>Processo não encontrado.</p>";
+          return;
+        }
+
+        const processo = data.hits.hits[0]._source;
+        resultado.innerHTML = `
+          <div class="card">
+            <strong>Número:</strong> ${processo.numeroProcesso}<br>
+            <strong>Classe:</strong> ${processo.classeProcessual || "N/D"}<br>
+            <strong>Assunto:</strong> ${processo.assunto || "N/D"}<br>
+            <strong>Data de Distribuição:</strong> ${processo.dataDistribuicao || "N/D"}<br>
+          </div>
+        `;
+
+        if (processo.movimentacoes && processo.movimentacoes.length > 0) {
+          resultado.innerHTML += "<h3>Movimentações:</h3>";
+          processo.movimentacoes.forEach(mov => {
+            resultado.innerHTML += `
+              <div class="card">
+                <strong>Data:</strong> ${mov.data || "Sem data"}<br>
+                <strong>Descrição:</strong> ${mov.descricao || "Sem descrição"}
+              </div>
+            `;
+          });
+        } else {
+          resultado.innerHTML += "<p>Sem movimentações disponíveis.</p>";
+        }
+
+      } catch (error) {
+        console.error(error);
+        resultado.innerHTML = "<p>Erro ao buscar o processo. Verifique o número e tente novamente.</p>";
+      }
+    }
+  </script>
 </body>
 </html>

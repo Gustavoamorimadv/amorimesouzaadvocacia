@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>CRM Firebase - AMR ADV</title>
+<title>CRM LocalStorage - AMR ADV</title>
 <style>
-/* --- Layout básico --- */
+/* --- Layout --- */
 *{box-sizing:border-box;margin:0;padding:0;font-family:Segoe UI,Roboto,Arial,sans-serif}
 body{display:flex;height:100vh;background:#f0f2f5}
 .sidebar{width:220px;background:#fff;border-right:1px solid #ddd;display:flex;flex-direction:column;padding:20px 10px}
@@ -19,7 +19,6 @@ header{height:60px;background:#fff;border-bottom:1px solid #ddd;display:flex;ali
 .kanban{display:flex;gap:20px;padding:20px;overflow:auto;flex:1}
 .column{background:#fff;border-radius:10px;padding:15px;min-width:260px;max-height:calc(100vh - 160px);display:flex;flex-direction:column;gap:10px;box-shadow:0 4px 8px rgba(0,0,0,.04)}
 .column h2{font-size:16px;color:#1e1e2f;margin-bottom:6px}
-
 /* --- Cards --- */
 .card{padding:12px;border-radius:8px;color:#fff;position:relative;cursor:grab}
 .card h3{font-size:15px;margin-bottom:6px}
@@ -28,13 +27,11 @@ header{height:60px;background:#fff;border-bottom:1px solid #ddd;display:flex;ali
 .card .actions{position:absolute;top:6px;right:6px;display:flex;gap:6px}
 .card button{background:rgba(0,0,0,0.18);border:0;color:#fff;padding:4px 6px;border-radius:4px;cursor:pointer;font-size:12px}
 .card button:hover{background:rgba(0,0,0,0.32)}
-
-/* cores por status */
+/* cores */
 .prospect{background:#3498db}
 .negociacao{background:#f1c40f;color:#000}
 .contrato-assinado{background:#9b59b6}
 .fechado{background:#2ecc71}
-
 /* --- Modal --- */
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.35);display:none;align-items:center;justify-content:center;z-index:50}
 .modal{background:#fff;padding:18px;border-radius:10px;min-width:320px;max-width:420px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
@@ -46,7 +43,6 @@ header{height:60px;background:#fff;border-bottom:1px solid #ddd;display:flex;ali
 .btn{padding:8px 12px;border-radius:6px;border:0;cursor:pointer}
 .btn.primary{background:#1e1e2f;color:#fff}
 .btn.ghost{background:#f1f3f5}
-
 /* --- Toast --- */
 .toast{position:fixed;right:20px;bottom:20px;background:#222;color:#fff;padding:8px 12px;border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.3);display:none;z-index:60}
 </style>
@@ -55,15 +51,15 @@ header{height:60px;background:#fff;border-bottom:1px solid #ddd;display:flex;ali
 
 <div class="sidebar">
   <h2>AMR ADV</h2>
-  <button id="btnRel">Relatórios</button>
-  <button id="btnAgenda">Agenda</button>
-  <button id="btnContatos">Contatos</button>
-  <button id="btnConfig">Configurações</button>
+  <button>Relatórios</button>
+  <button>Agenda</button>
+  <button>Contatos</button>
+  <button>Configurações</button>
 </div>
 
 <div class="main">
   <header>
-    <h1>CRM Firebase</h1>
+    <h1>CRM Local</h1>
     <button id="btnAdd" class="btn primary">Adicionar Cliente</button>
   </header>
 
@@ -88,7 +84,7 @@ header{height:60px;background:#fff;border-bottom:1px solid #ddd;display:flex;ali
 
 <!-- Modal -->
 <div class="modal-backdrop" id="modalBackdrop">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
     <h3 id="modalTitle">Novo Cliente</h3>
     <form id="clientForm">
       <div class="row">
@@ -110,7 +106,7 @@ header{height:60px;background:#fff;border-bottom:1px solid #ddd;display:flex;ali
       </div>
       <div class="actions">
         <button type="button" class="btn ghost" id="btnCancel">Cancelar</button>
-        <button type="submit" class="btn primary" id="btnSave">Salvar</button>
+        <button type="submit" class="btn primary">Salvar</button>
       </div>
     </form>
   </div>
@@ -118,39 +114,18 @@ header{height:60px;background:#fff;border-bottom:1px solid #ddd;display:flex;ali
 
 <div class="toast" id="toast"></div>
 
-<script type="module">
-/* ========== Import Firebase ========== */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  onSnapshot,
-  doc,
-  updateDoc,
-  deleteDoc
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+<script>
+/* ==== Helpers LocalStorage ==== */
+function getClientes(){
+  return JSON.parse(localStorage.getItem("clientes")||"[]");
+}
+function saveClientes(clientes){
+  localStorage.setItem("clientes", JSON.stringify(clientes));
+}
 
-/* ========== Config (seu projeto) ========== */
-const firebaseConfig = {
-  apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
-  authDomain: "dapapp-38637.firebaseapp.com",
-  projectId: "dapapp-38637",
-  storageBucket: "dapapp-38637.firebasestorage.app",
-  messagingSenderId: "628852295313",
-  appId: "1:628852295313:web:ce288c4e09b2037c022130",
-  measurementId: "G-WL3JR7CSWY"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const clientesRef = collection(db, "clientes");
-
-/* ========== App state ========== */
+/* ==== DOM ==== */
 const STATUS = ['prospect','negociacao','contrato-assinado','fechado'];
-let cardsMap = {}; // id -> element
-
-/* ========== DOM refs ========== */
+let cardsMap = {};
 const btnAdd = document.getElementById('btnAdd');
 const modalBackdrop = document.getElementById('modalBackdrop');
 const clientForm = document.getElementById('clientForm');
@@ -158,235 +133,138 @@ const inputNome = document.getElementById('inputNome');
 const inputObs = document.getElementById('inputObs');
 const inputStatus = document.getElementById('inputStatus');
 const btnCancel = document.getElementById('btnCancel');
-const kanban = document.getElementById('kanban');
 const searchInput = document.getElementById('searchInput');
 const filterStatus = document.getElementById('filterStatus');
 const toastEl = document.getElementById('toast');
 
-/* ========== Helpers ========== */
-function showToast(msg, timeout=4000){
+/* ==== Toast ==== */
+function showToast(msg){
   toastEl.innerText = msg;
   toastEl.style.display = 'block';
   clearTimeout(toastEl._t);
-  toastEl._t = setTimeout(()=> toastEl.style.display='none', timeout);
-}
-function openModal(mode='add', data=null){
-  modalBackdrop.style.display = 'flex';
-  document.getElementById('modalTitle').innerText = mode === 'add' ? 'Novo Cliente' : 'Editar Cliente';
-  if(data){
-    inputNome.value = data.nome||'';
-    inputObs.value = data.obs||'';
-    inputStatus.value = data.status||'prospect';
-    clientForm.dataset.editId = data.id;
-  } else {
-    inputNome.value=''; inputObs.value=''; inputStatus.value='prospect';
-    delete clientForm.dataset.editId;
-  }
-  inputNome.focus();
-}
-function closeModal(){
-  modalBackdrop.style.display = 'none';
-  delete clientForm.dataset.editId;
+  toastEl._t = setTimeout(()=> toastEl.style.display='none', 3000);
 }
 
-/* ========== Criar card (DOM) ========== */
-function criarCardCliente(id, cliente){
-  // evita duplicar
-  if(cardsMap[id]) return;
+/* ==== Modal ==== */
+function openModal(edit=false, data=null){
+  modalBackdrop.style.display = 'flex';
+  document.getElementById('modalTitle').innerText = edit ? "Editar Cliente" : "Novo Cliente";
+  if(edit && data){
+    inputNome.value = data.nome;
+    inputObs.value = data.obs;
+    inputStatus.value = data.status;
+    clientForm.dataset.editId = data.id;
+  } else {
+    inputNome.value=""; inputObs.value=""; inputStatus.value="prospect";
+    delete clientForm.dataset.editId;
+  }
+}
+function closeModal(){ modalBackdrop.style.display='none'; }
+
+/* ==== Criar Card ==== */
+function criarCard(cliente){
   const card = document.createElement('div');
   card.className = `card ${cliente.status}`;
   card.draggable = true;
-  card.dataset.id = id;
-  card.dataset.nome = (cliente.nome||'').toLowerCase();
+  card.dataset.id = cliente.id;
   card.dataset.status = cliente.status;
+  card.dataset.nome = cliente.nome.toLowerCase();
 
   card.innerHTML = `
     <h3>${cliente.nome}</h3>
-    <p>${cliente.obs || ''}</p>
-    <div class="meta">#${id}</div>
+    <p>${cliente.obs||''}</p>
+    <div class="meta">#${cliente.id}</div>
     <div class="actions">
-      <button class="edit-btn" data-id="${id}">✎</button>
-      <button class="del-btn" data-id="${id}">🗑</button>
+      <button class="edit">✎</button>
+      <button class="del">🗑</button>
     </div>
   `;
 
-  // events for drag within this element
   addDragEvents(card);
 
-  // append
-  const col = document.getElementById(cliente.status) || document.getElementById('prospect');
-  col.appendChild(card);
-  cardsMap[id] = card;
-  filtragemAplicada(); // aplica filtro/ busca
+  card.querySelector('.edit').onclick = ()=>openModal(true, cliente);
+  card.querySelector('.del').onclick = ()=>deleteCliente(cliente.id);
+
+  document.getElementById(cliente.status).appendChild(card);
+  cardsMap[cliente.id] = card;
 }
 
-/* ========== Add / Edit / Delete ========== */
-async function handleAddSubmit(e){
+/* ==== Renderizar ==== */
+function render(){
+  STATUS.forEach(s=>document.getElementById(s).innerHTML=`<h2>${s}</h2>`);
+  cardsMap = {};
+  getClientes().forEach(c=>criarCard(c));
+  filtragemAplicada();
+}
+
+/* ==== Adicionar/Editar ==== */
+clientForm.onsubmit = e=>{
   e.preventDefault();
   const nome = inputNome.value.trim();
-  if(!nome){ showToast('Nome obrigatório'); return; }
+  if(!nome){showToast("Nome obrigatório");return;}
   const obs = inputObs.value.trim();
   const status = inputStatus.value;
-
-  // cria card temporário (visual imediato)
-  const tempId = 'temp_' + Date.now();
-  criarCardCliente(tempId, { nome, obs, status });
-
-  // fechar modal e mostrar carregando
+  let clientes = getClientes();
+  if(clientForm.dataset.editId){
+    const id = clientForm.dataset.editId;
+    clientes = clientes.map(c=>c.id===id?{id,nome,obs,status}:c);
+    showToast("Cliente atualizado");
+  } else {
+    const id = Date.now().toString();
+    clientes.push({id,nome,obs,status});
+    showToast("Cliente adicionado");
+  }
+  saveClientes(clientes);
   closeModal();
-  showToast('Salvando cliente...');
+  render();
+};
 
-  try {
-    const docRef = await addDoc(clientesRef, { nome, obs, status });
-    // onSnapshot irá recriar cards; mas atualizamos o temp card para evitar piscada
-    const card = cardsMap[tempId];
-    if(card){
-      card.dataset.id = docRef.id;
-      card.querySelector('.meta').innerText = '#' + docRef.id;
-      cardsMap[docRef.id] = card;
-      delete cardsMap[tempId];
-    }
-    showToast('Cliente salvo');
-  } catch(err) {
-    console.error('Erro addDoc:', err);
-    // removemos o card temporário
-    const c = cardsMap[tempId];
-    if(c){ c.remove(); delete cardsMap[tempId]; }
-    if(err && err.code === 'permission-denied'){
-      showToast('Permissão negada: verifique regras do Firestore (use allow read, write: if true para teste).', 8000);
-    } else {
-      showToast('Erro ao salvar: ' + (err.message || err), 7000);
-    }
-  }
+/* ==== Excluir ==== */
+function deleteCliente(id){
+  if(!confirm("Deseja excluir?")) return;
+  const clientes = getClientes().filter(c=>c.id!==id);
+  saveClientes(clientes);
+  render();
+  showToast("Cliente excluído");
 }
 
-async function handleEdit(id){
-  const card = cardsMap[id];
-  if(!card){
-    showToast('Card não encontrado para editar');
-    return;
-  }
-  // preenche modal com dados
-  openModal('edit', { id, nome: card.querySelector('h3').innerText, obs: card.querySelector('p').innerText, status: card.dataset.status });
-}
-async function applyEdit(id, newData){
-  try {
-    await updateDoc(doc(db, "clientes", id), newData);
-    showToast('Cliente atualizado');
-  } catch(err) {
-    console.error('Erro updateDoc:', err);
-    showToast('Erro ao atualizar: ' + (err.message || err));
-  }
-}
-async function handleDelete(id){
-  if(!confirm('Deseja realmente excluir este cliente?')) return;
-  try {
-    await deleteDoc(doc(db, "clientes", id));
-    showToast('Cliente excluído');
-  } catch(err){
-    console.error('Erro deleteDoc:', err);
-    showToast('Erro ao excluir: ' + (err.message || err));
-  }
-}
-
-/* ========== Drag & Drop (move DOM imediatamente + atualiza Firestore) ========== */
-let draggedCard = null;
+/* ==== Drag & Drop ==== */
+let draggedCard=null;
 function addDragEvents(card){
-  card.addEventListener('dragstart', ()=>{ draggedCard = card; card.style.opacity = '.5'; });
-  card.addEventListener('dragend', ()=>{ if(draggedCard) draggedCard.style.opacity = '1'; draggedCard = null; });
+  card.addEventListener('dragstart', ()=>{draggedCard=card;card.style.opacity=".5";});
+  card.addEventListener('dragend', ()=>{if(draggedCard)draggedCard.style.opacity="1";draggedCard=null;});
 }
 document.querySelectorAll('.column').forEach(col=>{
-  col.addEventListener('dragover', e=> e.preventDefault());
-  col.addEventListener('drop', async e=>{
-    e.preventDefault();
+  col.addEventListener('dragover', e=>e.preventDefault());
+  col.addEventListener('drop', e=>{
     if(!draggedCard) return;
-    const targetCol = e.currentTarget;
-    // move DOM imediatamente
-    targetCol.appendChild(draggedCard);
-    const newStatus = targetCol.id;
-    draggedCard.dataset.status = newStatus;
-    // se for temp card (ainda não salvo) não tenta updateDoc
+    col.appendChild(draggedCard);
     const id = draggedCard.dataset.id;
-    if(id && id.startsWith('temp_')) {
-      showToast('Movido (temporário) — salvando quando criar no Firestore', 3000);
-      return;
-    }
-    // atualiza Firestore
-    try {
-      await updateDoc(doc(db, "clientes", id), { status: newStatus });
-      showToast('Status atualizado');
-    } catch(err){
-      console.error('Erro updateDoc no drop:', err);
-      showToast('Erro ao mudar status: ' + (err.message||err));
-    }
+    const clientes = getClientes().map(c=>c.id===id?{...c,status:col.id}:c);
+    saveClientes(clientes);
+    render();
+    showToast("Status atualizado");
   });
 });
 
-/* ========== Event delegation for edit/delete clicks inside kanban ========== */
-kanban.addEventListener('click', (ev)=>{
-  const editBtn = ev.target.closest('.edit-btn');
-  const delBtn = ev.target.closest('.del-btn');
-  if(editBtn){
-    const id = editBtn.dataset.id;
-    handleEdit(id);
-  } else if(delBtn){
-    const id = delBtn.dataset.id;
-    handleDelete(id);
-  }
-});
-
-/* ========== Form submit / modal events ========== */
-clientForm.addEventListener('submit', async (e)=>{
-  // Check if editing or creating
-  const editId = clientForm.dataset.editId;
-  if(editId){
-    // apply edit
-    const novoNome = inputNome.value.trim();
-    if(!novoNome){ showToast('Nome obrigatório'); return; }
-    const novaObs = inputObs.value.trim();
-    const novoStatus = inputStatus.value;
-    try {
-      await updateDoc(doc(db, "clientes", editId), { nome: novoNome, obs: novaObs, status: novoStatus });
-      closeModal();
-      showToast('Atualizado');
-    } catch(err){
-      console.error('Erro updateDoc (modal):', err);
-      showToast('Erro ao atualizar: ' + (err.message||err));
-    }
-  } else {
-    // create
-    await handleAddSubmit(e);
-  }
-});
-
-btnAdd.addEventListener('click', ()=> openModal('add'));
-btnCancel.addEventListener('click', closeModal);
-modalBackdrop.addEventListener('click', (ev)=> { if(ev.target === modalBackdrop) closeModal(); });
-
-/* ========== Search & Filter ========== */
-searchInput.addEventListener('input', filtragemAplicada);
-filterStatus.addEventListener('change', filtragemAplicada);
-
+/* ==== Filtro/Busca ==== */
+searchInput.oninput = filtragemAplicada;
+filterStatus.onchange = filtragemAplicada;
 function filtragemAplicada(){
-  const search = (searchInput.value||'').toLowerCase();
+  const search = searchInput.value.toLowerCase();
   const filter = filterStatus.value;
   Object.values(cardsMap).forEach(card=>{
-    const matchSearch = (card.dataset.nome||'').includes(search);
-    const matchFilter = !filter || card.dataset.status === filter;
+    const matchSearch = card.dataset.nome.includes(search);
+    const matchFilter = !filter || card.dataset.status===filter;
     card.style.display = (matchSearch && matchFilter) ? 'block' : 'none';
   });
 }
 
-/* ========== Realtime sync ========== */
-import { doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"; // import doc here for updateDoc/deleteDoc usage
-
-onSnapshot(clientesRef, snapshot=>{
-  // Limpa colunas
-  STATUS.forEach(s => document.getElementById(s).innerHTML = `<h2>${s.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</h2>`);
-  cardsMap = {};
-  snapshot.docs.forEach(d => criarCardCliente(d.id, d.data()));
-  filtragemAplicada();
-});
+/* ==== Init ==== */
+btnAdd.onclick=()=>openModal();
+btnCancel.onclick=()=>closeModal();
+modalBackdrop.onclick=e=>{if(e.target===modalBackdrop)closeModal();};
+render();
 </script>
 </body>
 </html>

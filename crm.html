@@ -123,7 +123,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
         <div class="row">
             <label>Status</label>
             <select id="inputStatus">
-                <option value="prospect">Prospect</option>
+                <option value="lista-fria">Lista Fria</option>
                 <option value="negociacao">Negociação</option>
                 <option value="contrato-assinado">Contrato Assinado</option>
                 <option value="fechado">Fechado</option>
@@ -174,7 +174,7 @@ function openModal(edit=false,data=null){
         inputValor.value=data.valor||"";
         clientForm.dataset.editId=data.id;
     }else{
-        inputNome.value=""; inputObs.value=""; inputStatus.value="prospect";
+        inputNome.value=""; inputObs.value=""; inputStatus.value="Lista-fria";
         inputNumeros.value=""; inputProcesso.value=""; inputValor.value="";
         delete clientForm.dataset.editId;
     }

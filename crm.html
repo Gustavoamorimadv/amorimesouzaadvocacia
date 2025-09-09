@@ -5,134 +5,59 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CRM AMR ADV</title>
 <style>
-    * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-    body { display:flex; background:#f0f2f5; height:100vh; }
+* { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+body { display:flex; background:#f0f2f5; height:100vh; }
 
-    /* Sidebar */
-    .sidebar {
-        width: 220px;
-        background:#fff;
-        border-right:1px solid #ddd;
-        display:flex;
-        flex-direction:column;
-        padding-top:20px;
-    }
-    .sidebar h2 { text-align:center; margin-bottom:20px; font-size:20px; color:#1e1e2f; }
-    .sidebar button {
-        padding:12px 20px;
-        margin:5px 10px;
-        border:none;
-        background:#f8f9fa;
-        text-align:left;
-        cursor:pointer;
-        border-radius:6px;
-        transition:0.2s;
-    }
-    .sidebar button:hover { background:#e2e6ea; }
+/* Sidebar */
+.sidebar { width:220px; background:#fff; border-right:1px solid #ddd; display:flex; flex-direction:column; padding-top:20px; }
+.sidebar h2 { text-align:center; margin-bottom:20px; font-size:20px; color:#1e1e2f; }
+.sidebar button { padding:12px 20px; margin:5px 10px; border:none; background:#f8f9fa; text-align:left; cursor:pointer; border-radius:6px; transition:0.2s; }
+.sidebar button:hover { background:#e2e6ea; }
 
-    /* Main */
-    .main { flex:1; display:flex; flex-direction:column; }
+/* Main */
+.main { flex:1; display:flex; flex-direction:column; }
 
-    header {
-        height:60px;
-        background:#fff;
-        border-bottom:1px solid #ddd;
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        padding:0 20px;
-    }
-    header h1 { font-size:22px; color:#1e1e2f; }
-    header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+header { height:60px; background:#fff; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; padding:0 20px; }
+header h1 { font-size:22px; color:#1e1e2f; }
+header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
 
-    .search-bar {
-        padding:10px 20px;
-        background:#fff;
-        border-bottom:1px solid #ddd;
-        display:flex;
-        gap:10px;
-        align-items:center;
-    }
-    .search-bar input, .search-bar select {
-        padding:8px;
-        border:1px solid #ccc;
-        border-radius:6px;
-    }
-    .search-bar input { flex:1; }
+.search-bar { padding:10px 20px; background:#fff; border-bottom:1px solid #ddd; display:flex; gap:10px; align-items:center; }
+.search-bar input, .search-bar select { padding:8px; border:1px solid #ccc; border-radius:6px; }
+.search-bar input { flex:1; }
 
-    /* Kanban */
-    .kanban {
-        display:flex;
-        gap:20px;
-        padding:20px;
-        overflow-x:auto;
-        flex:1;
-    }
+/* Kanban */
+.kanban { display:flex; gap:20px; padding:20px; overflow-x:auto; flex:1; }
+.column { background:#fff; border-radius:10px; padding:15px; min-width:280px; max-height:calc(100vh - 140px); display:flex; flex-direction:column; gap:10px; box-shadow:0 4px 8px rgba(0,0,0,0.05); }
+.column h2 { margin-bottom:10px; font-size:18px; color:#1e1e2f; }
 
-    .column {
-        background:#fff;
-        border-radius:10px;
-        padding:15px;
-        min-width:280px;
-        max-height:calc(100vh - 140px);
-        display:flex;
-        flex-direction:column;
-        gap:10px;
-        box-shadow:0 4px 8px rgba(0,0,0,0.05);
-    }
+/* Card estilo Bitrix */
+.card { display:flex; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.05); cursor:pointer; overflow:hidden; transition:0.2s; }
+.card:hover { transform:scale(1.02); }
+.card .color-bar { width:6px; }
+.card-content { padding:10px; flex:1; }
+.card h3 { font-size:16px; margin-bottom:5px; color:#333; }
+.card p { font-size:13px; color:#666; margin:2px 0; }
 
-    .column h2 { margin-bottom:10px; font-size:18px; color:#1e1e2f; }
+/* Cores por status */
+.prospect .color-bar { background:#3498db; }
+.negociacao .color-bar { background:#f1c40f; }
+.contrato-assinado .color-bar { background:#9b59b6; }
+.fechado .color-bar { background:#2ecc71; }
 
-    /* Card estilo Bitrix */
-    .card {
-        display:flex;
-        background:#fff;
-        border:1px solid #ddd;
-        border-radius:8px;
-        box-shadow:0 2px 4px rgba(0,0,0,0.05);
-        cursor:pointer;
-        overflow:hidden;
-        transition:0.2s;
-    }
-    .card:hover { transform:scale(1.02); }
+/* Modal */
+.modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); justify-content:center; align-items:center; z-index:50; }
+.modal { background:#fff; padding:18px; border-radius:10px; min-width:320px; max-width:420px; box-shadow:0 8px 30px rgba(0,0,0,.25); }
+.modal h3 { margin-bottom:12px; }
+.modal .row { margin-bottom:10px; }
+.modal input, .modal textarea, .modal select { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; }
+.modal textarea { min-height:80px; resize:vertical; }
+.modal .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
+.btn { padding:8px 12px; border-radius:6px; border:0; cursor:pointer; }
+.btn.primary { background:#1e1e2f; color:#fff; }
+.btn.ghost { background:#f1f3f5; }
 
-    .card .color-bar {
-        width:6px;
-    }
-
-    .card-content {
-        padding:10px;
-        flex:1;
-    }
-
-    .card h3 { font-size:16px; margin-bottom:5px; color:#333; }
-    .card p { font-size:13px; color:#666; margin:2px 0; }
-
-    /* Cores por status */
-    .prospect .color-bar { background:#3498db; }
-    .negociacao .color-bar { background:#f1c40f; }
-    .contrato-assinado .color-bar { background:#9b59b6; }
-    .fechado .color-bar { background:#2ecc71; }
-
-    /* Modal */
-    .modal {
-        display:none;
-        position:fixed;
-        top:0; left:0; right:0; bottom:0;
-        background:rgba(0,0,0,0.5);
-        justify-content:center;
-        align-items:center;
-    }
-    .modal-content {
-        background:#fff;
-        padding:20px;
-        border-radius:10px;
-        width:400px;
-        max-width:90%;
-    }
-    .modal-content h2 { margin-bottom:10px; }
-    .modal-content p { margin:5px 0; }
-    .modal button { margin-top:10px; padding:8px 16px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+/* Toast */
+.toast { position:fixed; right:20px; bottom:20px; background:#222; color:#fff; padding:8px 12px; border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.3); display:none; z-index:60; }
 </style>
 </head>
 <body>
@@ -146,143 +71,199 @@
 </div>
 
 <div class="main">
-    <header>
-        <h1>CRM Avançado</h1>
-        <button onclick="novoCliente()">Adicionar Cliente</button>
-    </header>
+<header>
+    <h1>CRM Avançado</h1>
+    <button id="btnAdd" class="btn primary">Adicionar Cliente</button>
+</header>
 
-    <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="Buscar cliente..." oninput="filtrarClientes()">
-        <select id="filterStatus" onchange="filtrarClientes()">
-            <option value="">Todos os status</option>
-            <option value="prospect">Prospect</option>
-            <option value="negociacao">Negociação</option>
-            <option value="contrato-assinado">Contrato Assinado</option>
-            <option value="fechado">Fechado</option>
-        </select>
-    </div>
-
-    <main class="kanban">
-        <div class="column" id="prospect"><h2>Prospect</h2></div>
-        <div class="column" id="negociacao"><h2>Negociação</h2></div>
-        <div class="column" id="contrato-assinado"><h2>Contrato Assinado</h2></div>
-        <div class="column" id="fechado"><h2>Fechado</h2></div>
-    </main>
+<div class="search-bar">
+    <input id="searchInput" placeholder="Buscar cliente..." />
+    <select id="filterStatus">
+        <option value="">Todos os status</option>
+        <option value="prospect">Prospect</option>
+        <option value="negociacao">Negociação</option>
+        <option value="contrato-assinado">Contrato Assinado</option>
+        <option value="fechado">Fechado</option>
+    </select>
 </div>
 
-<!-- Modal Detalhes -->
-<div class="modal" id="modal">
-  <div class="modal-content">
-    <h2 id="modalNome"></h2>
-    <p><strong>Número:</strong> <span id="modalNumero"></span></p>
-    <p><strong>Processo:</strong> <span id="modalProcesso"></span></p>
-    <p><strong>Valor da Causa:</strong> R$ <span id="modalValor"></span></p>
-    <p><strong>Observações:</strong> <span id="modalObs"></span></p>
-    <button onclick="fecharModal()">Fechar</button>
-  </div>
+<main class="kanban" id="kanban">
+    <div class="column" id="prospect"><h2>Prospect</h2></div>
+    <div class="column" id="negociacao"><h2>Negociação</h2></div>
+    <div class="column" id="contrato-assinado"><h2>Contrato Assinado</h2></div>
+    <div class="column" id="fechado"><h2>Fechado</h2></div>
+</main>
 </div>
+
+<!-- Modal de Edição -->
+<div class="modal-backdrop" id="modalBackdrop">
+<div class="modal">
+    <h3 id="modalTitle">Novo Cliente</h3>
+    <form id="clientForm">
+        <div class="row">
+            <label>Nome</label>
+            <input id="inputNome" required />
+        </div>
+        <div class="row">
+            <label>Números</label>
+            <input id="inputNumeros" placeholder="Ex: (21) 99999-9999" />
+        </div>
+        <div class="row">
+            <label>Número do Processo</label>
+            <input id="inputProcesso" placeholder="0000000-00.0000.0.00.0000" />
+        </div>
+        <div class="row">
+            <label>Valor da Causa</label>
+            <input id="inputValor" type="number" placeholder="Ex: 10000" />
+        </div>
+        <div class="row">
+            <label>Observação</label>
+            <textarea id="inputObs" maxlength="300"></textarea>
+        </div>
+        <div class="row">
+            <label>Status</label>
+            <select id="inputStatus">
+                <option value="prospect">Prospect</option>
+                <option value="negociacao">Negociação</option>
+                <option value="contrato-assinado">Contrato Assinado</option>
+                <option value="fechado">Fechado</option>
+            </select>
+        </div>
+        <div class="actions">
+            <button type="button" class="btn ghost" id="btnCancel">Cancelar</button>
+            <button type="submit" class="btn primary">Salvar</button>
+        </div>
+    </form>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
-    const STATUS = ['prospect','negociacao','contrato-assinado','fechado'];
-    let clientes = JSON.parse(localStorage.getItem('crmClientes')) || [];
+/* ==== LocalStorage ==== */
+function getClientes(){ return JSON.parse(localStorage.getItem("clientes")||"[]"); }
+function saveClientes(c){ localStorage.setItem("clientes", JSON.stringify(c)); }
 
-    function salvarLocalStorage(){ localStorage.setItem('crmClientes', JSON.stringify(clientes)); }
+/* ==== DOM ==== */
+const STATUS=['prospect','negociacao','contrato-assinado','fechado'];
+let cardsMap={};
+const btnAdd=document.getElementById('btnAdd');
+const modalBackdrop=document.getElementById('modalBackdrop');
+const clientForm=document.getElementById('clientForm');
+const inputNome=document.getElementById('inputNome');
+const inputObs=document.getElementById('inputObs');
+const inputStatus=document.getElementById('inputStatus');
+const inputNumeros=document.getElementById('inputNumeros');
+const inputProcesso=document.getElementById('inputProcesso');
+const inputValor=document.getElementById('inputValor');
+const btnCancel=document.getElementById('btnCancel');
+const searchInput=document.getElementById('searchInput');
+const filterStatus=document.getElementById('filterStatus');
+const toastEl=document.getElementById('toast');
 
-    function criarCardCliente(cliente){
-        const card = document.createElement('div');
-        card.className = `card ${cliente.status}`;
-        card.draggable = true;
-        card.dataset.nome = cliente.nome.toLowerCase();
-        card.dataset.status = cliente.status;
+function showToast(msg){
+  toastEl.innerText=msg; toastEl.style.display='block';
+  clearTimeout(toastEl._t);
+  toastEl._t=setTimeout(()=>toastEl.style.display='none',3000);
+}
 
-        card.innerHTML = `
-            <div class="color-bar"></div>
-            <div class="card-content">
-                <h3>${cliente.nome}</h3>
-                <p>Processo: ${cliente.processo}</p>
-                <p>Valor: R$ ${cliente.valor}</p>
-            </div>
-        `;
+/* ==== Modal ==== */
+function openModal(edit=false,data=null){
+  modalBackdrop.style.display='flex';
+  document.getElementById('modalTitle').innerText=edit?"Editar Cliente":"Novo Cliente";
+  if(edit&&data){
+    inputNome.value=data.nome;
+    inputObs.value=data.obs||"";
+    inputStatus.value=data.status;
+    inputNumeros.value=data.numeros||"";
+    inputProcesso.value=data.processo||"";
+    inputValor.value=data.valor||"";
+    clientForm.dataset.editId=data.id;
+  }else{
+    inputNome.value="";inputObs.value="";inputStatus.value="prospect";
+    inputNumeros.value="";inputProcesso.value="";inputValor.value="";
+    delete clientForm.dataset.editId;
+  }
+}
+btnAdd.onclick=()=>openModal();
+btnCancel.onclick=()=>modalBackdrop.style.display='none';
 
-        card.addEventListener('click', ()=>abrirModal(cliente));
-        addDragEvents(card);
-        document.getElementById(cliente.status).appendChild(card);
-    }
-
-    function renderClientes(){
-        STATUS.forEach(status=>{
-            const titles = {
-                'prospect':'Prospect',
-                'negociacao':'Negociação',
-                'contrato-assinado':'Contrato Assinado',
-                'fechado':'Fechado'
-            };
-            document.getElementById(status).innerHTML = `<h2>${titles[status]}</h2>`;
-        });
-        clientes.forEach(c=>criarCardCliente(c));
-        filtrarClientes();
-    }
-
-    function novoCliente(){
-        const nome = prompt('Nome do cliente:');
-        if(!nome) return;
-        const numero = prompt('Número do cliente:') || '';
-        const processo = prompt('Número do processo:') || '';
-        const valor = prompt('Valor da causa:') || '';
-        const obs = prompt('Observações:') || '';
-        let status = prompt('Status (prospect, negociacao, contrato-assinado, fechado):','prospect');
-        if(!STATUS.includes(status)) return alert('Status inválido');
-        const cliente = {nome, numero, processo, valor, obs, status};
-        clientes.push(cliente);
-        salvarLocalStorage();
-        renderClientes();
-    }
-
-    // Modal
-    function abrirModal(cliente){
-        document.getElementById('modalNome').innerText = cliente.nome;
-        document.getElementById('modalNumero').innerText = cliente.numero;
-        document.getElementById('modalProcesso').innerText = cliente.processo;
-        document.getElementById('modalValor').innerText = cliente.valor;
-        document.getElementById('modalObs').innerText = cliente.obs;
-        document.getElementById('modal').style.display = 'flex';
-    }
-    function fecharModal(){ document.getElementById('modal').style.display = 'none'; }
-
-    // Drag & Drop
-    const columns = document.querySelectorAll('.column');
-    let draggedCard = null;
-    function addDragEvents(card){
-        card.addEventListener('dragstart', ()=>{ draggedCard=card; card.style.opacity='0.5'; });
-        card.addEventListener('dragend', ()=>{ draggedCard=null; card.style.opacity='1'; });
-    }
-    columns.forEach(col=>{
-        col.addEventListener('dragover', e=>e.preventDefault());
-        col.addEventListener('drop', e=>{
-            if(draggedCard){
-                const status = col.id;
-                const nome = draggedCard.querySelector('h3').innerText;
-                const cliente = clientes.find(c=>c.nome===nome);
-                if(cliente){
-                    cliente.status = status;
-                    salvarLocalStorage();
-                    renderClientes();
-                }
-            }
-        });
+/* ==== Render ==== */
+function render(){
+  const clientes=getClientes();
+  STATUS.forEach(s=>document.getElementById(s).innerHTML=`<h2>${s.replace('-',' ').toUpperCase()}</h2>`);
+  clientes.forEach(c=>{
+    const col=document.getElementById(c.status);
+    const card=document.createElement('div');
+    card.className=`card ${c.status}`; card.dataset.id=c.id; card.draggable=true;
+    card.innerHTML=`<div class="color-bar"></div>
+                    <div class="card-content">
+                      <h3>${c.nome}</h3>
+                      <p>Processo: ${c.processo||"-"}</p>
+                      <p>Valor: R$ ${c.valor||0}</p>
+                    </div>`;
+    card.onclick=()=>openModal(true,c);
+    addDrag(card);
+    col.appendChild(card);
+  });
+}
+function addDrag(card){
+  card.addEventListener('dragstart',()=>card.classList.add('dragging'));
+  card.addEventListener('dragend',()=>{ card.classList.remove('dragging'); saveOrder(); });
+}
+function saveOrder(){
+  const clientes=getClientes();
+  STATUS.forEach(s=>{
+    const col=document.getElementById(s);
+    [...col.querySelectorAll('.card')].forEach((el,i)=>{
+      const c=clientes.find(c=>c.id==el.dataset.id);
+      if(c)c.status=s;
     });
+  });
+  saveClientes(clientes);
+}
 
-    function filtrarClientes(){
-        const search = document.getElementById('searchInput').value.toLowerCase();
-        const filter = document.getElementById('filterStatus').value;
-        document.querySelectorAll('.card').forEach(card=>{
-            const matchSearch = card.dataset.nome.includes(search);
-            const matchFilter = !filter || card.dataset.status===filter;
-            card.style.display = (matchSearch && matchFilter) ? 'flex' : 'none';
-        });
-    }
+/* ==== Form ==== */
+clientForm.onsubmit=function(e){
+  e.preventDefault();
+  let clientes=getClientes();
+  const id=this.dataset.editId||Date.now();
+  const novoCliente={
+    id,
+    nome:inputNome.value,
+    numeros:inputNumeros.value,
+    processo:inputProcesso.value,
+    valor:inputValor.value,
+    obs:inputObs.value.substring(0,300),
+    status:inputStatus.value
+  };
+  if(this.dataset.editId){
+    clientes=clientes.map(c=>c.id==id?novoCliente:c);
+    showToast("Cliente atualizado!");
+  }else{
+    clientes.push(novoCliente);
+    showToast("Cliente adicionado!");
+  }
+  saveClientes(clientes);
+  modalBackdrop.style.display='none';
+  render();
+}
 
-    renderClientes();
+/* ==== Filter ==== */
+searchInput.oninput=filterCards;
+filterStatus.onchange=filterCards;
+function filterCards(){
+  const txt=searchInput.value.toLowerCase();
+  const f=filterStatus.value;
+  document.querySelectorAll('.card').forEach(c=>{
+    const cl=getClientes().find(x=>x.id==c.dataset.id);
+    const match=(cl.nome.toLowerCase().includes(txt))&&(f?cl.status===f:true);
+    c.style.display=match?"flex":"none";
+  });
+}
+
+/* ==== Init ==== */
+render();
 </script>
 </body>
 </html>

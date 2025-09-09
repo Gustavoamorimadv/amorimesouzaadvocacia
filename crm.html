@@ -140,14 +140,9 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 <div class="toast" id="toast"></div>
 
 <script>
-/* ==== LocalStorage ==== */
-function getClientes(){ return JSON.parse(localStorage.getItem("clientes")||"[]"); }
-function saveClientes(c){ localStorage.setItem("clientes", JSON.stringify(c)); }
-
-/* ==== DOM ==== */
 const STATUS=['prospect','negociacao','contrato-assinado','fechado'];
-let cardsMap={};
-const btnAdd=document.getElementById('btnAdd');
+let clientes = JSON.parse(localStorage.getItem('clientes')||'[]');
+const cardsMap={};
 const modalBackdrop=document.getElementById('modalBackdrop');
 const clientForm=document.getElementById('clientForm');
 const inputNome=document.getElementById('inputNome');
@@ -156,113 +151,124 @@ const inputStatus=document.getElementById('inputStatus');
 const inputNumeros=document.getElementById('inputNumeros');
 const inputProcesso=document.getElementById('inputProcesso');
 const inputValor=document.getElementById('inputValor');
+const btnAdd=document.getElementById('btnAdd');
 const btnCancel=document.getElementById('btnCancel');
 const searchInput=document.getElementById('searchInput');
 const filterStatus=document.getElementById('filterStatus');
 const toastEl=document.getElementById('toast');
 
-function showToast(msg){
-  toastEl.innerText=msg; toastEl.style.display='block';
-  clearTimeout(toastEl._t);
-  toastEl._t=setTimeout(()=>toastEl.style.display='none',3000);
-}
+function showToast(msg){ toastEl.innerText=msg; toastEl.style.display='block'; clearTimeout(toastEl._t); toastEl._t=setTimeout(()=>toastEl.style.display='none',3000); }
 
-/* ==== Modal ==== */
+function getClientes(){ return JSON.parse(localStorage.getItem('clientes')||'[]'); }
+function saveClientes(c){ localStorage.setItem('clientes', JSON.stringify(c)); }
+
 function openModal(edit=false,data=null){
-  modalBackdrop.style.display='flex';
-  document.getElementById('modalTitle').innerText=edit?"Editar Cliente":"Novo Cliente";
-  if(edit&&data){
-    inputNome.value=data.nome;
-    inputObs.value=data.obs||"";
-    inputStatus.value=data.status;
-    inputNumeros.value=data.numeros||"";
-    inputProcesso.value=data.processo||"";
-    inputValor.value=data.valor||"";
-    clientForm.dataset.editId=data.id;
-  }else{
-    inputNome.value="";inputObs.value="";inputStatus.value="prospect";
-    inputNumeros.value="";inputProcesso.value="";inputValor.value="";
-    delete clientForm.dataset.editId;
-  }
+    modalBackdrop.style.display='flex';
+    document.getElementById('modalTitle').innerText=edit?"Editar Cliente":"Novo Cliente";
+    if(edit&&data){
+        inputNome.value=data.nome;
+        inputObs.value=data.obs||"";
+        inputStatus.value=data.status;
+        inputNumeros.value=data.numeros||"";
+        inputProcesso.value=data.processo||"";
+        inputValor.value=data.valor||"";
+        clientForm.dataset.editId=data.id;
+    }else{
+        inputNome.value=""; inputObs.value=""; inputStatus.value="prospect";
+        inputNumeros.value=""; inputProcesso.value=""; inputValor.value="";
+        delete clientForm.dataset.editId;
+    }
 }
-btnAdd.onclick=()=>openModal();
-btnCancel.onclick=()=>modalBackdrop.style.display='none';
 
-/* ==== Render ==== */
-function render(){
-  const clientes=getClientes();
-  STATUS.forEach(s=>document.getElementById(s).innerHTML=`<h2>${s.replace('-',' ').toUpperCase()}</h2>`);
-  clientes.forEach(c=>{
-    const col=document.getElementById(c.status);
+function closeModal(){ modalBackdrop.style.display='none'; }
+
+function criarCard(cliente){
     const card=document.createElement('div');
-    card.className=`card ${c.status}`; card.dataset.id=c.id; card.draggable=true;
-    card.innerHTML=`<div class="color-bar"></div>
-                    <div class="card-content">
-                      <h3>${c.nome}</h3>
-                      <p>Processo: ${c.processo||"-"}</p>
-                      <p>Valor: R$ ${c.valor||0}</p>
-                    </div>`;
-    card.onclick=()=>openModal(true,c);
-    addDrag(card);
-    col.appendChild(card);
-  });
-}
-function addDrag(card){
-  card.addEventListener('dragstart',()=>card.classList.add('dragging'));
-  card.addEventListener('dragend',()=>{ card.classList.remove('dragging'); saveOrder(); });
-}
-function saveOrder(){
-  const clientes=getClientes();
-  STATUS.forEach(s=>{
-    const col=document.getElementById(s);
-    [...col.querySelectorAll('.card')].forEach((el,i)=>{
-      const c=clientes.find(c=>c.id==el.dataset.id);
-      if(c)c.status=s;
-    });
-  });
-  saveClientes(clientes);
+    card.className=`card ${cliente.status}`;
+    card.dataset.id=cliente.id;
+    card.dataset.status=cliente.status;
+    card.dataset.nome=cliente.nome.toLowerCase();
+    card.draggable=true;
+    card.innerHTML=`
+        <div class="color-bar"></div>
+        <div class="card-content">
+            <h3>${cliente.nome}</h3>
+            <p>Processo: ${cliente.processo||'-'}</p>
+            <p>Valor: R$ ${cliente.valor||0}</p>
+        </div>`;
+    card.onclick=()=>openModal(true,cliente);
+    addDragEvents(card);
+    document.getElementById(cliente.status).appendChild(card);
+    cardsMap[cliente.id]=card;
 }
 
-/* ==== Form ==== */
+function render(){
+    STATUS.forEach(s=>document.getElementById(s).innerHTML=`<h2>${s.replace('-',' ').toUpperCase()}</h2>`);
+    for(const c of getClientes()) criarCard(c);
+    filtragemAplicada();
+}
+
 clientForm.onsubmit=function(e){
-  e.preventDefault();
-  let clientes=getClientes();
-  const id=this.dataset.editId||Date.now();
-  const novoCliente={
-    id,
-    nome:inputNome.value,
-    numeros:inputNumeros.value,
-    processo:inputProcesso.value,
-    valor:inputValor.value,
-    obs:inputObs.value.substring(0,300),
-    status:inputStatus.value
-  };
-  if(this.dataset.editId){
-    clientes=clientes.map(c=>c.id==id?novoCliente:c);
-    showToast("Cliente atualizado!");
-  }else{
-    clientes.push(novoCliente);
-    showToast("Cliente adicionado!");
-  }
-  saveClientes(clientes);
-  modalBackdrop.style.display='none';
-  render();
+    e.preventDefault();
+    const nome=inputNome.value.trim();
+    if(!nome){ showToast("Nome obrigatório"); return; }
+    const novo={
+        id:clientForm.dataset.editId||Date.now(),
+        nome, obs:inputObs.value.trim().substring(0,300),
+        status:inputStatus.value, numeros:inputNumeros.value,
+        processo:inputProcesso.value, valor:inputValor.value
+    };
+    let clientes=getClientes();
+    if(clientForm.dataset.editId){
+        clientes=clientes.map(c=>c.id==novo.id?novo:c);
+        showToast("Cliente atualizado!");
+    }else{
+        clientes.push(novo);
+        showToast("Cliente adicionado!");
+    }
+    saveClientes(clientes);
+    closeModal(); render();
+};
+
+btnAdd.onclick=()=>openModal();
+btnCancel.onclick=()=>closeModal();
+
+function deleteCliente(id){
+    if(confirm("Deseja excluir este cliente?")){
+        saveClientes(getClientes().filter(c=>c.id!=id));
+        render(); showToast("Cliente excluído");
+    }
 }
 
-/* ==== Filter ==== */
-searchInput.oninput=filterCards;
-filterStatus.onchange=filterCards;
-function filterCards(){
-  const txt=searchInput.value.toLowerCase();
-  const f=filterStatus.value;
-  document.querySelectorAll('.card').forEach(c=>{
-    const cl=getClientes().find(x=>x.id==c.dataset.id);
-    const match=(cl.nome.toLowerCase().includes(txt))&&(f?cl.status===f:true);
-    c.style.display=match?"flex":"none";
-  });
+/* Drag & Drop */
+let draggedCard=null;
+function addDragEvents(card){
+    card.addEventListener('dragstart',()=>{ draggedCard=card; card.style.opacity='.5'; });
+    card.addEventListener('dragend',()=>{ draggedCard=null; card.style.opacity='1'; });
+}
+document.querySelectorAll('.column').forEach(col=>{
+    col.addEventListener('dragover', e=>e.preventDefault());
+    col.addEventListener('drop', ()=>{
+        if(!draggedCard) return;
+        const id=draggedCard.dataset.id;
+        const status=col.id;
+        const clientes=getClientes().map(c=>c.id==id?{...c,status}:c);
+        saveClientes(clientes); render(); showToast("Status atualizado");
+    });
+});
+
+/* Filtro */
+searchInput.oninput=filtragemAplicada;
+filterStatus.onchange=filtragemAplicada;
+function filtragemAplicada(){
+    const search=searchInput.value.toLowerCase(),filter=filterStatus.value;
+    Object.values(cardsMap).forEach(card=>{
+        const matchSearch=card.dataset.nome.includes(search);
+        const matchFilter=!filter||card.dataset.status===filter;
+        card.style.display=(matchSearch&&matchFilter)?'flex':'none';
+    });
 }
 
-/* ==== Init ==== */
 render();
 </script>
 </body>

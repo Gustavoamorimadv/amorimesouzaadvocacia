@@ -26,7 +26,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 .content { padding:20px; flex:1; overflow-y:auto; }
 
 form { display:flex; flex-wrap: wrap; gap:15px; background:#fff; padding:20px; border-radius:10px; margin-bottom:20px; box-shadow:0 4px 12px rgba(0,0,0,0.05);}
-form input { padding:8px; border-radius:6px; border:1px solid #ccc; flex:1;}
+form input, form select { padding:8px; border-radius:6px; border:1px solid #ccc; flex:1;}
 form button { padding:10px 20px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
 
 table { width:100%; border-collapse:collapse; background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.05);}
@@ -34,6 +34,10 @@ th, td { padding:10px; text-align:center; border-bottom:1px solid #ddd; }
 th { background:#1e1e2f; color:#fff; }
 
 #chartContainer { margin-top:30px; background:#fff; padding:20px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.05); }
+
+.btn { cursor:pointer; border:none; border-radius:6px; padding:6px 10px; }
+.btn.edit { background:#3498db; color:#fff; }
+.btn.delete { background:#e74c3c; color:#fff; }
 </style>
 </head>
 <body>
@@ -54,8 +58,14 @@ th { background:#1e1e2f; color:#fff; }
 <div class="content">
     <form id="clienteForm">
         <input type="text" id="nomeCliente" placeholder="Nome do Cliente" required>
-        <input type="number" id="parcelasPagas" placeholder="Parcelas Pagas" min="0" required>
         <input type="number" id="valorTotal" placeholder="Valor Total" min="0" required>
+        <input type="number" id="numParcelas" placeholder="Número de Parcelas" min="1" required>
+        <input type="number" id="parcelasPagas" placeholder="Parcelas Pagas" min="0" required>
+        <select id="statusCliente">
+            <option value="Não iniciado">Não iniciado</option>
+            <option value="Em andamento">Em andamento</option>
+            <option value="Concluído">Concluído</option>
+        </select>
         <button type="submit">Adicionar Cliente</button>
     </form>
 
@@ -63,9 +73,11 @@ th { background:#1e1e2f; color:#fff; }
         <thead>
             <tr>
                 <th>Nome</th>
-                <th>Parcelas Pagas</th>
                 <th>Valor Total</th>
+                <th>Nº de Parcelas</th>
+                <th>Parcelas Pagas</th>
                 <th>Status</th>
+                <th>Ações</th>
             </tr>
         </thead>
         <tbody id="clientesTable"></tbody>
@@ -87,41 +99,73 @@ const ctx = document.getElementById('pagamentosChart').getContext('2d');
 
 let chart = new Chart(ctx, {
     type: 'bar',
-    data: { labels: [], datasets: [{ label: 'Valor Total Pago', data: [], backgroundColor: 'rgba(75, 192, 192, 0.6)' }] },
+    data: { labels: [], datasets: [{ label: 'Valor Pago', data: [], backgroundColor: 'rgba(75, 192, 192, 0.6)' }] },
     options: { responsive:true, scales:{y:{beginAtZero:true}} }
 });
 
 function atualizarTabela(){
     tabela.innerHTML='';
-    clientes.forEach(c=>{
+    clientes.forEach((c,index)=>{
         const row = tabela.insertRow();
         row.insertCell(0).innerText = c.nome;
-        row.insertCell(1).innerText = c.parcelas;
-        row.insertCell(2).innerText = 'R$ '+parseFloat(c.valor).toFixed(2);
-        const status = c.parcelas>0 ? 'Pago parcialmente':'Não pago';
-        row.insertCell(3).innerText = status;
+        row.insertCell(1).innerText = 'R$ '+parseFloat(c.valorTotal).toFixed(2);
+        row.insertCell(2).innerText = c.numParcelas;
+        row.insertCell(3).innerText = c.parcelasPagas;
+        row.insertCell(4).innerText = c.status;
+        const acoes = row.insertCell(5);
+        acoes.innerHTML = `<button class="btn edit" onclick="editarCliente(${index})">Editar</button> 
+                           <button class="btn delete" onclick="deletarCliente(${index})">Excluir</button>`;
     });
 }
 
 function atualizarGrafico(){
     chart.data.labels = clientes.map(c=>c.nome);
-    chart.data.datasets[0].data = clientes.map(c=>c.valor * (c.parcelas>0?1:0));
+    chart.data.datasets[0].data = clientes.map(c=>c.valorTotal * (c.parcelasPagas / c.numParcelas));
     chart.update();
 }
 
 form.addEventListener('submit', e=>{
     e.preventDefault();
-    const novo = {
+    const novoCliente = {
         nome: document.getElementById('nomeCliente').value,
-        parcelas: parseInt(document.getElementById('parcelasPagas').value),
-        valor: parseFloat(document.getElementById('valorTotal').value)
+        valorTotal: parseFloat(document.getElementById('valorTotal').value),
+        numParcelas: parseInt(document.getElementById('numParcelas').value),
+        parcelasPagas: parseInt(document.getElementById('parcelasPagas').value),
+        status: document.getElementById('statusCliente').value
     };
-    clientes.push(novo);
+
+    const editIndex = form.dataset.editIndex;
+    if(editIndex !== undefined){
+        clientes[editIndex] = novoCliente;
+        delete form.dataset.editIndex;
+    } else {
+        clientes.push(novoCliente);
+    }
+
     localStorage.setItem('clientes', JSON.stringify(clientes));
+    form.reset();
     atualizarTabela();
     atualizarGrafico();
-    form.reset();
 });
+
+function editarCliente(index){
+    const c = clientes[index];
+    document.getElementById('nomeCliente').value = c.nome;
+    document.getElementById('valorTotal').value = c.valorTotal;
+    document.getElementById('numParcelas').value = c.numParcelas;
+    document.getElementById('parcelasPagas').value = c.parcelasPagas;
+    document.getElementById('statusCliente').value = c.status;
+    form.dataset.editIndex = index;
+}
+
+function deletarCliente(index){
+    if(confirm('Deseja realmente excluir este cliente?')){
+        clientes.splice(index,1);
+        localStorage.setItem('clientes', JSON.stringify(clientes));
+        atualizarTabela();
+        atualizarGrafico();
+    }
+}
 
 atualizarTabela();
 atualizarGrafico();

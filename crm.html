@@ -4,13 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CRM AMR ADV</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
 body { display:flex; background:#f0f2f5; height:100vh; }
 
 /* Sidebar */
 .sidebar { width:220px; background:#fff; border-right:1px solid #ddd; display:flex; flex-direction:column; padding-top:20px; }
-.sidebar h2 { text-align:center; margin-bottom:20px; font-size:20px; color:#1e1e2f; }
+.sidebar h2 { text-align:center; margin-bottom:20px; font-size:22px; font-family:'Poppins', sans-serif; font-weight:600; color:#1e1e2f; letter-spacing:1px; }
 .sidebar button { padding:12px 20px; margin:5px 10px; border:none; background:#f8f9fa; text-align:left; cursor:pointer; border-radius:6px; transition:0.2s; }
 .sidebar button:hover { background:#e2e6ea; }
 
@@ -18,7 +19,7 @@ body { display:flex; background:#f0f2f5; height:100vh; }
 .main { flex:1; display:flex; flex-direction:column; }
 
 header { height:60px; background:#fff; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; padding:0 20px; }
-header h1 { font-size:22px; color:#1e1e2f; }
+header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
 header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
 
 .search-bar { padding:10px 20px; background:#fff; border-bottom:1px solid #ddd; display:flex; gap:10px; align-items:center; }
@@ -27,16 +28,16 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 
 /* Kanban */
 .kanban { display:flex; gap:20px; padding:20px; overflow-x:auto; flex:1; }
-.column { background:#fff; border-radius:10px; padding:15px; min-width:280px; max-height:calc(100vh - 140px); display:flex; flex-direction:column; gap:10px; box-shadow:0 4px 8px rgba(0,0,0,0.05); }
+.column { background:#fff; border-radius:10px; padding:15px; min-width:300px; max-height:calc(100vh - 140px); display:flex; flex-direction:column; gap:12px; box-shadow:0 4px 8px rgba(0,0,0,0.05); }
 .column h2 { margin-bottom:10px; font-size:18px; color:#1e1e2f; }
 
 /* Card estilo Bitrix */
-.card { display:flex; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.05); cursor:pointer; overflow:hidden; transition:0.2s; }
-.card:hover { transform:scale(1.02); }
+.card { display:flex; background:#fff; border:1px solid #ddd; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.08); cursor:pointer; overflow:hidden; transition:0.2s; min-height:110px; }
+.card:hover { transform:scale(1.03); }
 .card .color-bar { width:6px; }
-.card-content { padding:10px; flex:1; }
-.card h3 { font-size:16px; margin-bottom:5px; color:#333; }
-.card p { font-size:13px; color:#666; margin:2px 0; }
+.card-content { padding:14px; flex:1; }
+.card h3 { font-size:18px; margin-bottom:6px; color:#333; }
+.card p { font-size:14px; color:#555; margin:3px 0; }
 
 /* Cores por status */
 .lista-fria .color-bar { background:#3498db; }
@@ -72,7 +73,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 
 <div class="main">
 <header>
-    <h1>CRM </h1>
+    <h1>CRM</h1>
     <button id="btnAdd" class="btn primary">Adicionar Cliente</button>
 </header>
 
@@ -103,6 +104,10 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
         <div class="row">
             <label>Nome</label>
             <input id="inputNome" required />
+        </div>
+        <div class="row">
+            <label>CPF</label>
+            <input id="inputCPF" placeholder="000.000.000-00" />
         </div>
         <div class="row">
             <label>Números</label>
@@ -146,6 +151,7 @@ const cardsMap={};
 const modalBackdrop=document.getElementById('modalBackdrop');
 const clientForm=document.getElementById('clientForm');
 const inputNome=document.getElementById('inputNome');
+const inputCPF=document.getElementById('inputCPF');
 const inputObs=document.getElementById('inputObs');
 const inputStatus=document.getElementById('inputStatus');
 const inputNumeros=document.getElementById('inputNumeros');
@@ -167,6 +173,7 @@ function openModal(edit=false,data=null){
     document.getElementById('modalTitle').innerText=edit?"Editar Cliente":"Novo Cliente";
     if(edit&&data){
         inputNome.value=data.nome;
+        inputCPF.value=data.cpf||"";
         inputObs.value=data.obs||"";
         inputStatus.value=data.status;
         inputNumeros.value=data.numeros||"";
@@ -174,7 +181,7 @@ function openModal(edit=false,data=null){
         inputValor.value=data.valor||"";
         clientForm.dataset.editId=data.id;
     }else{
-        inputNome.value=""; inputObs.value=""; inputStatus.value="lista-fria";
+        inputNome.value=""; inputCPF.value=""; inputObs.value=""; inputStatus.value="lista-fria";
         inputNumeros.value=""; inputProcesso.value=""; inputValor.value="";
         delete clientForm.dataset.editId;
     }
@@ -193,6 +200,7 @@ function criarCard(cliente){
         <div class="color-bar"></div>
         <div class="card-content">
             <h3>${cliente.nome}</h3>
+            <p>CPF: ${cliente.cpf||'-'}</p>
             <p>Processo: ${cliente.processo||'-'}</p>
             <p>Valor: R$ ${cliente.valor||0}</p>
         </div>`;
@@ -214,7 +222,8 @@ clientForm.onsubmit=function(e){
     if(!nome){ showToast("Nome obrigatório"); return; }
     const novo={
         id:clientForm.dataset.editId||Date.now(),
-        nome, obs:inputObs.value.trim().substring(0,300),
+        nome, cpf:inputCPF.value.trim(),
+        obs:inputObs.value.trim().substring(0,300),
         status:inputStatus.value, numeros:inputNumeros.value,
         processo:inputProcesso.value, valor:inputValor.value
     };

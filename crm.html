@@ -5,11 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CRM Avançado - AMR ADV</title>
 <style>
-    /* RESET */
     * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
     body { display:flex; background:#f0f2f5; height:100vh; }
 
-    /* MENU LATERAL */
     .sidebar {
         width: 220px;
         background:#fff;
@@ -31,7 +29,6 @@
     }
     .sidebar button:hover { background:#e2e6ea; }
 
-    /* CONTEÚDO PRINCIPAL */
     .main { flex:1; display:flex; flex-direction:column; }
 
     header {
@@ -97,14 +94,13 @@
     }
     .card:hover { opacity:0.9; }
 
-    /* Cores por status */
     .prospect { background:#3498db; }
     .negociacao { background:#f1c40f; color:#000; }
+    .contrato-assinado { background:#9b59b6; }
     .fechado { background:#2ecc71; }
 
     .card h3 { font-size:16px; margin-bottom:5px; }
     .card p { font-size:14px; }
-
 </style>
 </head>
 <body>
@@ -127,22 +123,22 @@
         <input type="text" id="searchInput" placeholder="Buscar cliente..." oninput="filtrarClientes()">
         <select id="filterStatus" onchange="filtrarClientes()">
             <option value="">Todos os status</option>
-            <option value="cliente frio">Cliente Frio</option>
+            <option value="prospect">Prospect</option>
             <option value="negociacao">Negociação</option>
-            <option value="contrato assinado">Contrato Assinado</option>
+            <option value="contrato-assinado">Contrato Assinado</option>
             <option value="fechado">Fechado</option>
         </select>
     </div>
 
     <main class="kanban">
-        <div class="column" id="cliente frio">
-            <h2>cliente frio</h2>
+        <div class="column" id="prospect">
+            <h2>Prospect</h2>
         </div>
         <div class="column" id="negociacao">
             <h2>Negociação</h2>
         </div>
-        <div class="column" id="contrato assinado">
-            <h2>contrato assinado</h2>
+        <div class="column" id="contrato-assinado">
+            <h2>Contrato Assinado</h2>
         </div>
         <div class="column" id="fechado">
             <h2>Fechado</h2>
@@ -151,6 +147,9 @@
 </div>
 
 <script>
+    // Corrige os status aceitos
+    const STATUS = ['prospect', 'negociacao', 'contrato-assinado', 'fechado'];
+
     let clientes = JSON.parse(localStorage.getItem('crmClientes')) || [];
 
     function salvarLocalStorage() {
@@ -159,6 +158,7 @@
 
     function criarCardCliente(cliente) {
         const card = document.createElement('div');
+        // Usar classe CSS correspondente ao status
         card.className = `card ${cliente.status}`;
         card.draggable = true;
         card.dataset.nome = cliente.nome.toLowerCase();
@@ -169,18 +169,25 @@
     }
 
     function renderClientes() {
-        ['prospect','negociacao','fechado'].forEach(status => {
-            document.getElementById(status).innerHTML = `<h2>${status.charAt(0).toUpperCase() + status.slice(1)}</h2>`;
+        // Limpa as colunas
+        STATUS.forEach(status => {
+            let titulo = '';
+            if(status === 'prospect') titulo = 'Prospect';
+            else if(status === 'negociacao') titulo = 'Negociação';
+            else if(status === 'contrato-assinado') titulo = 'Contrato Assinado';
+            else if(status === 'fechado') titulo = 'Fechado';
+            document.getElementById(status).innerHTML = `<h2>${titulo}</h2>`;
         });
         clientes.forEach(cliente => criarCardCliente(cliente));
+        filtrarClientes();
     }
 
     function novoCliente() {
         const nome = prompt('Nome do cliente:');
         if(!nome) return;
         const obs = prompt('Observação:') || '';
-        const status = prompt('Status (prospect, negociacao, fechado):', 'prospect');
-        if(!['prospect','negociacao','fechado'].includes(status)) return alert('Status inválido');
+        let status = prompt('Status (prospect, negociacao, contrato-assinado, fechado):', 'prospect');
+        if(!STATUS.includes(status)) return alert('Status inválido');
         const cliente = {nome, obs, status};
         clientes.push(cliente);
         salvarLocalStorage();

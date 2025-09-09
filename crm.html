@@ -1,169 +1,81 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRM - AMR ADV</title>
-    <style>
-        /* RESET BÁSICO */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: #f8f9fa;
-            color: #333;
-        }
-
-        header {
-            background-color: #1e1e2f;
-            color: #fff;
-            padding: 20px 40px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        header h1 {
-            font-size: 24px;
-        }
-
-        header button {
-            background-color: #ff6b6b;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .kanban {
-            display: flex;
-            gap: 20px;
-            padding: 20px 40px;
-            overflow-x: auto;
-        }
-
-        .column {
-            background-color: #fff;
-            border-radius: 10px;
-            padding: 15px;
-            min-width: 250px;
-            max-height: 80vh;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        .column h2 {
-            margin-bottom: 10px;
-            font-size: 18px;
-            color: #1e1e2f;
-        }
-
-        .card {
-            background-color: #f1f3f5;
-            padding: 15px;
-            border-radius: 8px;
-            cursor: grab;
-            transition: all 0.2s ease;
-            border-left: 5px solid #1e1e2f;
-        }
-
-        .card:hover {
-            background-color: #e9ecef;
-        }
-
-        .card h3 {
-            font-size: 16px;
-            margin-bottom: 5px;
-        }
-
-        .card p {
-            font-size: 14px;
-            color: #555;
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #1e1e2f;
-            border-radius: 4px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM Funcional - AMR ADV</title>
+<style>
+    body { margin:0; font-family: 'Segoe UI', sans-serif; background:#f8f9fa; }
+    header { background:#1e1e2f; color:#fff; padding:15px 30px; display:flex; justify-content:space-between; align-items:center; }
+    header h1 { font-size:24px; }
+    header button { padding:10px 20px; border:none; border-radius:6px; background:#ff6b6b; color:#fff; cursor:pointer; font-weight:bold; }
+    .kanban { display:flex; gap:20px; padding:20px 30px; overflow-x:auto; }
+    .column { background:#fff; border-radius:10px; padding:15px; min-width:250px; max-height:80vh; display:flex; flex-direction:column; gap:10px; box-shadow:0 4px 8px rgba(0,0,0,0.1); }
+    .column h2 { margin-bottom:10px; font-size:18px; color:#1e1e2f; }
+    .card { background:#f1f3f5; padding:15px; border-radius:8px; cursor:grab; border-left:5px solid #1e1e2f; transition:all 0.2s ease; }
+    .card:hover { background:#e9ecef; }
+    .card h3 { font-size:16px; margin-bottom:5px; }
+    .card p { font-size:14px; color:#555; }
+</style>
 </head>
 <body>
-    <header>
-        <h1>CRM - AMR ADV</h1>
-        <button>+ Novo Cliente</button>
-    </header>
 
-    <main class="kanban">
-        <div class="column" id="prospect">
-            <h2>Prospect</h2>
-            <div class="card">
-                <h3>João Silva</h3>
-                <p>Contato inicial feito</p>
-            </div>
-            <div class="card">
-                <h3>Maria Souza</h3>
-                <p>Interessada em defesa de veículo</p>
-            </div>
-        </div>
+<header>
+    <h1>CRM - AMR ADV</h1>
+    <button onclick="novoCliente()">+ Novo Cliente</button>
+</header>
 
-        <div class="column" id="negociacao">
-            <h2>Negociação</h2>
-            <div class="card">
-                <h3>Carlos Pereira</h3>
-                <p>Negociando valores</p>
-            </div>
-        </div>
+<main class="kanban">
+    <div class="column" id="prospect">
+        <h2>Prospect</h2>
+    </div>
+    <div class="column" id="negociacao">
+        <h2>Negociação</h2>
+    </div>
+    <div class="column" id="fechado">
+        <h2>Fechado</h2>
+    </div>
+</main>
 
-        <div class="column" id="fechado">
-            <h2>Fechado</h2>
-            <div class="card">
-                <h3>Ana Oliveira</h3>
-                <p>Contrato assinado</p>
-            </div>
-        </div>
-    </main>
+<script>
+    // Função para criar card
+    function criarCard(nome, obs) {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.draggable = true;
+        card.innerHTML = `<h3>${nome}</h3><p>${obs}</p>`;
+        addDragEvents(card);
+        document.getElementById('prospect').appendChild(card);
+    }
 
-    <script>
-        // Exemplo simples de drag & drop entre colunas
-        const cards = document.querySelectorAll('.card');
-        const columns = document.querySelectorAll('.column');
+    // Evento para adicionar cliente via prompt
+    function novoCliente() {
+        const nome = prompt('Nome do cliente:');
+        if(!nome) return;
+        const obs = prompt('Observação:') || '';
+        criarCard(nome, obs);
+    }
 
-        let draggedCard = null;
+    // Drag & drop
+    const columns = document.querySelectorAll('.column');
+    let draggedCard = null;
 
-        cards.forEach(card => {
-            card.addEventListener('dragstart', () => {
-                draggedCard = card;
-                card.style.opacity = '0.5';
-            });
+    function addDragEvents(card) {
+        card.addEventListener('dragstart', () => { draggedCard = card; card.style.opacity = '0.5'; });
+        card.addEventListener('dragend', () => { draggedCard = null; card.style.opacity = '1'; });
+    }
 
-            card.addEventListener('dragend', () => {
-                draggedCard = null;
-                card.style.opacity = '1';
-            });
-        });
+    columns.forEach(col => {
+        col.addEventListener('dragover', e => e.preventDefault());
+        col.addEventListener('drop', e => { if(draggedCard) col.appendChild(draggedCard); });
+    });
 
-        columns.forEach(col => {
-            col.addEventListener('dragover', e => e.preventDefault());
+    // Cards iniciais
+    criarCard('João Silva', 'Contato inicial feito');
+    criarCard('Maria Souza', 'Interessada em defesa de veículo');
+    criarCard('Carlos Pereira', 'Negociando valores');
+    criarCard('Ana Oliveira', 'Contrato assinado');
+</script>
 
-            col.addEventListener('drop', e => {
-                if(draggedCard){
-                    col.appendChild(draggedCard);
-                }
-            });
-        });
-    </script>
 </body>
 </html>

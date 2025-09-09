@@ -3,107 +3,48 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CRM Avançado - AMR ADV</title>
+<title>CRM Firebase - AMR ADV</title>
 <style>
-    * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-    body { display:flex; background:#f0f2f5; height:100vh; }
+* { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+body { display:flex; background:#f0f2f5; height:100vh; }
 
-    /* Menu lateral */
-    .sidebar {
-        width: 220px;
-        background:#fff;
-        border-right:1px solid #ddd;
-        display:flex;
-        flex-direction:column;
-        padding-top:20px;
-    }
-    .sidebar h2 { text-align:center; margin-bottom:20px; font-size:20px; color:#1e1e2f; }
-    .sidebar button {
-        padding:12px 20px;
-        margin:5px 10px;
-        border:none;
-        background:#f8f9fa;
-        text-align:left;
-        cursor:pointer;
-        border-radius:6px;
-        transition:0.2s;
-    }
-    .sidebar button:hover { background:#e2e6ea; }
+.sidebar {
+    width:220px;
+    background:#fff;
+    border-right:1px solid #ddd;
+    display:flex;
+    flex-direction:column;
+    padding-top:20px;
+}
+.sidebar h2 { text-align:center; margin-bottom:20px; font-size:20px; color:#1e1e2f; }
+.sidebar button { padding:12px 20px; margin:5px 10px; border:none; background:#f8f9fa; text-align:left; cursor:pointer; border-radius:6px; transition:0.2s; }
+.sidebar button:hover { background:#e2e6ea; }
 
-    /* Conteúdo principal */
-    .main { flex:1; display:flex; flex-direction:column; }
+.main { flex:1; display:flex; flex-direction:column; }
 
-    header {
-        height:60px;
-        background:#fff;
-        border-bottom:1px solid #ddd;
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        padding:0 20px;
-    }
-    header h1 { font-size:22px; color:#1e1e2f; }
-    header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+header { height:60px; background:#fff; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; padding:0 20px; }
+header h1 { font-size:22px; color:#1e1e2f; }
+header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
 
-    .search-bar {
-        padding:10px 20px;
-        background:#fff;
-        border-bottom:1px solid #ddd;
-        display:flex;
-        gap:10px;
-        align-items:center;
-    }
-    .search-bar input {
-        flex:1;
-        padding:8px;
-        border:1px solid #ccc;
-        border-radius:6px;
-    }
-    .search-bar select {
-        padding:8px;
-        border-radius:6px;
-        border:1px solid #ccc;
-    }
+.search-bar { padding:10px 20px; background:#fff; border-bottom:1px solid #ddd; display:flex; gap:10px; align-items:center; }
+.search-bar input { flex:1; padding:8px; border:1px solid #ccc; border-radius:6px; }
+.search-bar select { padding:8px; border-radius:6px; border:1px solid #ccc; }
 
-    .kanban {
-        display:flex;
-        gap:20px;
-        padding:20px;
-        overflow-x:auto;
-        flex:1;
-    }
+.kanban { display:flex; gap:20px; padding:20px; overflow-x:auto; flex:1; }
 
-    .column {
-        background:#fff;
-        border-radius:10px;
-        padding:15px;
-        min-width:250px;
-        max-height:calc(100vh - 140px);
-        display:flex;
-        flex-direction:column;
-        gap:10px;
-        box-shadow:0 4px 8px rgba(0,0,0,0.05);
-    }
+.column { background:#fff; border-radius:10px; padding:15px; min-width:250px; max-height:calc(100vh - 140px); display:flex; flex-direction:column; gap:10px; box-shadow:0 4px 8px rgba(0,0,0,0.05); }
+.column h2 { margin-bottom:10px; font-size:18px; color:#1e1e2f; }
 
-    .column h2 { margin-bottom:10px; font-size:18px; color:#1e1e2f; }
+.card { padding:12px; border-radius:8px; cursor:grab; transition:all 0.2s ease; color:#fff; }
+.card:hover { opacity:0.9; }
 
-    .card {
-        padding:12px;
-        border-radius:8px;
-        cursor:grab;
-        transition:all 0.2s ease;
-        color:#fff;
-    }
-    .card:hover { opacity:0.9; }
+.prospect { background:#3498db; }
+.negociacao { background:#f1c40f; color:#000; }
+.contrato-assinado { background:#9b59b6; }
+.fechado { background:#2ecc71; }
 
-    /* Cores por status */
-    .prospect { background:#3498db; }
-    .negociacao { background:#f1c40f; color:#000; }
-    .contrato-assinado { background:#9b59b6; }
-    .fechado { background:#2ecc71; }
-
-    .card h3 { font-size:16px; margin-bottom:5px; }
-    .card p { font-size:14px; }
+.card h3 { font-size:16px; margin-bottom:5px; }
+.card p { font-size:14px; }
 </style>
 </head>
 <body>
@@ -118,7 +59,7 @@
 
 <div class="main">
     <header>
-        <h1>CRM Avançado</h1>
+        <h1>CRM Firebase</h1>
         <button onclick="novoCliente()">Adicionar Cliente</button>
     </header>
 
@@ -141,69 +82,101 @@
     </main>
 </div>
 
-<script>
-    const STATUS = ['prospect', 'negociacao', 'contrato-assinado', 'fechado'];
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-    let clientes = JSON.parse(localStorage.getItem('crmClientes')) || [];
+  // Configuração Firebase do seu projeto
+  const firebaseConfig = {
+    apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
+    authDomain: "dapapp-38637.firebaseapp.com",
+    projectId: "dapapp-38637",
+    storageBucket: "dapapp-38637.firebasestorage.app",
+    messagingSenderId: "628852295313",
+    appId: "1:628852295313:web:ce288c4e09b2037c022130",
+    measurementId: "G-WL3JR7CSWY"
+  };
 
-    function salvarLocalStorage() {
-        localStorage.setItem('crmClientes', JSON.stringify(clientes));
-    }
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const clientesRef = collection(db, "clientes");
 
-    function criarCardCliente(cliente) {
-        const card = document.createElement('div');
-        card.className = `card ${cliente.status}`;
-        card.draggable = true;
-        card.dataset.nome = cliente.nome.toLowerCase();
-        card.dataset.status = cliente.status;
-        card.innerHTML = `<h3>${cliente.nome}</h3><p>${cliente.obs}</p>`;
-        addDragEvents(card);
-        document.getElementById(cliente.status).appendChild(card);
-    }
+  const STATUS = ['prospect', 'negociacao', 'contrato-assinado', 'fechado'];
+  let cardsMap = {};
 
-    function renderClientes() {
-        STATUS.forEach(status => {
-            let titulo = '';
-            if(status === 'prospect') titulo = 'Prospect';
-            else if(status === 'negociacao') titulo = 'Negociação';
-            else if(status === 'contrato-assinado') titulo = 'Contrato Assinado';
-            else if(status === 'fechado') titulo = 'Fechado';
-            document.getElementById(status).innerHTML = `<h2>${titulo}</h2>`;
-        });
-        clientes.forEach(cliente => criarCardCliente(cliente));
-        filtrarClientes();
-    }
+  function criarCardCliente(id, cliente) {
+    const card = document.createElement('div');
+    card.className = `card ${cliente.status}`;
+    card.draggable = true;
+    card.dataset.id = id;
+    card.dataset.nome = cliente.nome.toLowerCase();
+    card.dataset.status = cliente.status;
+    card.innerHTML = `<h3>${cliente.nome}</h3><p>${cliente.obs}</p>`;
+    addDragEvents(card);
+    document.getElementById(cliente.status).appendChild(card);
+    cardsMap[id] = card;
+  }
 
-    function novoCliente() {
-        const nome = prompt('Nome do cliente:');
-        if(!nome) return;
-        const obs = prompt('Observação:') || '';
-        let status = prompt('Status (prospect, negociacao, contrato-assinado, fechado):', 'prospect');
-        if(!STATUS.includes(status)) return alert('Status inválido');
-        clientes.push({nome, obs, status});
-        salvarLocalStorage();
-        renderClientes();
-    }
+  function renderClientes(snapshot) {
+    STATUS.forEach(status => {
+      document.getElementById(status).innerHTML = `<h2>${status.replace(/-/g,' ').replace(/\b\w/g, l=>l.toUpperCase())}</h2>`;
+    });
+    snapshot.forEach(docSnap => {
+      criarCardCliente(docSnap.id, docSnap.data());
+    });
+    filtrarClientes();
+  }
 
-    // Drag & Drop
-    const columns = document.querySelectorAll('.column');
-    let draggedCard = null;
+  async function novoCliente() {
+    const nome = prompt('Nome do cliente:');
+    if(!nome) return;
+    const obs = prompt('Observação:') || '';
+    let status = prompt('Status (prospect, negociacao, contrato-assinado, fechado):', 'prospect');
+    if(!STATUS.includes(status)) return alert('Status inválido');
+    await addDoc(clientesRef, { nome, obs, status });
+  }
 
-    function addDragEvents(card) {
-        card.addEventListener('dragstart', () => { draggedCard = card; card.style.opacity = '0.5'; });
-        card.addEventListener('dragend', () => { draggedCard = null; card.style.opacity = '1'; });
-    }
+  // Drag & Drop
+  const columns = document.querySelectorAll('.column');
+  let draggedCard = null;
 
-    columns.forEach(col => {
-        col.addEventListener('dragover', e => e.preventDefault());
-        col.addEventListener('drop', e => {
-            if(draggedCard){
-                const status = col.id;
-                const nome = draggedCard.querySelector('h3').innerText;
-                const cliente = clientes.find(c => c.nome === nome);
-                if(cliente){
-                    cliente.status = status;
-                    salvarLocalStorage();
-                    renderClientes();
-                }
-            }
+  function addDragEvents(card) {
+    card.addEventListener('dragstart', () => { draggedCard = card; card.style.opacity = '0.5'; });
+    card.addEventListener('dragend', () => { draggedCard = null; card.style.opacity = '1'; });
+  }
+
+  columns.forEach(col => {
+    col.addEventListener('dragover', e => e.preventDefault());
+    col.addEventListener('drop', async e => {
+      if(draggedCard){
+        const id = draggedCard.dataset.id;
+        const status = col.id;
+        const docRef = doc(db, "clientes", id);
+        await updateDoc(docRef, { status });
+      }
+    });
+  });
+
+  // Busca e filtro
+  function filtrarClientes() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const filter = document.getElementById('filterStatus').value;
+    Object.values(cardsMap).forEach(card => {
+      const matchSearch = card.dataset.nome.includes(search);
+      const matchFilter = !filter || card.dataset.status === filter;
+      card.style.display = (matchSearch && matchFilter) ? 'block' : 'none';
+    });
+  }
+
+  // Atualização em tempo real
+  onSnapshot(clientesRef, snapshot => {
+    // Limpa todos os cards antes de renderizar
+    STATUS.forEach(status => document.getElementById(status).innerHTML = `<h2>${status.replace(/-/g,' ').replace(/\b\w/g, l=>l.toUpperCase())}</h2>`);
+    cardsMap = {};
+    snapshot.docs.forEach(docSnap => criarCardCliente(docSnap.id, docSnap.data()));
+    filtrarClientes();
+  });
+</script>
+
+</body>
+</html>

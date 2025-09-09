@@ -8,6 +8,7 @@
     * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
     body { display:flex; background:#f0f2f5; height:100vh; }
 
+    /* Menu lateral */
     .sidebar {
         width: 220px;
         background:#fff;
@@ -29,6 +30,7 @@
     }
     .sidebar button:hover { background:#e2e6ea; }
 
+    /* Conteúdo principal */
     .main { flex:1; display:flex; flex-direction:column; }
 
     header {
@@ -94,6 +96,7 @@
     }
     .card:hover { opacity:0.9; }
 
+    /* Cores por status */
     .prospect { background:#3498db; }
     .negociacao { background:#f1c40f; color:#000; }
     .contrato-assinado { background:#9b59b6; }
@@ -131,23 +134,14 @@
     </div>
 
     <main class="kanban">
-        <div class="column" id="prospect">
-            <h2>Prospect</h2>
-        </div>
-        <div class="column" id="negociacao">
-            <h2>Negociação</h2>
-        </div>
-        <div class="column" id="contrato-assinado">
-            <h2>Contrato Assinado</h2>
-        </div>
-        <div class="column" id="fechado">
-            <h2>Fechado</h2>
-        </div>
+        <div class="column" id="prospect"><h2>Prospect</h2></div>
+        <div class="column" id="negociacao"><h2>Negociação</h2></div>
+        <div class="column" id="contrato-assinado"><h2>Contrato Assinado</h2></div>
+        <div class="column" id="fechado"><h2>Fechado</h2></div>
     </main>
 </div>
 
 <script>
-    // Corrige os status aceitos
     const STATUS = ['prospect', 'negociacao', 'contrato-assinado', 'fechado'];
 
     let clientes = JSON.parse(localStorage.getItem('crmClientes')) || [];
@@ -158,7 +152,6 @@
 
     function criarCardCliente(cliente) {
         const card = document.createElement('div');
-        // Usar classe CSS correspondente ao status
         card.className = `card ${cliente.status}`;
         card.draggable = true;
         card.dataset.nome = cliente.nome.toLowerCase();
@@ -169,7 +162,6 @@
     }
 
     function renderClientes() {
-        // Limpa as colunas
         STATUS.forEach(status => {
             let titulo = '';
             if(status === 'prospect') titulo = 'Prospect';
@@ -188,8 +180,7 @@
         const obs = prompt('Observação:') || '';
         let status = prompt('Status (prospect, negociacao, contrato-assinado, fechado):', 'prospect');
         if(!STATUS.includes(status)) return alert('Status inválido');
-        const cliente = {nome, obs, status};
-        clientes.push(cliente);
+        clientes.push({nome, obs, status});
         salvarLocalStorage();
         renderClientes();
     }
@@ -216,23 +207,3 @@
                     renderClientes();
                 }
             }
-        });
-    });
-
-    // Filtro e busca
-    function filtrarClientes() {
-        const search = document.getElementById('searchInput').value.toLowerCase();
-        const filter = document.getElementById('filterStatus').value;
-        document.querySelectorAll('.card').forEach(card => {
-            const matchSearch = card.dataset.nome.includes(search);
-            const matchFilter = !filter || card.dataset.status === filter;
-            card.style.display = (matchSearch && matchFilter) ? 'block' : 'none';
-        });
-    }
-
-    // Inicial
-    renderClientes();
-</script>
-
-</body>
-</html>

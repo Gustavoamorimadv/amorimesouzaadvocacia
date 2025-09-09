@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CRM - AMR ADV</title>
+<title>CRM Avançado - AMR ADV</title>
 <style>
     /* RESET */
     * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
@@ -32,11 +32,7 @@
     .sidebar button:hover { background:#e2e6ea; }
 
     /* CONTEÚDO PRINCIPAL */
-    .main {
-        flex:1;
-        display:flex;
-        flex-direction:column;
-    }
+    .main { flex:1; display:flex; flex-direction:column; }
 
     header {
         height:60px;
@@ -49,6 +45,26 @@
     }
     header h1 { font-size:22px; color:#1e1e2f; }
     header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+
+    .search-bar {
+        padding:10px 20px;
+        background:#fff;
+        border-bottom:1px solid #ddd;
+        display:flex;
+        gap:10px;
+        align-items:center;
+    }
+    .search-bar input {
+        flex:1;
+        padding:8px;
+        border:1px solid #ccc;
+        border-radius:6px;
+    }
+    .search-bar select {
+        padding:8px;
+        border-radius:6px;
+        border:1px solid #ccc;
+    }
 
     .kanban {
         display:flex;
@@ -63,7 +79,7 @@
         border-radius:10px;
         padding:15px;
         min-width:250px;
-        max-height:calc(100vh - 100px);
+        max-height:calc(100vh - 140px);
         display:flex;
         flex-direction:column;
         gap:10px;
@@ -73,16 +89,22 @@
     .column h2 { margin-bottom:10px; font-size:18px; color:#1e1e2f; }
 
     .card {
-        background:#f8f9fa;
         padding:12px;
         border-radius:8px;
         cursor:grab;
-        border-left:5px solid #1e1e2f;
         transition:all 0.2s ease;
+        color:#fff;
     }
-    .card:hover { background:#e2e6ea; }
+    .card:hover { opacity:0.9; }
+
+    /* Cores por status */
+    .prospect { background:#3498db; }
+    .negociacao { background:#f1c40f; color:#000; }
+    .fechado { background:#2ecc71; }
+
     .card h3 { font-size:16px; margin-bottom:5px; }
-    .card p { font-size:14px; color:#555; }
+    .card p { font-size:14px; }
+
 </style>
 </head>
 <body>
@@ -92,21 +114,29 @@
     <button onclick="novoCliente()">+ Novo Cliente</button>
     <button onclick="alert('Função de relatórios')">Relatórios</button>
     <button onclick="alert('Função de agenda')">Agenda</button>
-    <button onclick="alert('Função de Tarefa')">Tarefa</button>
     <button onclick="alert('Função de contatos')">Contatos</button>
     <button onclick="alert('Função de configurações')">Configurações</button>
-
 </div>
 
 <div class="main">
     <header>
-        <h1>CRM Funcional</h1>
+        <h1>CRM Avançado</h1>
         <button onclick="novoCliente()">Adicionar Cliente</button>
     </header>
 
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Buscar cliente..." oninput="filtrarClientes()">
+        <select id="filterStatus" onchange="filtrarClientes()">
+            <option value="">Todos os status</option>
+            <option value="prospect">Prospect</option>
+            <option value="negociacao">Negociação</option>
+            <option value="fechado">Fechado</option>
+        </select>
+    </div>
+
     <main class="kanban">
-        <div class="column" id="Cliente Frio">
-            <h2>Cliente Frio</h2>
+        <div class="column" id="prospect">
+            <h2>Prospect</h2>
         </div>
         <div class="column" id="negociacao">
             <h2>Negociação</h2>
@@ -114,29 +144,44 @@
         <div class="column" id="fechado">
             <h2>Fechado</h2>
         </div>
-         <div class="column" id="Contrato Assinado">
-            <h2>contrato assinado</h2>
-        </div>
     </main>
 </div>
 
 <script>
-    // Criar card
-    function criarCard(nome, obs) {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.draggable = true;
-        card.innerHTML = `<h3>${nome}</h3><p>${obs}</p>`;
-        addDragEvents(card);
-        document.getElementById('prospect').appendChild(card);
+    let clientes = JSON.parse(localStorage.getItem('crmClientes')) || [];
+
+    function salvarLocalStorage() {
+        localStorage.setItem('crmClientes', JSON.stringify(clientes));
     }
 
-    // Adicionar cliente via prompt
+    function criarCardCliente(cliente) {
+        const card = document.createElement('div');
+        card.className = `card ${cliente.status}`;
+        card.draggable = true;
+        card.dataset.nome = cliente.nome.toLowerCase();
+        card.dataset.status = cliente.status;
+        card.innerHTML = `<h3>${cliente.nome}</h3><p>${cliente.obs}</p>`;
+        addDragEvents(card);
+        document.getElementById(cliente.status).appendChild(card);
+    }
+
+    function renderClientes() {
+        ['prospect','negociacao','fechado'].forEach(status => {
+            document.getElementById(status).innerHTML = `<h2>${status.charAt(0).toUpperCase() + status.slice(1)}</h2>`;
+        });
+        clientes.forEach(cliente => criarCardCliente(cliente));
+    }
+
     function novoCliente() {
         const nome = prompt('Nome do cliente:');
         if(!nome) return;
         const obs = prompt('Observação:') || '';
-        criarCard(nome, obs);
+        const status = prompt('Status (prospect, negociacao, fechado):', 'prospect');
+        if(!['prospect','negociacao','fechado'].includes(status)) return alert('Status inválido');
+        const cliente = {nome, obs, status};
+        clientes.push(cliente);
+        salvarLocalStorage();
+        renderClientes();
     }
 
     // Drag & Drop
@@ -150,14 +195,33 @@
 
     columns.forEach(col => {
         col.addEventListener('dragover', e => e.preventDefault());
-        col.addEventListener('drop', e => { if(draggedCard) col.appendChild(draggedCard); });
+        col.addEventListener('drop', e => {
+            if(draggedCard){
+                const status = col.id;
+                const nome = draggedCard.querySelector('h3').innerText;
+                const cliente = clientes.find(c => c.nome === nome);
+                if(cliente){
+                    cliente.status = status;
+                    salvarLocalStorage();
+                    renderClientes();
+                }
+            }
+        });
     });
 
-    // Cards iniciais
-    criarCard('João Silva', 'Contato inicial feito');
-    criarCard('Maria Souza', 'Interessada em defesa de veículo');
-    criarCard('Carlos Pereira', 'Negociando valores');
-    criarCard('Ana Oliveira', 'Contrato assinado');
+    // Filtro e busca
+    function filtrarClientes() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const filter = document.getElementById('filterStatus').value;
+        document.querySelectorAll('.card').forEach(card => {
+            const matchSearch = card.dataset.nome.includes(search);
+            const matchFilter = !filter || card.dataset.status === filter;
+            card.style.display = (matchSearch && matchFilter) ? 'block' : 'none';
+        });
+    }
+
+    // Inicial
+    renderClientes();
 </script>
 
 </body>

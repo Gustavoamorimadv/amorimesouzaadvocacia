@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatórios - AMR ADV</title>
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f4f4f4;
+    }
+
+    h1 {
+        text-align: center;
+        color: #333;
+    }
+
+    .container {
+        max-width: 1000px;
+        margin: auto;
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+    }
+
+    th {
+        background-color: #333;
+        color: white;
+    }
+
+    input[type=text], input[type=number] {
+        padding: 5px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    button {
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+
+    #chartContainer {
+        margin-top: 40px;
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1>Relatórios de Clientes</h1>
+
+        <!-- Formulário para adicionar cliente -->
+        <h2>Adicionar Cliente</h2>
+        <form id="clienteForm">
+            <label>Nome do Cliente:</label>
+            <input type="text" id="nomeCliente" required>
+            <label>Parcelas Pagas:</label>
+            <input type="number" id="parcelasPagas" min="0" required>
+            <label>Valor Total:</label>
+            <input type="number" id="valorTotal" min="0" required>
+            <button type="submit">Adicionar Cliente</button>
+        </form>
+
+        <!-- Tabela de clientes -->
+        <h2>Clientes</h2>
+        <table id="clientesTable">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Parcelas Pagas</th>
+                    <th>Valor Total</th>
+                    <th>Status de Pagamento</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Clientes adicionados aparecerão aqui -->
+            </tbody>
+        </table>
+
+        <!-- Gráficos -->
+        <div id="chartContainer">
+            <h2>Gráficos de Pagamento</h2>
+            <canvas id="pagamentosChart"></canvas>
+        </div>
+    </div>
+
+<script>
+    const clientes = [];
+
+    const form = document.getElementById('clienteForm');
+    const tabela = document.getElementById('clientesTable').getElementsByTagName('tbody')[0];
+    const ctx = document.getElementById('pagamentosChart').getContext('2d');
+
+    let chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Valor Total Pago',
+                data: [],
+                backgroundColor: 'rgba(75, 192, 192, 0.6)'
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
+    form.addEventListener('submit', function(e){
+        e.preventDefault();
+
+        const nome = document.getElementById('nomeCliente').value;
+        const parcelas = parseInt(document.getElementById('parcelasPagas').value);
+        const valor = parseFloat(document.getElementById('valorTotal').value);
+
+        const cliente = { nome, parcelas, valor };
+        clientes.push(cliente);
+
+        atualizarTabela();
+        atualizarGrafico();
+
+        form.reset();
+    });
+
+    function atualizarTabela() {
+        tabela.innerHTML = '';
+        clientes.forEach(cliente => {
+            const row = tabela.insertRow();
+            row.insertCell(0).innerText = cliente.nome;
+            row.insertCell(1).innerText = cliente.parcelas;
+            row.insertCell(2).innerText = 'R$ ' + cliente.valor.toFixed(2);
+            const status = cliente.parcelas > 0 ? 'Pago parcialmente' : 'Não pago';
+            row.insertCell(3).innerText = status;
+        });
+    }
+
+    function atualizarGrafico() {
+        chart.data.labels = clientes.map(c => c.nome);
+        chart.data.datasets[0].data = clientes.map(c => c.valor * (c.parcelas / 1)); // Aqui você pode ajustar % pago
+        chart.update();
+    }
+</script>
+</body>
+</html>

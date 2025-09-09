@@ -9,9 +9,11 @@
 body { display:flex; background:#f0f2f5; height:100vh; }
 
 /* Sidebar */
-.sidebar { width:220px; background:#fff; border-right:1px solid #ddd; display:flex; flex-direction:column; padding-top:20px; }
-.sidebar h2 { text-align:center; margin-bottom:20px; font-size:20px; color:#1e1e2f; }
-.sidebar button { padding:12px 20px; margin:5px 10px; border:none; background:#f8f9fa; text-align:left; cursor:pointer; border-radius:6px; transition:0.2s; }
+.sidebar { width:220px; background:#fff; border-right:1px solid #ddd; display:flex; flex-direction:column; padding-top:20px; align-items:center; }
+.sidebar img { max-width:160px; margin-bottom:20px; }
+
+/* Botões da sidebar */
+.sidebar button { padding:12px 20px; margin:5px 10px; border:none; background:#f8f9fa; text-align:left; cursor:pointer; border-radius:6px; transition:0.2s; width:calc(100% - 20px); }
 .sidebar button:hover { background:#e2e6ea; }
 
 /* Main */
@@ -63,7 +65,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 <body>
 
 <div class="sidebar">
-    <h2>AMR ADV</h2>
+    <img src="LOGO AMRADV.jpg" alt="AMR Software">
     <button>Relatórios</button>
     <button onclick="window.location.href='agenda.html'">Agenda</button>
     <button>Contatos</button>
@@ -72,7 +74,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 
 <div class="main">
 <header>
-    <h1>CRM </h1>
+    <h1>CRM Avançado</h1>
     <button id="btnAdd" class="btn primary">Adicionar Cliente</button>
 </header>
 

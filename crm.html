@@ -146,7 +146,26 @@ async function novoCliente() {
     const obs = prompt('Observação:') || '';
     let status = prompt('Status (prospect, negociacao, contrato-assinado, fechado):', 'prospect');
     if(!STATUS.includes(status)) return alert('Status inválido');
-    await addDoc(clientesRef, { nome, obs, status });
+
+    // Cria card imediatamente
+    const tempId = 'temp_' + Date.now();
+    criarCardCliente(tempId, { nome, obs, status });
+
+    // Salva no Firestore
+    try {
+        const docRef = await addDoc(clientesRef, { nome, obs, status });
+        // Atualiza card temporário para o ID real
+        const card = cardsMap[tempId];
+        card.dataset.id = docRef.id;
+        cardsMap[docRef.id] = card;
+        delete cardsMap[tempId];
+    } catch(err) {
+        alert('Erro ao salvar no Firestore: ' + err);
+        // Remove card temporário se erro
+        const card = cardsMap[tempId];
+        card.remove();
+        delete cardsMap[tempId];
+    }
 }
 
 // Editar cliente
@@ -208,7 +227,7 @@ onSnapshot(clientesRef, snapshot => {
     filtrarClientes();
 });
 
-// Tornar funções globais para funcionar com onclick
+// Tornar funções globais para onclick
 window.novoCliente = novoCliente;
 window.editarCliente = editarCliente;
 window.excluirCliente = excluirCliente;

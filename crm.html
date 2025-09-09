@@ -207,6 +207,11 @@ onSnapshot(clientesRef, snapshot => {
     snapshot.docs.forEach(docSnap => criarCardCliente(docSnap.id, docSnap.data()));
     filtrarClientes();
 });
+
+// Tornar funções globais para funcionar com onclick
+window.novoCliente = novoCliente;
+window.editarCliente = editarCliente;
+window.excluirCliente = excluirCliente;
 </script>
 
 </body>

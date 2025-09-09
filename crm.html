@@ -1,222 +1,392 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>CRM Firebase - AMR ADV</title>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-body { display:flex; background:#f0f2f5; height:100vh; }
+/* --- Layout básico --- */
+*{box-sizing:border-box;margin:0;padding:0;font-family:Segoe UI,Roboto,Arial,sans-serif}
+body{display:flex;height:100vh;background:#f0f2f5}
+.sidebar{width:220px;background:#fff;border-right:1px solid #ddd;display:flex;flex-direction:column;padding:20px 10px}
+.sidebar h2{text-align:center;margin-bottom:12px;color:#1e1e2f}
+.sidebar button{padding:10px;border-radius:6px;border:0;background:#f8f9fa;margin:6px;cursor:pointer}
+.main{flex:1;display:flex;flex-direction:column}
+header{height:60px;background:#fff;border-bottom:1px solid #ddd;display:flex;align-items:center;justify-content:space-between;padding:0 20px}
+.search-bar{padding:10px 20px;background:#fff;border-bottom:1px solid #ddd;display:flex;gap:10px;align-items:center}
+.search-bar input{flex:1;padding:8px;border-radius:6px;border:1px solid #ccc}
+.search-bar select{padding:8px;border-radius:6px;border:1px solid #ccc}
+.kanban{display:flex;gap:20px;padding:20px;overflow:auto;flex:1}
+.column{background:#fff;border-radius:10px;padding:15px;min-width:260px;max-height:calc(100vh - 160px);display:flex;flex-direction:column;gap:10px;box-shadow:0 4px 8px rgba(0,0,0,.04)}
+.column h2{font-size:16px;color:#1e1e2f;margin-bottom:6px}
 
-.sidebar {
-    width:220px;
-    background:#fff;
-    border-right:1px solid #ddd;
-    display:flex;
-    flex-direction:column;
-    padding-top:20px;
-}
-.sidebar h2 { text-align:center; margin-bottom:20px; font-size:20px; color:#1e1e2f; }
-.sidebar button { padding:12px 20px; margin:5px 10px; border:none; background:#f8f9fa; text-align:left; cursor:pointer; border-radius:6px; transition:0.2s; }
-.sidebar button:hover { background:#e2e6ea; }
+/* --- Cards --- */
+.card{padding:12px;border-radius:8px;color:#fff;position:relative;cursor:grab}
+.card h3{font-size:15px;margin-bottom:6px}
+.card p{font-size:13px;margin-bottom:6px;opacity:.95}
+.card .meta{font-size:12px;opacity:.85}
+.card .actions{position:absolute;top:6px;right:6px;display:flex;gap:6px}
+.card button{background:rgba(0,0,0,0.18);border:0;color:#fff;padding:4px 6px;border-radius:4px;cursor:pointer;font-size:12px}
+.card button:hover{background:rgba(0,0,0,0.32)}
 
-.main { flex:1; display:flex; flex-direction:column; }
+/* cores por status */
+.prospect{background:#3498db}
+.negociacao{background:#f1c40f;color:#000}
+.contrato-assinado{background:#9b59b6}
+.fechado{background:#2ecc71}
 
-header { height:60px; background:#fff; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; padding:0 20px; }
-header h1 { font-size:22px; color:#1e1e2f; }
-header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+/* --- Modal --- */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.35);display:none;align-items:center;justify-content:center;z-index:50}
+.modal{background:#fff;padding:18px;border-radius:10px;min-width:320px;max-width:420px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+.modal h3{margin-bottom:12px}
+.modal .row{margin-bottom:10px}
+.modal input,.modal textarea,.modal select{width:100%;padding:8px;border-radius:6px;border:1px solid #ccc}
+.modal textarea{min-height:80px;resize:vertical}
+.modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
+.btn{padding:8px 12px;border-radius:6px;border:0;cursor:pointer}
+.btn.primary{background:#1e1e2f;color:#fff}
+.btn.ghost{background:#f1f3f5}
 
-.search-bar { padding:10px 20px; background:#fff; border-bottom:1px solid #ddd; display:flex; gap:10px; align-items:center; }
-.search-bar input { flex:1; padding:8px; border:1px solid #ccc; border-radius:6px; }
-.search-bar select { padding:8px; border-radius:6px; border:1px solid #ccc; }
-
-.kanban { display:flex; gap:20px; padding:20px; overflow-x:auto; flex:1; }
-
-.column { background:#fff; border-radius:10px; padding:15px; min-width:250px; max-height:calc(100vh - 140px); display:flex; flex-direction:column; gap:10px; box-shadow:0 4px 8px rgba(0,0,0,0.05); }
-.column h2 { margin-bottom:10px; font-size:18px; color:#1e1e2f; }
-
-.card { padding:12px; border-radius:8px; cursor:grab; transition:all 0.2s ease; color:#fff; position:relative; }
-.card:hover { opacity:0.9; }
-
-.prospect { background:#3498db; }
-.negociacao { background:#f1c40f; color:#000; }
-.contrato-assinado { background:#9b59b6; }
-.fechado { background:#2ecc71; }
-
-.card h3 { font-size:16px; margin-bottom:5px; }
-.card p { font-size:14px; }
-
-.card button {
-    position:absolute;
-    top:5px;
-    right:5px;
-    background:rgba(0,0,0,0.2);
-    border:none;
-    color:#fff;
-    padding:2px 6px;
-    border-radius:4px;
-    cursor:pointer;
-    font-size:12px;
-    margin-left:2px;
-}
-.card button:hover { background:rgba(0,0,0,0.4); }
+/* --- Toast --- */
+.toast{position:fixed;right:20px;bottom:20px;background:#222;color:#fff;padding:8px 12px;border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.3);display:none;z-index:60}
 </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <h2>AMR ADV</h2>
-    <button onclick="alert('Função de relatórios')">Relatórios</button>
-    <button onclick="alert('Função de agenda')">Agenda</button>
-    <button onclick="alert('Função de contatos')">Contatos</button>
-    <button onclick="alert('Função de configurações')">Configurações</button>
+  <h2>AMR ADV</h2>
+  <button id="btnRel">Relatórios</button>
+  <button id="btnAgenda">Agenda</button>
+  <button id="btnContatos">Contatos</button>
+  <button id="btnConfig">Configurações</button>
 </div>
 
 <div class="main">
-    <header>
-        <h1>CRM Firebase</h1>
-        <button onclick="novoCliente()">Adicionar Cliente</button>
-    </header>
+  <header>
+    <h1>CRM Firebase</h1>
+    <button id="btnAdd" class="btn primary">Adicionar Cliente</button>
+  </header>
 
-    <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="Buscar cliente..." oninput="filtrarClientes()">
-        <select id="filterStatus" onchange="filtrarClientes()">
-            <option value="">Todos os status</option>
-            <option value="prospect">Prospect</option>
-            <option value="negociacao">Negociação</option>
-            <option value="contrato-assinado">Contrato Assinado</option>
-            <option value="fechado">Fechado</option>
-        </select>
-    </div>
+  <div class="search-bar">
+    <input id="searchInput" placeholder="Buscar cliente..." />
+    <select id="filterStatus">
+      <option value="">Todos os status</option>
+      <option value="prospect">Prospect</option>
+      <option value="negociacao">Negociação</option>
+      <option value="contrato-assinado">Contrato Assinado</option>
+      <option value="fechado">Fechado</option>
+    </select>
+  </div>
 
-    <main class="kanban">
-        <div class="column" id="prospect"><h2>Prospect</h2></div>
-        <div class="column" id="negociacao"><h2>Negociação</h2></div>
-        <div class="column" id="contrato-assinado"><h2>Contrato Assinado</h2></div>
-        <div class="column" id="fechado"><h2>Fechado</h2></div>
-    </main>
+  <main class="kanban" id="kanban">
+    <div class="column" id="prospect"><h2>Prospect</h2></div>
+    <div class="column" id="negociacao"><h2>Negociação</h2></div>
+    <div class="column" id="contrato-assinado"><h2>Contrato Assinado</h2></div>
+    <div class="column" id="fechado"><h2>Fechado</h2></div>
+  </main>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+<!-- Modal -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h3 id="modalTitle">Novo Cliente</h3>
+    <form id="clientForm">
+      <div class="row">
+        <label>Nome</label>
+        <input id="inputNome" required />
+      </div>
+      <div class="row">
+        <label>Observação</label>
+        <textarea id="inputObs"></textarea>
+      </div>
+      <div class="row">
+        <label>Status</label>
+        <select id="inputStatus">
+          <option value="prospect">Prospect</option>
+          <option value="negociacao">Negociação</option>
+          <option value="contrato-assinado">Contrato Assinado</option>
+          <option value="fechado">Fechado</option>
+        </select>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn ghost" id="btnCancel">Cancelar</button>
+        <button type="submit" class="btn primary" id="btnSave">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-// Firebase Config
+<div class="toast" id="toast"></div>
+
+<script type="module">
+/* ========== Import Firebase ========== */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  onSnapshot,
+  doc,
+  updateDoc,
+  deleteDoc
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+/* ========== Config (seu projeto) ========== */
 const firebaseConfig = {
-    apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
-    authDomain: "dapapp-38637.firebaseapp.com",
-    projectId: "dapapp-38637",
-    storageBucket: "dapapp-38637.firebasestorage.app",
-    messagingSenderId: "628852295313",
-    appId: "1:628852295313:web:ce288c4e09b2037c022130",
-    measurementId: "G-WL3JR7CSWY"
+  apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
+  authDomain: "dapapp-38637.firebaseapp.com",
+  projectId: "dapapp-38637",
+  storageBucket: "dapapp-38637.firebasestorage.app",
+  messagingSenderId: "628852295313",
+  appId: "1:628852295313:web:ce288c4e09b2037c022130",
+  measurementId: "G-WL3JR7CSWY"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const clientesRef = collection(db, "clientes");
 
-const STATUS = ['prospect', 'negociacao', 'contrato-assinado', 'fechado'];
-let cardsMap = {};
+/* ========== App state ========== */
+const STATUS = ['prospect','negociacao','contrato-assinado','fechado'];
+let cardsMap = {}; // id -> element
 
-// Criar card
-function criarCardCliente(id, cliente) {
-    const card = document.createElement('div');
-    card.className = `card ${cliente.status}`;
-    card.draggable = true;
-    card.dataset.id = id;
-    card.dataset.nome = cliente.nome.toLowerCase();
-    card.dataset.status = cliente.status;
+/* ========== DOM refs ========== */
+const btnAdd = document.getElementById('btnAdd');
+const modalBackdrop = document.getElementById('modalBackdrop');
+const clientForm = document.getElementById('clientForm');
+const inputNome = document.getElementById('inputNome');
+const inputObs = document.getElementById('inputObs');
+const inputStatus = document.getElementById('inputStatus');
+const btnCancel = document.getElementById('btnCancel');
+const kanban = document.getElementById('kanban');
+const searchInput = document.getElementById('searchInput');
+const filterStatus = document.getElementById('filterStatus');
+const toastEl = document.getElementById('toast');
 
-    card.innerHTML = `
-        <h3>${cliente.nome}</h3>
-        <p>${cliente.obs}</p>
-        <button onclick="editarCliente('${id}')">✎</button>
-        <button onclick="excluirCliente('${id}')">🗑</button>
-    `;
-    addDragEvents(card);
-    document.getElementById(cliente.status).appendChild(card);
-    cardsMap[id] = card;
+/* ========== Helpers ========== */
+function showToast(msg, timeout=4000){
+  toastEl.innerText = msg;
+  toastEl.style.display = 'block';
+  clearTimeout(toastEl._t);
+  toastEl._t = setTimeout(()=> toastEl.style.display='none', timeout);
+}
+function openModal(mode='add', data=null){
+  modalBackdrop.style.display = 'flex';
+  document.getElementById('modalTitle').innerText = mode === 'add' ? 'Novo Cliente' : 'Editar Cliente';
+  if(data){
+    inputNome.value = data.nome||'';
+    inputObs.value = data.obs||'';
+    inputStatus.value = data.status||'prospect';
+    clientForm.dataset.editId = data.id;
+  } else {
+    inputNome.value=''; inputObs.value=''; inputStatus.value='prospect';
+    delete clientForm.dataset.editId;
+  }
+  inputNome.focus();
+}
+function closeModal(){
+  modalBackdrop.style.display = 'none';
+  delete clientForm.dataset.editId;
 }
 
-// Adicionar cliente
-async function novoCliente() {
-    const nome = prompt('Nome do cliente:');
-    if(!nome) return;
-    const obs = prompt('Observação:') || '';
-    let status = prompt('Status (prospect, negociacao, contrato-assinado, fechado):', 'prospect');
-    if(!STATUS.includes(status)) return alert('Status inválido');
-    await addDoc(clientesRef, { nome, obs, status });
+/* ========== Criar card (DOM) ========== */
+function criarCardCliente(id, cliente){
+  // evita duplicar
+  if(cardsMap[id]) return;
+  const card = document.createElement('div');
+  card.className = `card ${cliente.status}`;
+  card.draggable = true;
+  card.dataset.id = id;
+  card.dataset.nome = (cliente.nome||'').toLowerCase();
+  card.dataset.status = cliente.status;
+
+  card.innerHTML = `
+    <h3>${cliente.nome}</h3>
+    <p>${cliente.obs || ''}</p>
+    <div class="meta">#${id}</div>
+    <div class="actions">
+      <button class="edit-btn" data-id="${id}">✎</button>
+      <button class="del-btn" data-id="${id}">🗑</button>
+    </div>
+  `;
+
+  // events for drag within this element
+  addDragEvents(card);
+
+  // append
+  const col = document.getElementById(cliente.status) || document.getElementById('prospect');
+  col.appendChild(card);
+  cardsMap[id] = card;
+  filtragemAplicada(); // aplica filtro/ busca
 }
 
-// Editar cliente
-async function editarCliente(id) {
-    const card = cardsMap[id];
-    const novoNome = prompt('Editar nome:', card.querySelector('h3').innerText);
-    if(!novoNome) return;
-    const novaObs = prompt('Editar observação:', card.querySelector('p').innerText);
-    let novoStatus = prompt('Editar status (prospect, negociacao, contrato-assinado, fechado):', card.dataset.status);
-    if(!STATUS.includes(novoStatus)) return alert('Status inválido');
-    await updateDoc(doc(db, "clientes", id), { nome: novoNome, obs: novaObs, status: novoStatus });
-}
+/* ========== Add / Edit / Delete ========== */
+async function handleAddSubmit(e){
+  e.preventDefault();
+  const nome = inputNome.value.trim();
+  if(!nome){ showToast('Nome obrigatório'); return; }
+  const obs = inputObs.value.trim();
+  const status = inputStatus.value;
 
-// Excluir cliente
-async function excluirCliente(id) {
-    if(confirm('Deseja realmente excluir este cliente?')){
-        await deleteDoc(doc(db, "clientes", id));
+  // cria card temporário (visual imediato)
+  const tempId = 'temp_' + Date.now();
+  criarCardCliente(tempId, { nome, obs, status });
+
+  // fechar modal e mostrar carregando
+  closeModal();
+  showToast('Salvando cliente...');
+
+  try {
+    const docRef = await addDoc(clientesRef, { nome, obs, status });
+    // onSnapshot irá recriar cards; mas atualizamos o temp card para evitar piscada
+    const card = cardsMap[tempId];
+    if(card){
+      card.dataset.id = docRef.id;
+      card.querySelector('.meta').innerText = '#' + docRef.id;
+      cardsMap[docRef.id] = card;
+      delete cardsMap[tempId];
     }
+    showToast('Cliente salvo');
+  } catch(err) {
+    console.error('Erro addDoc:', err);
+    // removemos o card temporário
+    const c = cardsMap[tempId];
+    if(c){ c.remove(); delete cardsMap[tempId]; }
+    if(err && err.code === 'permission-denied'){
+      showToast('Permissão negada: verifique regras do Firestore (use allow read, write: if true para teste).', 8000);
+    } else {
+      showToast('Erro ao salvar: ' + (err.message || err), 7000);
+    }
+  }
 }
 
-// Drag & Drop
-const columns = document.querySelectorAll('.column');
+async function handleEdit(id){
+  const card = cardsMap[id];
+  if(!card){
+    showToast('Card não encontrado para editar');
+    return;
+  }
+  // preenche modal com dados
+  openModal('edit', { id, nome: card.querySelector('h3').innerText, obs: card.querySelector('p').innerText, status: card.dataset.status });
+}
+async function applyEdit(id, newData){
+  try {
+    await updateDoc(doc(db, "clientes", id), newData);
+    showToast('Cliente atualizado');
+  } catch(err) {
+    console.error('Erro updateDoc:', err);
+    showToast('Erro ao atualizar: ' + (err.message || err));
+  }
+}
+async function handleDelete(id){
+  if(!confirm('Deseja realmente excluir este cliente?')) return;
+  try {
+    await deleteDoc(doc(db, "clientes", id));
+    showToast('Cliente excluído');
+  } catch(err){
+    console.error('Erro deleteDoc:', err);
+    showToast('Erro ao excluir: ' + (err.message || err));
+  }
+}
+
+/* ========== Drag & Drop (move DOM imediatamente + atualiza Firestore) ========== */
 let draggedCard = null;
-
-function addDragEvents(card) {
-    card.addEventListener('dragstart', () => { draggedCard = card; card.style.opacity = '0.5'; });
-    card.addEventListener('dragend', () => { draggedCard = null; card.style.opacity = '1'; });
+function addDragEvents(card){
+  card.addEventListener('dragstart', ()=>{ draggedCard = card; card.style.opacity = '.5'; });
+  card.addEventListener('dragend', ()=>{ if(draggedCard) draggedCard.style.opacity = '1'; draggedCard = null; });
 }
-
-columns.forEach(col => {
-    col.addEventListener('dragover', e => e.preventDefault());
-    col.addEventListener('drop', async e => {
-        if(draggedCard){
-            const id = draggedCard.dataset.id;
-            const novoStatus = col.id;
-
-            // Atualiza no Firestore
-            await updateDoc(doc(db, "clientes", id), { status: novoStatus });
-
-            // Move no DOM imediatamente
-            col.appendChild(draggedCard);
-            draggedCard.dataset.status = novoStatus;
-        }
-    });
+document.querySelectorAll('.column').forEach(col=>{
+  col.addEventListener('dragover', e=> e.preventDefault());
+  col.addEventListener('drop', async e=>{
+    e.preventDefault();
+    if(!draggedCard) return;
+    const targetCol = e.currentTarget;
+    // move DOM imediatamente
+    targetCol.appendChild(draggedCard);
+    const newStatus = targetCol.id;
+    draggedCard.dataset.status = newStatus;
+    // se for temp card (ainda não salvo) não tenta updateDoc
+    const id = draggedCard.dataset.id;
+    if(id && id.startsWith('temp_')) {
+      showToast('Movido (temporário) — salvando quando criar no Firestore', 3000);
+      return;
+    }
+    // atualiza Firestore
+    try {
+      await updateDoc(doc(db, "clientes", id), { status: newStatus });
+      showToast('Status atualizado');
+    } catch(err){
+      console.error('Erro updateDoc no drop:', err);
+      showToast('Erro ao mudar status: ' + (err.message||err));
+    }
+  });
 });
 
-// Busca e filtro
-function filtrarClientes() {
-    const search = document.getElementById('searchInput').value.toLowerCase();
-    const filter = document.getElementById('filterStatus').value;
-    Object.values(cardsMap).forEach(card => {
-        const matchSearch = card.dataset.nome.includes(search);
-        const matchFilter = !filter || card.dataset.status === filter;
-        card.style.display = (matchSearch && matchFilter) ? 'block' : 'none';
-    });
-}
-
-// Atualização em tempo real
-onSnapshot(clientesRef, snapshot => {
-    STATUS.forEach(status => document.getElementById(status).innerHTML = `<h2>${status.replace(/-/g,' ').replace(/\b\w/g, l=>l.toUpperCase())}</h2>`);
-    cardsMap = {};
-    snapshot.docs.forEach(docSnap => criarCardCliente(docSnap.id, docSnap.data()));
-    filtrarClientes();
+/* ========== Event delegation for edit/delete clicks inside kanban ========== */
+kanban.addEventListener('click', (ev)=>{
+  const editBtn = ev.target.closest('.edit-btn');
+  const delBtn = ev.target.closest('.del-btn');
+  if(editBtn){
+    const id = editBtn.dataset.id;
+    handleEdit(id);
+  } else if(delBtn){
+    const id = delBtn.dataset.id;
+    handleDelete(id);
+  }
 });
 
-// Expor para onclick
-window.novoCliente = novoCliente;
-window.editarCliente = editarCliente;
-window.excluirCliente = excluirCliente;
+/* ========== Form submit / modal events ========== */
+clientForm.addEventListener('submit', async (e)=>{
+  // Check if editing or creating
+  const editId = clientForm.dataset.editId;
+  if(editId){
+    // apply edit
+    const novoNome = inputNome.value.trim();
+    if(!novoNome){ showToast('Nome obrigatório'); return; }
+    const novaObs = inputObs.value.trim();
+    const novoStatus = inputStatus.value;
+    try {
+      await updateDoc(doc(db, "clientes", editId), { nome: novoNome, obs: novaObs, status: novoStatus });
+      closeModal();
+      showToast('Atualizado');
+    } catch(err){
+      console.error('Erro updateDoc (modal):', err);
+      showToast('Erro ao atualizar: ' + (err.message||err));
+    }
+  } else {
+    // create
+    await handleAddSubmit(e);
+  }
+});
+
+btnAdd.addEventListener('click', ()=> openModal('add'));
+btnCancel.addEventListener('click', closeModal);
+modalBackdrop.addEventListener('click', (ev)=> { if(ev.target === modalBackdrop) closeModal(); });
+
+/* ========== Search & Filter ========== */
+searchInput.addEventListener('input', filtragemAplicada);
+filterStatus.addEventListener('change', filtragemAplicada);
+
+function filtragemAplicada(){
+  const search = (searchInput.value||'').toLowerCase();
+  const filter = filterStatus.value;
+  Object.values(cardsMap).forEach(card=>{
+    const matchSearch = (card.dataset.nome||'').includes(search);
+    const matchFilter = !filter || card.dataset.status === filter;
+    card.style.display = (matchSearch && matchFilter) ? 'block' : 'none';
+  });
+}
+
+/* ========== Realtime sync ========== */
+import { doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"; // import doc here for updateDoc/deleteDoc usage
+
+onSnapshot(clientesRef, snapshot=>{
+  // Limpa colunas
+  STATUS.forEach(s => document.getElementById(s).innerHTML = `<h2>${s.replace(/-/g,' ').replace(/\b\w/g,l=>l.toUpperCase())}</h2>`);
+  cardsMap = {};
+  snapshot.docs.forEach(d => criarCardCliente(d.id, d.data()));
+  filtragemAplicada();
+});
 </script>
-
 </body>
 </html>

@@ -229,11 +229,7 @@
         const numero = prompt('Número do cliente:') || '';
         const processo = prompt('Número do processo:') || '';
         const valor = prompt('Valor da causa:') || '';
-        let obs = prompt('Observações (máx. 300 caracteres):') || '';
-        if(obs.length > 300){
-            obs = obs.substring(0,300);
-            alert("O campo Observações foi limitado a 300 caracteres.");
-        }
+        const obs = prompt('Observações:') || '';
         let status = prompt('Status (prospect, negociacao, contrato-assinado, fechado):','prospect');
         if(!STATUS.includes(status)) return alert('Status inválido');
         const cliente = {nome, numero, processo, valor, obs, status};

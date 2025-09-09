@@ -39,7 +39,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 .card p { font-size:13px; color:#666; margin:2px 0; }
 
 /* Cores por status */
-.prospect .color-bar { background:#3498db; }
+.lista-fria .color-bar { background:#3498db; }
 .negociacao .color-bar { background:#f1c40f; }
 .contrato-assinado .color-bar { background:#9b59b6; }
 .fechado .color-bar { background:#2ecc71; }
@@ -65,14 +65,14 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 <div class="sidebar">
     <h2>AMR ADV</h2>
     <button>Relatórios</button>
-    <button>Agenda</button>
+    <button onclick="window.location.href='agenda.html'">Agenda</button>
     <button>Contatos</button>
     <button>Configurações</button>
 </div>
 
 <div class="main">
 <header>
-    <h1>CRM Avançado</h1>
+    <h1>CRM </h1>
     <button id="btnAdd" class="btn primary">Adicionar Cliente</button>
 </header>
 
@@ -80,7 +80,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
     <input id="searchInput" placeholder="Buscar cliente..." />
     <select id="filterStatus">
         <option value="">Todos os status</option>
-        <option value="prospect">Prospect</option>
+        <option value="lista-fria">Lista Fria</option>
         <option value="negociacao">Negociação</option>
         <option value="contrato-assinado">Contrato Assinado</option>
         <option value="fechado">Fechado</option>
@@ -88,7 +88,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 </div>
 
 <main class="kanban" id="kanban">
-    <div class="column" id="prospect"><h2>Prospect</h2></div>
+    <div class="column" id="lista-fria"><h2>Lista Fria</h2></div>
     <div class="column" id="negociacao"><h2>Negociação</h2></div>
     <div class="column" id="contrato-assinado"><h2>Contrato Assinado</h2></div>
     <div class="column" id="fechado"><h2>Fechado</h2></div>
@@ -123,7 +123,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
         <div class="row">
             <label>Status</label>
             <select id="inputStatus">
-                <option value="prospect">Prospect</option>
+                <option value="lista-fria">Lista Fria</option>
                 <option value="negociacao">Negociação</option>
                 <option value="contrato-assinado">Contrato Assinado</option>
                 <option value="fechado">Fechado</option>
@@ -140,7 +140,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 <div class="toast" id="toast"></div>
 
 <script>
-const STATUS=['prospect','negociacao','contrato-assinado','fechado'];
+const STATUS=['lista-fria','negociacao','contrato-assinado','fechado'];
 let clientes = JSON.parse(localStorage.getItem('clientes')||'[]');
 const cardsMap={};
 const modalBackdrop=document.getElementById('modalBackdrop');
@@ -174,7 +174,7 @@ function openModal(edit=false,data=null){
         inputValor.value=data.valor||"";
         clientForm.dataset.editId=data.id;
     }else{
-        inputNome.value=""; inputObs.value=""; inputStatus.value="prospect";
+        inputNome.value=""; inputObs.value=""; inputStatus.value="lista-fria";
         inputNumeros.value=""; inputProcesso.value=""; inputValor.value="";
         delete clientForm.dataset.editId;
     }

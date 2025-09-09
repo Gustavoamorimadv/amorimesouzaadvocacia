@@ -119,7 +119,7 @@ const clientesRef = collection(db, "clientes");
 const STATUS = ['prospect', 'negociacao', 'contrato-assinado', 'fechado'];
 let cardsMap = {};
 
-// Criar card de cliente
+// Criar card
 function criarCardCliente(id, cliente) {
     const card = document.createElement('div');
     card.className = `card ${cliente.status}`;
@@ -146,38 +146,18 @@ async function novoCliente() {
     const obs = prompt('Observação:') || '';
     let status = prompt('Status (prospect, negociacao, contrato-assinado, fechado):', 'prospect');
     if(!STATUS.includes(status)) return alert('Status inválido');
-
-    // Cria card imediatamente
-    const tempId = 'temp_' + Date.now();
-    criarCardCliente(tempId, { nome, obs, status });
-
-    // Salva no Firestore
-    try {
-        const docRef = await addDoc(clientesRef, { nome, obs, status });
-        // Atualiza card temporário para o ID real
-        const card = cardsMap[tempId];
-        card.dataset.id = docRef.id;
-        cardsMap[docRef.id] = card;
-        delete cardsMap[tempId];
-    } catch(err) {
-        alert('Erro ao salvar no Firestore: ' + err);
-        // Remove card temporário se erro
-        const card = cardsMap[tempId];
-        card.remove();
-        delete cardsMap[tempId];
-    }
+    await addDoc(clientesRef, { nome, obs, status });
 }
 
 // Editar cliente
 async function editarCliente(id) {
-    const clienteDoc = doc(db, "clientes", id);
     const card = cardsMap[id];
     const novoNome = prompt('Editar nome:', card.querySelector('h3').innerText);
     if(!novoNome) return;
     const novaObs = prompt('Editar observação:', card.querySelector('p').innerText);
     let novoStatus = prompt('Editar status (prospect, negociacao, contrato-assinado, fechado):', card.dataset.status);
     if(!STATUS.includes(novoStatus)) return alert('Status inválido');
-    await updateDoc(clienteDoc, { nome: novoNome, obs: novaObs, status: novoStatus });
+    await updateDoc(doc(db, "clientes", id), { nome: novoNome, obs: novaObs, status: novoStatus });
 }
 
 // Excluir cliente
@@ -201,9 +181,14 @@ columns.forEach(col => {
     col.addEventListener('drop', async e => {
         if(draggedCard){
             const id = draggedCard.dataset.id;
-            const status = col.id;
-            const docRef = doc(db, "clientes", id);
-            await updateDoc(docRef, { status });
+            const novoStatus = col.id;
+
+            // Atualiza no Firestore
+            await updateDoc(doc(db, "clientes", id), { status: novoStatus });
+
+            // Move no DOM imediatamente
+            col.appendChild(draggedCard);
+            draggedCard.dataset.status = novoStatus;
         }
     });
 });
@@ -227,7 +212,7 @@ onSnapshot(clientesRef, snapshot => {
     filtrarClientes();
 });
 
-// Tornar funções globais para onclick
+// Expor para onclick
 window.novoCliente = novoCliente;
 window.editarCliente = editarCliente;
 window.excluirCliente = excluirCliente;

@@ -35,7 +35,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 .column { background:#fff; border-radius:10px; padding:15px; min-width:250px; max-height:calc(100vh - 140px); display:flex; flex-direction:column; gap:10px; box-shadow:0 4px 8px rgba(0,0,0,0.05); }
 .column h2 { margin-bottom:10px; font-size:18px; color:#1e1e2f; }
 
-.card { padding:12px; border-radius:8px; cursor:grab; transition:all 0.2s ease; color:#fff; }
+.card { padding:12px; border-radius:8px; cursor:grab; transition:all 0.2s ease; color:#fff; position:relative; }
 .card:hover { opacity:0.9; }
 
 .prospect { background:#3498db; }
@@ -45,6 +45,21 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 
 .card h3 { font-size:16px; margin-bottom:5px; }
 .card p { font-size:14px; }
+
+.card button {
+    position:absolute;
+    top:5px;
+    right:5px;
+    background:rgba(0,0,0,0.2);
+    border:none;
+    color:#fff;
+    padding:2px 6px;
+    border-radius:4px;
+    cursor:pointer;
+    font-size:12px;
+    margin-left:2px;
+}
+.card button:hover { background:rgba(0,0,0,0.4); }
 </style>
 </head>
 <body>
@@ -83,11 +98,11 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-  // Configuração Firebase do seu projeto
-  const firebaseConfig = {
+// Firebase Config
+const firebaseConfig = {
     apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
     authDomain: "dapapp-38637.firebaseapp.com",
     projectId: "dapapp-38637",
@@ -95,87 +110,103 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
     messagingSenderId: "628852295313",
     appId: "1:628852295313:web:ce288c4e09b2037c022130",
     measurementId: "G-WL3JR7CSWY"
-  };
+};
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const clientesRef = collection(db, "clientes");
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const clientesRef = collection(db, "clientes");
 
-  const STATUS = ['prospect', 'negociacao', 'contrato-assinado', 'fechado'];
-  let cardsMap = {};
+const STATUS = ['prospect', 'negociacao', 'contrato-assinado', 'fechado'];
+let cardsMap = {};
 
-  function criarCardCliente(id, cliente) {
+// Criar card de cliente
+function criarCardCliente(id, cliente) {
     const card = document.createElement('div');
     card.className = `card ${cliente.status}`;
     card.draggable = true;
     card.dataset.id = id;
     card.dataset.nome = cliente.nome.toLowerCase();
     card.dataset.status = cliente.status;
-    card.innerHTML = `<h3>${cliente.nome}</h3><p>${cliente.obs}</p>`;
+
+    card.innerHTML = `
+        <h3>${cliente.nome}</h3>
+        <p>${cliente.obs}</p>
+        <button onclick="editarCliente('${id}')">✎</button>
+        <button onclick="excluirCliente('${id}')">🗑</button>
+    `;
     addDragEvents(card);
     document.getElementById(cliente.status).appendChild(card);
     cardsMap[id] = card;
-  }
+}
 
-  function renderClientes(snapshot) {
-    STATUS.forEach(status => {
-      document.getElementById(status).innerHTML = `<h2>${status.replace(/-/g,' ').replace(/\b\w/g, l=>l.toUpperCase())}</h2>`;
-    });
-    snapshot.forEach(docSnap => {
-      criarCardCliente(docSnap.id, docSnap.data());
-    });
-    filtrarClientes();
-  }
-
-  async function novoCliente() {
+// Adicionar cliente
+async function novoCliente() {
     const nome = prompt('Nome do cliente:');
     if(!nome) return;
     const obs = prompt('Observação:') || '';
     let status = prompt('Status (prospect, negociacao, contrato-assinado, fechado):', 'prospect');
     if(!STATUS.includes(status)) return alert('Status inválido');
     await addDoc(clientesRef, { nome, obs, status });
-  }
+}
 
-  // Drag & Drop
-  const columns = document.querySelectorAll('.column');
-  let draggedCard = null;
+// Editar cliente
+async function editarCliente(id) {
+    const clienteDoc = doc(db, "clientes", id);
+    const card = cardsMap[id];
+    const novoNome = prompt('Editar nome:', card.querySelector('h3').innerText);
+    if(!novoNome) return;
+    const novaObs = prompt('Editar observação:', card.querySelector('p').innerText);
+    let novoStatus = prompt('Editar status (prospect, negociacao, contrato-assinado, fechado):', card.dataset.status);
+    if(!STATUS.includes(novoStatus)) return alert('Status inválido');
+    await updateDoc(clienteDoc, { nome: novoNome, obs: novaObs, status: novoStatus });
+}
 
-  function addDragEvents(card) {
+// Excluir cliente
+async function excluirCliente(id) {
+    if(confirm('Deseja realmente excluir este cliente?')){
+        await deleteDoc(doc(db, "clientes", id));
+    }
+}
+
+// Drag & Drop
+const columns = document.querySelectorAll('.column');
+let draggedCard = null;
+
+function addDragEvents(card) {
     card.addEventListener('dragstart', () => { draggedCard = card; card.style.opacity = '0.5'; });
     card.addEventListener('dragend', () => { draggedCard = null; card.style.opacity = '1'; });
-  }
+}
 
-  columns.forEach(col => {
+columns.forEach(col => {
     col.addEventListener('dragover', e => e.preventDefault());
     col.addEventListener('drop', async e => {
-      if(draggedCard){
-        const id = draggedCard.dataset.id;
-        const status = col.id;
-        const docRef = doc(db, "clientes", id);
-        await updateDoc(docRef, { status });
-      }
+        if(draggedCard){
+            const id = draggedCard.dataset.id;
+            const status = col.id;
+            const docRef = doc(db, "clientes", id);
+            await updateDoc(docRef, { status });
+        }
     });
-  });
+});
 
-  // Busca e filtro
-  function filtrarClientes() {
+// Busca e filtro
+function filtrarClientes() {
     const search = document.getElementById('searchInput').value.toLowerCase();
     const filter = document.getElementById('filterStatus').value;
     Object.values(cardsMap).forEach(card => {
-      const matchSearch = card.dataset.nome.includes(search);
-      const matchFilter = !filter || card.dataset.status === filter;
-      card.style.display = (matchSearch && matchFilter) ? 'block' : 'none';
+        const matchSearch = card.dataset.nome.includes(search);
+        const matchFilter = !filter || card.dataset.status === filter;
+        card.style.display = (matchSearch && matchFilter) ? 'block' : 'none';
     });
-  }
+}
 
-  // Atualização em tempo real
-  onSnapshot(clientesRef, snapshot => {
-    // Limpa todos os cards antes de renderizar
+// Atualização em tempo real
+onSnapshot(clientesRef, snapshot => {
     STATUS.forEach(status => document.getElementById(status).innerHTML = `<h2>${status.replace(/-/g,' ').replace(/\b\w/g, l=>l.toUpperCase())}</h2>`);
     cardsMap = {};
     snapshot.docs.forEach(docSnap => criarCardCliente(docSnap.id, docSnap.data()));
     filtrarClientes();
-  });
+});
 </script>
 
 </body>

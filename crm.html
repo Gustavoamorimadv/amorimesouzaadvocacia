@@ -65,7 +65,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 <div class="sidebar">
     <h2>AMR ADV</h2>
     <button>Relatórios</button>
-    <button>Agenda</button>
+    <button onclick="window.location.href='agenda.html'">Agenda</button>
     <button>Contatos</button>
     <button>Configurações</button>
 </div>
@@ -157,119 +157,4 @@ const searchInput=document.getElementById('searchInput');
 const filterStatus=document.getElementById('filterStatus');
 const toastEl=document.getElementById('toast');
 
-function showToast(msg){ toastEl.innerText=msg; toastEl.style.display='block'; clearTimeout(toastEl._t); toastEl._t=setTimeout(()=>toastEl.style.display='none',3000); }
-
-function getClientes(){ return JSON.parse(localStorage.getItem('clientes')||'[]'); }
-function saveClientes(c){ localStorage.setItem('clientes', JSON.stringify(c)); }
-
-function openModal(edit=false,data=null){
-    modalBackdrop.style.display='flex';
-    document.getElementById('modalTitle').innerText=edit?"Editar Cliente":"Novo Cliente";
-    if(edit&&data){
-        inputNome.value=data.nome;
-        inputObs.value=data.obs||"";
-        inputStatus.value=data.status;
-        inputNumeros.value=data.numeros||"";
-        inputProcesso.value=data.processo||"";
-        inputValor.value=data.valor||"";
-        clientForm.dataset.editId=data.id;
-    }else{
-        inputNome.value=""; inputObs.value=""; inputStatus.value="prospect";
-        inputNumeros.value=""; inputProcesso.value=""; inputValor.value="";
-        delete clientForm.dataset.editId;
-    }
-}
-
-function closeModal(){ modalBackdrop.style.display='none'; }
-
-function criarCard(cliente){
-    const card=document.createElement('div');
-    card.className=`card ${cliente.status}`;
-    card.dataset.id=cliente.id;
-    card.dataset.status=cliente.status;
-    card.dataset.nome=cliente.nome.toLowerCase();
-    card.draggable=true;
-    card.innerHTML=`
-        <div class="color-bar"></div>
-        <div class="card-content">
-            <h3>${cliente.nome}</h3>
-            <p>Processo: ${cliente.processo||'-'}</p>
-            <p>Valor: R$ ${cliente.valor||0}</p>
-        </div>`;
-    card.onclick=()=>openModal(true,cliente);
-    addDragEvents(card);
-    document.getElementById(cliente.status).appendChild(card);
-    cardsMap[cliente.id]=card;
-}
-
-function render(){
-    STATUS.forEach(s=>document.getElementById(s).innerHTML=`<h2>${s.replace('-',' ').toUpperCase()}</h2>`);
-    for(const c of getClientes()) criarCard(c);
-    filtragemAplicada();
-}
-
-clientForm.onsubmit=function(e){
-    e.preventDefault();
-    const nome=inputNome.value.trim();
-    if(!nome){ showToast("Nome obrigatório"); return; }
-    const novo={
-        id:clientForm.dataset.editId||Date.now(),
-        nome, obs:inputObs.value.trim().substring(0,300),
-        status:inputStatus.value, numeros:inputNumeros.value,
-        processo:inputProcesso.value, valor:inputValor.value
-    };
-    let clientes=getClientes();
-    if(clientForm.dataset.editId){
-        clientes=clientes.map(c=>c.id==novo.id?novo:c);
-        showToast("Cliente atualizado!");
-    }else{
-        clientes.push(novo);
-        showToast("Cliente adicionado!");
-    }
-    saveClientes(clientes);
-    closeModal(); render();
-};
-
-btnAdd.onclick=()=>openModal();
-btnCancel.onclick=()=>closeModal();
-
-function deleteCliente(id){
-    if(confirm("Deseja excluir este cliente?")){
-        saveClientes(getClientes().filter(c=>c.id!=id));
-        render(); showToast("Cliente excluído");
-    }
-}
-
-/* Drag & Drop */
-let draggedCard=null;
-function addDragEvents(card){
-    card.addEventListener('dragstart',()=>{ draggedCard=card; card.style.opacity='.5'; });
-    card.addEventListener('dragend',()=>{ draggedCard=null; card.style.opacity='1'; });
-}
-document.querySelectorAll('.column').forEach(col=>{
-    col.addEventListener('dragover', e=>e.preventDefault());
-    col.addEventListener('drop', ()=>{
-        if(!draggedCard) return;
-        const id=draggedCard.dataset.id;
-        const status=col.id;
-        const clientes=getClientes().map(c=>c.id==id?{...c,status}:c);
-        saveClientes(clientes); render(); showToast("Status atualizado");
-    });
-});
-
-/* Filtro */
-searchInput.oninput=filtragemAplicada;
-filterStatus.onchange=filtragemAplicada;
-function filtragemAplicada(){
-    const search=searchInput.value.toLowerCase(),filter=filterStatus.value;
-    Object.values(cardsMap).forEach(card=>{
-        const matchSearch=card.dataset.nome.includes(search);
-        const matchFilter=!filter||card.dataset.status===filter;
-        card.style.display=(matchSearch&&matchFilter)?'flex':'none';
-    });
-}
-
-render();
-</script>
-</body>
-</html>
+function showToast(msg){ toastEl.innerText=msg; toastEl.style.display='block'; clearTimeout(toastEl._t); toastEl._t=set

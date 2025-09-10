@@ -139,4 +139,142 @@ const inputCPF=document.getElementById('inputCPF');
 const inputProcesso=document.getElementById('inputProcesso');
 const inputObs=document.getElementById('inputObs');
 const btnAdd=document.getElementById('btnAdd');
-const btnCancel=document.getElementById('btn
+const btnCancel=document.getElementById('btnCancel');
+const contactsTable=document.querySelector('#contactsTable tbody');
+const waPanel=document.getElementById('waPanel');
+const waNumber=document.getElementById('waNumber');
+const waMessage=document.getElementById('waMessage');
+const toast=document.getElementById('toast');
+
+let editIndex=null;
+
+// Funções Modal
+btnAdd.onclick=()=>{openModal();};
+btnCancel.onclick=()=>{closeModal();};
+
+function openModal(contact=null){
+    modalBackdrop.style.display='flex';
+    if(contact){
+        inputNome.value=contact.nome;
+        inputTelefone.value=contact.telefone;
+        inputCPF.value=contact.cpf;
+        inputProcesso.value=contact.processo;
+        inputObs.value=contact.obs;
+        editIndex=contact.index;
+        document.getElementById('modalTitle').innerText='Editar Contato';
+    }else{
+        contactForm.reset();
+        document.getElementById('modalTitle').innerText='Novo Contato';
+        editIndex=null;
+    }
+}
+
+function closeModal(){ modalBackdrop.style.display='none'; }
+
+contactForm.onsubmit=function(e){
+    e.preventDefault();
+    const contato={
+        nome:inputNome.value,
+        telefone:inputTelefone.value,
+        cpf:inputCPF.value,
+        processo:inputProcesso.value,
+        obs:inputObs.value
+    };
+    let contatos=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+    if(editIndex!==null){
+        contatos[editIndex]=contato;
+    }else{
+        contatos.push(contato);
+    }
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(contatos));
+    loadTable();
+    closeModal();
+    showToast('Contato salvo com sucesso!');
+}
+
+// Carregar tabela
+function loadTable(){
+    const contatos=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+    contactsTable.innerHTML='';
+    contatos.forEach((c,i)=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
+        <td>${c.nome}</td>
+        <td>${c.telefone}</td>
+        <td>${c.cpf}</td>
+        <td>${c.processo}</td>
+        <td>
+            <button class="btn btn-wa" onclick="openWAPanel('${c.telefone}')">WhatsApp</button>
+            <button class="btn btn-edit" onclick="editContact(${i})">Editar</button>
+            <button class="btn btn-del" onclick="deleteContact(${i})">Excluir</button>
+        </td>
+        `;
+        contactsTable.appendChild(tr);
+    });
+}
+
+// Funções CRUD
+function editContact(index){
+    const contatos=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+    const c=contatos[index];
+    c.index=index;
+    openModal(c);
+}
+
+function deleteContact(index){
+    let contatos=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+    contatos.splice(index,1);
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(contatos));
+    loadTable();
+    showToast('Contato removido!');
+}
+
+// WhatsApp
+function openWAPanel(number){
+    waPanel.style.display='block';
+    waNumber.value=number.replace(/\D/g,'');
+}
+
+function closeWAPanel(){ waPanel.style.display='none'; }
+
+async function sendWhatsApp(){
+    const number=waNumber.value.trim();
+    const message=waMessage.value.trim();
+    if(!number||!message){ showToast('Número e mensagem obrigatórios!'); return; }
+
+    try{
+        await fetch('http://localhost:3000/send',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({number,message})
+        });
+        showToast('Mensagem enviada com sucesso!');
+        waMessage.value='';
+    }catch(err){
+        console.error(err);
+        showToast('Erro ao enviar mensagem!');
+    }
+}
+
+// Toast
+function showToast(msg){
+    toast.innerText=msg;
+    toast.style.display='block';
+    setTimeout(()=>{toast.style.display='none';},3000);
+}
+
+// Busca
+document.getElementById('searchInput').oninput=function(){
+    const q=this.value.toLowerCase();
+    const rows=contactsTable.querySelectorAll('tr');
+    rows.forEach(row=>{
+        row.style.display=row.innerText.toLowerCase().includes(q)?'':'none';
+    });
+}
+
+// Inicializar
+loadTable();
+</script>
+
+</body>
+</html>

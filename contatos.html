@@ -1,127 +1,217 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contato - Amorim & Souza Advocacia</title>
-  <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=65200&format=png&color=000000">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Roboto', sans-serif; background: #fff; color: #333; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contatos - AMR ADV</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', sans-serif; }
+body { display:flex; background:#f0f2f5; height:100vh; }
 
-    /* Header */
-    header { 
-      background-image: url('https://images.squarespace-cdn.com/content/v1/581c7148be6594d155f50234/1581617132961-PNOIJYH2ZYILG6JP9XRV/macroarq_arquitetura_interiores_corporativo_projeto_escritorio_advocacia_hall_entrada_piso_elevado_carpete_madeira_cumaru_divisoria_serralheria_vidro_funcional_clean.jpg');
-      background-size: cover; background-position: center; 
-      color: white; padding: 100px 20px 70px; text-align: center; 
-      position: relative;
-    }
-    header::after { content: ""; position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.4); z-index:1; }
-    header h1, header p { position: relative; z-index:2; }
-    header h1 a { color:white; text-decoration:none; font-size:2.5em; font-family:'Montserrat', sans-serif; font-weight:700; letter-spacing:1px; }
-    header h1 img { width:40px; margin-right:10px; vertical-align:middle; }
-    header p { margin-top:12px; font-size:18px; }
+/* Sidebar */
+.sidebar { width:220px; background:#fff; border-right:1px solid #ddd; display:flex; flex-direction:column; padding-top:20px; }
+.sidebar h2 { text-align:center; margin-bottom:20px; font-size:22px; font-family:'Poppins', sans-serif; font-weight:600; color:#1e1e2f; letter-spacing:1px; cursor:pointer; }
+.sidebar button { padding:12px 20px; margin:5px 10px; border:none; background:#f8f9fa; text-align:left; cursor:pointer; border-radius:6px; transition:.2s; }
+.sidebar button:hover { background:#e2e6ea; }
 
-    /* Nav */
-    nav { background:#002244; text-align:center; position:sticky; top:0; z-index:1000; }
-    nav a { display:inline-block; padding:15px 20px; color:white; text-decoration:none; transition:background 0.3s; }
-    nav a:hover { background:#004080; }
+/* Main */
+.main { flex:1; display:flex; flex-direction:column; }
 
-    /* Section */
-    section { padding:80px 20px; max-width:1100px; margin:auto; }
+/* Header */
+header { height:60px; background:#fff; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; padding:0 20px; }
+header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
+header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
 
-    h2 { font-size:32px; color:#003366; margin-bottom:20px; text-align:center; }
+/* Search */
+.search-bar { padding:10px 20px; background:#fff; border-bottom:1px solid #ddd; display:flex; gap:10px; align-items:center; }
+.search-bar input { flex:1; padding:8px; border:1px solid #ccc; border-radius:6px; }
 
-    /* Cards de contato */
-    .contact-cards { display:flex; flex-wrap:wrap; gap:20px; justify-content:center; margin-bottom:50px; }
-    .card { flex:1 1 220px; background:#fff; padding:25px; border-radius:12px; text-align:center; box-shadow:0 6px 15px rgba(0,0,0,0.1); transition:transform .3s, box-shadow .3s; }
-    .card:hover { transform:translateY(-5px); box-shadow:0 10px 20px rgba(0,0,0,0.15); }
-    .card img { width:50px; margin-bottom:15px; }
-    .card h3 { color:#003366; margin-bottom:8px; }
+/* Table */
+.table-container { flex:1; overflow-y:auto; padding:20px; }
+table { width:100%; border-collapse:collapse; background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.08); }
+thead { background:#f8f9fa; }
+th, td { text-align:left; padding:12px 15px; border-bottom:1px solid #eee; font-size:14px; }
+th { font-weight:600; color:#1e1e2f; }
+tr:hover { background:#f5f5f5; cursor:pointer; }
 
-    /* Formulário */
-    form { background:#f9f9f9; padding:30px; border-radius:12px; box-shadow:0 6px 15px rgba(0,0,0,0.1); }
-    form label { display:block; margin-bottom:6px; font-weight:bold; color:#003366; }
-    form input, form textarea { width:100%; padding:12px; border:1px solid #ccc; border-radius:8px; margin-bottom:20px; font-size:15px; }
-    form button { background:#003366; color:white; padding:14px 28px; border:none; border-radius:8px; font-size:16px; cursor:pointer; font-weight:bold; transition:background .3s; }
-    form button:hover { background:#0055aa; }
+/* Modal */
+.modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); justify-content:center; align-items:center; z-index:50; }
+.modal { background:#fff; padding:18px; border-radius:10px; min-width:320px; max-width:420px; box-shadow:0 8px 30px rgba(0,0,0,.25); }
+.modal h3 { margin-bottom:12px; }
+.modal .row { margin-bottom:10px; }
+.modal input, .modal textarea { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; }
+.modal textarea { min-height:80px; resize:vertical; }
+.modal .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
 
-    /* Mapa */
-    .map { margin-top:50px; border-radius:12px; overflow:hidden; box-shadow:0 6px 15px rgba(0,0,0,0.1); }
+/* Botões */
+.btn { padding:8px 12px; border-radius:6px; border:0; cursor:pointer; }
+.btn.primary { background:#1e1e2f; color:#fff; }
+.btn.ghost { background:#f1f3f5; }
 
-    /* Footer */
-    footer { background:#003366; color:white; text-align:center; padding:40px 20px; font-size:14px; margin-top:60px; }
-    footer a { color:white; text-decoration:underline; }
-  </style>
+/* Toast */
+.toast { position:fixed; right:20px; bottom:20px; background:#222; color:#fff; padding:8px 12px; border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.3); display:none; z-index:60; }
+</style>
 </head>
 <body>
-  <!-- Header -->
-  <header>
-    <h1>
-      <img src="https://img.icons8.com/ios-filled/50/ffffff/scales.png" alt="Balança da Justiça">
-      <a href="index.html">AMORIM & SOUZA ADVOCACIA</a>
-    </h1>
-    <p>Entre em contato conosco</p>
-  </header>
 
-  <!-- Navbar -->
-  <nav>
-    <a href="sobre.html">Sobre</a>
-    <a href="crm.html">CRM</a>
-    <a href="enderecos.html">Endereços</a>
-    <a href="acompanhamento.html">Acompanhamento</a>
-    <a href="contatos.html">Contato</a>
-  </nav>
+<!-- Sidebar -->
+<div class="sidebar">
+    <h2 onclick="window.location.href='crm.html'">AMR ADV</h2>
+    <button onclick="window.location.href='relatorios.html'">Relatórios</button>
+    <button onclick="window.location.href='agenda.html'">Agenda</button>
+    <button>Contatos</button>
+    <button>Configurações</button>
+</div>
 
-  <!-- Contatos Rápidos -->
-  <section>
-    <h2>Formas de Contato</h2>
-    <div class="contact-cards">
-      <div class="card">
-        <img src="https://img.icons8.com/ios-filled/50/003366/phone.png"/>
-        <h3>Telefone</h3>
-        <p>(21) 9826-7718</p>
-      </div>
-      <div class="card">
-        <img src="https://img.icons8.com/ios-filled/50/003366/whatsapp.png"/>
-        <h3>WhatsApp</h3>
-        <p><a href="https://wa.me/552198267718" target="_blank">Iniciar Conversa</a></p>
-      </div>
-      <div class="card">
-        <img src="https://img.icons8.com/ios-filled/50/003366/email.png"/>
-        <h3>Email</h3>
-        <p>contato@amorimesouza.com</p>
-      </div>
-      <div class="card">
-        <img src="https://img.icons8.com/ios-filled/50/003366/marker.png"/>
-        <h3>Endereço</h3>
-        <p>Av. das Américas, Nº3443<br>Barra da Tijuca - RJ</p>
-      </div>
+<!-- Main -->
+<div class="main">
+    <header>
+        <h1>Contatos</h1>
+        <button id="btnAdd" class="btn primary">Adicionar Contato</button>
+    </header>
+
+    <div class="search-bar">
+        <input id="searchInput" placeholder="Buscar contato..." />
     </div>
-  </section>
 
-  <!-- Formulário -->
-  <section>
-    <h2>Envie sua Mensagem</h2>
-    <form action="mailto:contato@amorimesouza.com" method="post" enctype="text/plain">
-      <label for="nome">Nome</label>
-      <input type="text" id="nome" name="nome" required>
+    <div class="table-container">
+        <table id="contactsTable">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Telefone</th>
+                    <th>CPF</th>
+                    <th>Processo</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
 
-      <label for="email">E-mail</label>
-      <input type="email" id="email" name="email" required>
+<!-- Modal -->
+<div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+        <h3 id="modalTitle">Novo Contato</h3>
+        <form id="contactForm">
+            <div class="row"><label>Nome</label><input id="inputNome" required /></div>
+            <div class="row"><label>Telefone</label><input id="inputTelefone" placeholder="(21) 99999-9999" /></div>
+            <div class="row"><label>CPF</label><input id="inputCPF" placeholder="000.000.000-00" /></div>
+            <div class="row"><label>Número do Processo</label><input id="inputProcesso" placeholder="0000000-00.0000.0.00.0000" /></div>
+            <div class="row"><label>Observação</label><textarea id="inputObs" maxlength="300"></textarea></div>
+            <div class="actions">
+                <button type="button" class="btn ghost" id="btnCancel">Cancelar</button>
+                <button type="submit" class="btn primary">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-      <label for="telefone">Telefone</label>
-      <input type="tel" id="telefone" name="telefone">
+<!-- Toast -->
+<div class="toast" id="toast"></div>
 
-      <label for="mensagem">Mensagem</label>
-      <textarea id="mensagem" name="mensagem" rows="5" required></textarea>
+<script>
+const STORAGE_KEY='crm_contatos';
+const modalBackdrop=document.getElementById('modalBackdrop');
+const contactForm=document.getElementById('contactForm');
+const inputNome=document.getElementById('inputNome');
+const inputTelefone=document.getElementById('inputTelefone');
+const inputCPF=document.getElementById('inputCPF');
+const inputProcesso=document.getElementById('inputProcesso');
+const inputObs=document.getElementById('inputObs');
+const btnAdd=document.getElementById('btnAdd');
+const btnCancel=document.getElementById('btnCancel');
+const toastEl=document.getElementById('toast');
+const searchInput=document.getElementById('searchInput');
+const tbody=document.querySelector('#contactsTable tbody');
 
-      <button type="submit">Enviar</button>
-    </form>
-  </section>
+function showToast(msg){ toastEl.innerText=msg; toastEl.style.display='block'; clearTimeout(toastEl._t); toastEl._t=setTimeout(()=>toastEl.style.display='none',3000); }
+function getContatos(){ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); }
+function saveContatos(c){ localStorage.setItem(STORAGE_KEY, JSON.stringify(c)); }
 
-  <!-- Google Maps -->
-  <section class="map">
-    <iframe 
-      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3675.153858446518!2d-43.3654369248237!3d-22.99999998496233!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9bd5455446d54b%3A0xf3b75a12bb5ee0f3!2sAv.%20das%20Am%C3%A9ricas%2C%203443%20-%20Barra%20da%20Tijuca%2C%20Rio%20de%20Janeiro%20-%20RJ!5e0!3m2!1spt-BR!2sbr!4v17
+function openModal(edit=false,data=null){
+    modalBackdrop.style.display='flex';
+    document.getElementById('modalTitle').innerText=edit?"Editar Contato":"Novo Contato";
+    if(edit&&data){
+        inputNome.value=data.nome; inputTelefone.value=data.telefone||""; inputCPF.value=data.cpf||"";
+        inputProcesso.value=data.processo||""; inputObs.value=data.obs||""; 
+        contactForm.dataset.editId=data.id;
+    }else{
+        inputNome.value=""; inputTelefone.value=""; inputCPF.value="";
+        inputProcesso.value=""; inputObs.value="";
+        delete contactForm.dataset.editId;
+    }
+}
+function closeModal(){ modalBackdrop.style.display='none'; }
+
+function render(){
+    tbody.innerHTML="";
+    for(const c of getContatos()){
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
+            <td>${c.nome}</td>
+            <td>${c.telefone||'-'}</td>
+            <td>${c.cpf||'-'}</td>
+            <td>${c.processo||'-'}</td>
+            <td>
+                <button onclick='editContato(${c.id})'>✏️</button>
+                <button onclick='deleteContato(${c.id})'>🗑️</button>
+            </td>`;
+        tbody.appendChild(tr);
+    }
+    aplicarFiltro();
+}
+
+contactForm.onsubmit=function(e){
+    e.preventDefault();
+    const nome=inputNome.value.trim();
+    if(!nome){ showToast("Nome obrigatório"); return; }
+    const novo={
+        id:contactForm.dataset.editId||Date.now(),
+        nome, telefone:inputTelefone.value.trim(),
+        cpf:inputCPF.value.trim(),
+        processo:inputProcesso.value.trim(),
+        obs:inputObs.value.trim()
+    };
+    let contatos=getContatos();
+    if(contactForm.dataset.editId){
+        contatos=contatos.map(c=>c.id==novo.id?novo:c);
+        showToast("Contato atualizado!");
+    }else{
+        contatos.push(novo);
+        showToast("Contato adicionado!");
+    }
+    saveContatos(contatos);
+    closeModal(); render();
+};
+
+function editContato(id){
+    const contato=getContatos().find(c=>c.id==id);
+    if(contato) openModal(true,contato);
+}
+function deleteContato(id){
+    if(confirm("Deseja excluir este contato?")){
+        saveContatos(getContatos().filter(c=>c.id!=id));
+        render(); showToast("Contato excluído");
+    }
+}
+
+/* Filtro */
+searchInput.oninput=aplicarFiltro;
+function aplicarFiltro(){
+    const search=searchInput.value.toLowerCase();
+    Array.from(tbody.children).forEach(tr=>{
+        const nome=tr.children[0].innerText.toLowerCase();
+        tr.style.display=nome.includes(search)?'table-row':'none';
+    });
+}
+
+btnAdd.onclick=()=>openModal();
+btnCancel.onclick=()=>closeModal();
+
+render();
+</script>
+</body>
+</html>

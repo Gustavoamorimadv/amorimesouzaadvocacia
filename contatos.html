@@ -34,6 +34,10 @@ thead { background:#f8f9fa; }
 th, td { text-align:left; padding:12px 15px; border-bottom:1px solid #eee; font-size:14px; }
 th { font-weight:600; color:#1e1e2f; }
 tr:hover { background:#f5f5f5; cursor:pointer; }
+td button { margin-right:5px; padding:6px 10px; border:none; border-radius:6px; cursor:pointer; font-size:13px; }
+.btn-edit { background:#f1c40f; color:#fff; }
+.btn-del { background:#e74c3c; color:#fff; }
+.btn-wa { background:#2ecc71; color:#fff; }
 
 /* Modal */
 .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); justify-content:center; align-items:center; z-index:50; }
@@ -43,6 +47,11 @@ tr:hover { background:#f5f5f5; cursor:pointer; }
 .modal input, .modal textarea { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; }
 .modal textarea { min-height:80px; resize:vertical; }
 .modal .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
+
+/* Painel Venom */
+#waPanel { display:none; margin:20px; background:#fff; padding:15px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.08); max-width:500px; }
+#waPanel input, #waPanel textarea { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; margin-bottom:10px; }
+#waPanel textarea { min-height:80px; }
 
 /* Botões */
 .btn { padding:8px 12px; border-radius:6px; border:0; cursor:pointer; }
@@ -89,6 +98,15 @@ tr:hover { background:#f5f5f5; cursor:pointer; }
             <tbody></tbody>
         </table>
     </div>
+
+    <!-- Painel Venom -->
+    <div id="waPanel">
+        <h2>Enviar WhatsApp</h2>
+        <input id="waNumber" placeholder="Número (ex: 5521999999999)" />
+        <textarea id="waMessage" placeholder="Digite sua mensagem..."></textarea>
+        <button onclick="sendWhatsApp()" class="btn primary">Enviar Mensagem</button>
+        <button onclick="closeWAPanel()" class="btn ghost">Cancelar</button>
+    </div>
 </div>
 
 <!-- Modal -->
@@ -126,6 +144,9 @@ const btnCancel=document.getElementById('btnCancel');
 const toastEl=document.getElementById('toast');
 const searchInput=document.getElementById('searchInput');
 const tbody=document.querySelector('#contactsTable tbody');
+const waPanel=document.getElementById('waPanel');
+const waNumber=document.getElementById('waNumber');
+const waMessage=document.getElementById('waMessage');
 
 function showToast(msg){ toastEl.innerText=msg; toastEl.style.display='block'; clearTimeout(toastEl._t); toastEl._t=setTimeout(()=>toastEl.style.display='none',3000); }
 function getContatos(){ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); }
@@ -156,8 +177,9 @@ function render(){
             <td>${c.cpf||'-'}</td>
             <td>${c.processo||'-'}</td>
             <td>
-                <button onclick='editContato(${c.id})'>✏️</button>
-                <button onclick='deleteContato(${c.id})'>🗑️</button>
+                <button class="btn-edit" onclick='editContato(${c.id})'>✏️</button>
+                <button class="btn-del" onclick='deleteContato(${c.id})'>🗑️</button>
+                <button class="btn-wa" onclick='openWAPanel("${c.telefone||""}")'>📲</button>
             </td>`;
         tbody.appendChild(tr);
     }
@@ -195,6 +217,42 @@ function deleteContato(id){
     if(confirm("Deseja excluir este contato?")){
         saveContatos(getContatos().filter(c=>c.id!=id));
         render(); showToast("Contato excluído");
+    }
+}
+
+/* Painel WhatsApp */
+function openWAPanel(numero=""){
+    waPanel.style.display='block';
+    waNumber.value=numero.replace(/\D/g,""); // limpa caracteres
+    waMessage.value="";
+}
+function closeWAPanel(){ waPanel.style.display='none'; }
+
+async function sendWhatsApp(){
+    const number = waNumber.value.trim();
+    const message = waMessage.value.trim();
+
+    if(!number || !message){
+        showToast("Número e mensagem são obrigatórios!");
+        return;
+    }
+
+    try {
+        const res = await fetch("http://localhost:3000/send", { // altere para seu servidor Venom
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ number, message })
+        });
+
+        if(res.ok){
+            showToast("Mensagem enviada com sucesso!");
+            closeWAPanel();
+        } else {
+            showToast("Erro ao enviar mensagem.");
+        }
+    } catch (err) {
+        console.error(err);
+        showToast("Falha de conexão com o servidor Venom.");
     }
 }
 

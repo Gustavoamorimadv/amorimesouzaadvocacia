@@ -6,7 +6,6 @@
 <title>Contatos - AMR ADV</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
 <style>
-/* Seus estilos originais permanecem aqui */
 * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', sans-serif; }
 body { display:flex; background:#f0f2f5; height:100vh; }
 .sidebar { width:220px; background:#fff; border-right:1px solid #ddd; display:flex; flex-direction:column; padding-top:20px; }
@@ -46,7 +45,6 @@ td button { margin-right:5px; padding:6px 10px; border:none; border-radius:6px; 
 </style>
 </head>
 <body>
-
 <div class="sidebar">
     <h2 onclick="window.location.href='crm.html'">AMR ADV</h2>
     <button onclick="window.location.href='relatorios.html'">Relatórios</button>
@@ -54,17 +52,14 @@ td button { margin-right:5px; padding:6px 10px; border:none; border-radius:6px; 
     <button>Contatos</button>
     <button>Configurações</button>
 </div>
-
 <div class="main">
     <header>
         <h1>Contatos</h1>
         <button id="btnAdd" class="btn primary">Adicionar Contato</button>
     </header>
-
     <div class="search-bar">
         <input id="searchInput" placeholder="Buscar contato..." />
     </div>
-
     <div class="table-container">
         <table id="contactsTable">
             <thead>
@@ -79,7 +74,6 @@ td button { margin-right:5px; padding:6px 10px; border:none; border-radius:6px; 
             <tbody></tbody>
         </table>
     </div>
-
     <div id="waPanel">
         <h2>Enviar WhatsApp</h2>
         <input id="waNumber" placeholder="Número (ex: 5521999999999)" />
@@ -88,7 +82,6 @@ td button { margin-right:5px; padding:6px 10px; border:none; border-radius:6px; 
         <button onclick="closeWAPanel()" class="btn ghost">Cancelar</button>
     </div>
 </div>
-
 <div class="modal-backdrop" id="modalBackdrop">
     <div class="modal">
         <h3 id="modalTitle">Novo Contato</h3>
@@ -105,7 +98,6 @@ td button { margin-right:5px; padding:6px 10px; border:none; border-radius:6px; 
         </form>
     </div>
 </div>
-
 <div class="toast" id="toast"></div>
 
 <script>
@@ -124,7 +116,6 @@ const waPanel=document.getElementById('waPanel');
 const waNumber=document.getElementById('waNumber');
 const waMessage=document.getElementById('waMessage');
 const toast=document.getElementById('toast');
-
 let editIndex=null;
 
 btnAdd.onclick=()=>{openModal();};
@@ -205,28 +196,23 @@ function deleteContact(index){
     showToast('Contato removido!');
 }
 
-// WhatsApp
-function formatWhatsAppNumber(number){
-    // Remove tudo que não for dígito
-    let sanitized = number.replace(/\D/g,'');
-    // Adiciona DDI 55 se não existir
-    if(!sanitized.startsWith('55')){
-        sanitized = '55'+sanitized;
-    }
-    return sanitized + '@c.us';
-}
-
 function openWAPanel(number){
     waPanel.style.display='block';
-    waNumber.value=formatWhatsAppNumber(number).replace('@c.us','');
+    waNumber.value = number.replace(/\D/g,''); // mantém apenas números
 }
 
 function closeWAPanel(){ waPanel.style.display='none'; }
 
+function formatWhatsAppNumber(number){
+    let sanitized = number.replace(/\D/g,'');
+    if(!sanitized.startsWith('55')) sanitized='55'+sanitized;
+    return sanitized;
+}
+
 async function sendWhatsApp(){
     const number = formatWhatsAppNumber(waNumber.value.trim());
     const message = waMessage.value.trim();
-    if(!number||!message){ showToast('Número e mensagem obrigatórios!'); return; }
+    if(!number || !message){ showToast('Número e mensagem obrigatórios!'); return; }
 
     try{
         await fetch('http://localhost:3000/send',{
@@ -242,14 +228,12 @@ async function sendWhatsApp(){
     }
 }
 
-// Toast
 function showToast(msg){
     toast.innerText=msg;
     toast.style.display='block';
     setTimeout(()=>{toast.style.display='none';},3000);
 }
 
-// Busca
 document.getElementById('searchInput').oninput=function(){
     const q=this.value.toLowerCase();
     const rows=contactsTable.querySelectorAll('tr');
@@ -258,9 +242,7 @@ document.getElementById('searchInput').oninput=function(){
     });
 }
 
-// Inicializar
 loadTable();
 </script>
-
 </body>
 </html>

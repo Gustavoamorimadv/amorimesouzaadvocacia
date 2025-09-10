@@ -19,8 +19,8 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 .search-bar { padding:10px 20px; background:#fff; border-bottom:1px solid #ddd; display:flex; gap:10px; align-items:center; flex-shrink:0; }
 .search-bar input, .search-bar select { padding:8px; border:1px solid #ccc; border-radius:6px; }
 .search-bar input { flex:1; }
-.kanban-container { flex:1; overflow-x:auto; padding:20px; } /* rolagem horizontal somente aqui */
-.kanban { display:flex; gap:20px; min-width:max-content; } /* manter colunas lado a lado */
+.kanban-container { flex:1; overflow-x:auto; padding:20px; } /* rolagem horizontal do kanban */
+.kanban { display:flex; gap:20px; min-width:max-content; height:100%; } /* colunas lado a lado */
 .column { background:#fff; border-radius:15px; padding:15px; min-width:320px; max-height:calc(100%); display:flex; flex-direction:column; gap:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); overflow-y:auto; }
 .column h2 { margin-bottom:10px; font-size:18px; color:#1e1e2f; text-transform:uppercase; }
 .card { display:flex; background:#fff; border-radius:15px; box-shadow:0 12px 30px rgba(0,0,0,0.12); cursor:pointer; overflow:hidden; transition:0.3s; min-height:150px; flex-direction:row; }

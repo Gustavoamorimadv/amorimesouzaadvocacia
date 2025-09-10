@@ -238,7 +238,7 @@ async function sendWhatsApp(){
     }
 
     try {
-        const res = await fetch("http://localhost:3000/send", { // altere para seu servidor Venom
+        const res = await fetch("http://localhost:3000/send", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ number, message })

@@ -48,11 +48,6 @@ td button { margin-right:5px; padding:6px 10px; border:none; border-radius:6px; 
 .modal textarea { min-height:80px; resize:vertical; }
 .modal .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
 
-/* Painel Venom */
-#waPanel { display:none; margin:20px; background:#fff; padding:15px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.08); max-width:500px; }
-#waPanel input, #waPanel textarea { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; margin-bottom:10px; }
-#waPanel textarea { min-height:80px; }
-
 /* Botões */
 .btn { padding:8px 12px; border-radius:6px; border:0; cursor:pointer; }
 .btn.primary { background:#1e1e2f; color:#fff; }
@@ -98,18 +93,9 @@ td button { margin-right:5px; padding:6px 10px; border:none; border-radius:6px; 
             <tbody></tbody>
         </table>
     </div>
-
-    <!-- Painel Venom -->
-    <div id="waPanel">
-        <h2>Enviar WhatsApp</h2>
-        <input id="waNumber" placeholder="Número (ex: 5521999999999)" />
-        <textarea id="waMessage" placeholder="Digite sua mensagem..."></textarea>
-        <button onclick="sendWhatsApp()" class="btn primary">Enviar Mensagem</button>
-        <button onclick="closeWAPanel()" class="btn ghost">Cancelar</button>
-    </div>
 </div>
 
-<!-- Modal -->
+<!-- Modal único (Add/Edit + Envio WhatsApp) -->
 <div class="modal-backdrop" id="modalBackdrop">
     <div class="modal">
         <h3 id="modalTitle">Novo Contato</h3>
@@ -119,9 +105,10 @@ td button { margin-right:5px; padding:6px 10px; border:none; border-radius:6px; 
             <div class="row"><label>CPF</label><input id="inputCPF" placeholder="000.000.000-00" /></div>
             <div class="row"><label>Número do Processo</label><input id="inputProcesso" placeholder="0000000-00.0000.0.00.0000" /></div>
             <div class="row"><label>Observação</label><textarea id="inputObs" maxlength="300"></textarea></div>
+            <div class="row"><label>Mensagem WhatsApp</label><textarea id="inputWA" placeholder="Digite a mensagem para o contato..."></textarea></div>
             <div class="actions">
                 <button type="button" class="btn ghost" id="btnCancel">Cancelar</button>
-                <button type="submit" class="btn primary">Salvar</button>
+                <button type="submit" class="btn primary">Salvar / Enviar</button>
             </div>
         </form>
     </div>
@@ -139,14 +126,12 @@ const inputTelefone=document.getElementById('inputTelefone');
 const inputCPF=document.getElementById('inputCPF');
 const inputProcesso=document.getElementById('inputProcesso');
 const inputObs=document.getElementById('inputObs');
+const inputWA=document.getElementById('inputWA');
 const btnAdd=document.getElementById('btnAdd');
 const btnCancel=document.getElementById('btnCancel');
 const toastEl=document.getElementById('toast');
 const searchInput=document.getElementById('searchInput');
 const tbody=document.querySelector('#contactsTable tbody');
-const waPanel=document.getElementById('waPanel');
-const waNumber=document.getElementById('waNumber');
-const waMessage=document.getElementById('waMessage');
 
 function showToast(msg){ toastEl.innerText=msg; toastEl.style.display='block'; clearTimeout(toastEl._t); toastEl._t=setTimeout(()=>toastEl.style.display='none',3000); }
 function getContatos(){ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); }
@@ -156,15 +141,20 @@ function openModal(edit=false,data=null){
     modalBackdrop.style.display='flex';
     document.getElementById('modalTitle').innerText=edit?"Editar Contato":"Novo Contato";
     if(edit&&data){
-        inputNome.value=data.nome; inputTelefone.value=data.telefone||""; inputCPF.value=data.cpf||"";
-        inputProcesso.value=data.processo||""; inputObs.value=data.obs||""; 
+        inputNome.value=data.nome; 
+        inputTelefone.value=data.telefone||""; 
+        inputCPF.value=data.cpf||"";
+        inputProcesso.value=data.processo||""; 
+        inputObs.value=data.obs||""; 
+        inputWA.value="";
         contactForm.dataset.editId=data.id;
     }else{
         inputNome.value=""; inputTelefone.value=""; inputCPF.value="";
-        inputProcesso.value=""; inputObs.value="";
+        inputProcesso.value=""; inputObs.value=""; inputWA.value="";
         delete contactForm.dataset.editId;
     }
 }
+
 function closeModal(){ modalBackdrop.style.display='none'; }
 
 function render(){
@@ -179,14 +169,14 @@ function render(){
             <td>
                 <button class="btn-edit" onclick='editContato(${c.id})'>✏️</button>
                 <button class="btn-del" onclick='deleteContato(${c.id})'>🗑️</button>
-                <button class="btn-wa" onclick='openWAPanel("${c.telefone||""}")'>📲</button>
+                <button class="btn-wa" onclick='editContato(${c.id}); inputWA.focus()'>📲</button>
             </td>`;
         tbody.appendChild(tr);
     }
     aplicarFiltro();
 }
 
-contactForm.onsubmit=function(e){
+contactForm.onsubmit=async function(e){
     e.preventDefault();
     const nome=inputNome.value.trim();
     if(!nome){ showToast("Nome obrigatório"); return; }
@@ -206,6 +196,24 @@ contactForm.onsubmit=function(e){
         showToast("Contato adicionado!");
     }
     saveContatos(contatos);
+
+    // Envio WhatsApp
+    const message=inputWA.value.trim();
+    if(message && inputTelefone.value.trim()){
+        try{
+            const res = await fetch("http://localhost:3000/send", {
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify({ number: inputTelefone.value.replace(/\D/g,''), message })
+            });
+            if(res.ok) showToast("Contato salvo e mensagem enviada!");
+            else showToast("Contato salvo, mas falha ao enviar WhatsApp.");
+        }catch(err){
+            console.error(err);
+            showToast("Contato salvo, mas erro de conexão com Venom.");
+        }
+    }
+
     closeModal(); render();
 };
 
@@ -220,43 +228,6 @@ function deleteContato(id){
     }
 }
 
-/* Painel WhatsApp */
-function openWAPanel(numero=""){
-    waPanel.style.display='block';
-    waNumber.value=numero.replace(/\D/g,""); // limpa caracteres
-    waMessage.value="";
-}
-function closeWAPanel(){ waPanel.style.display='none'; }
-
-async function sendWhatsApp(){
-    const number = waNumber.value.trim();
-    const message = waMessage.value.trim();
-
-    if(!number || !message){
-        showToast("Número e mensagem são obrigatórios!");
-        return;
-    }
-
-    try {
-        const res = await fetch("http://localhost:3000/send", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ number, message })
-        });
-
-        if(res.ok){
-            showToast("Mensagem enviada com sucesso!");
-            closeWAPanel();
-        } else {
-            showToast("Erro ao enviar mensagem.");
-        }
-    } catch (err) {
-        console.error(err);
-        showToast("Falha de conexão com o servidor Venom.");
-    }
-}
-
-/* Filtro */
 searchInput.oninput=aplicarFiltro;
 function aplicarFiltro(){
     const search=searchInput.value.toLowerCase();

@@ -4,23 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard - AMR ADV</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
-.sidebar { width:220px; background:#fff; border-right:1px solid #ddd; display:flex; flex-direction:column; padding-top:20px; flex-shrink:0; }
-.sidebar h2 { text-align:center; margin-bottom:20px; font-size:22px; font-family:'Poppins', sans-serif; font-weight:600; color:#1e1e2f; letter-spacing:1px; cursor:pointer; }
-.sidebar button { padding:12px 20px; margin:5px 10px; border:none; background:#f8f9fa; text-align:left; cursor:pointer; border-radius:6px; transition:0.2s; }
-.sidebar button:hover { background:#e2e6ea; }
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
+body { display:flex; background:#f5f6fa; height:100vh; overflow:hidden; color:#1e1e2f; }
+.sidebar { width:220px; background:#fff; border-right:1px solid #e1e4eb; display:flex; flex-direction:column; padding-top:20px; flex-shrink:0; }
+.sidebar h2 { text-align:center; margin-bottom:20px; font-size:22px; font-weight:600; cursor:pointer; }
+.sidebar button { padding:14px 20px; margin:5px 10px; border:none; background:#f8f9fa; text-align:left; cursor:pointer; border-radius:8px; font-weight:500; transition:0.2s; }
+.sidebar button:hover { background:#e0e3eb; }
 .main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
-header { height:60px; background:#fff; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; padding:0 20px; flex-shrink:0; }
-header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins',sans-serif; }
+header { height:60px; background:#fff; border-bottom:1px solid #e1e4eb; display:flex; align-items:center; padding:0 20px; font-weight:600; font-size:20px; flex-shrink:0; }
 .dashboard { padding:20px; flex:1; overflow:auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px; }
-.card { background:#fff; padding:20px; border-radius:15px; box-shadow:0 12px 30px rgba(0,0,0,0.12); display:flex; flex-direction:column; justify-content:center; }
-.card h3 { font-size:18px; margin-bottom:10px; color:#333; }
+.card { background:#fff; padding:20px; border-radius:16px; box-shadow:0 8px 20px rgba(0,0,0,0.05); display:flex; flex-direction:column; justify-content:center; transition:0.3s; }
+.card:hover { box-shadow:0 12px 28px rgba(0,0,0,0.08); }
+.card h3 { font-size:16px; font-weight:500; color:#666; margin-bottom:6px; }
 .card p { font-size:24px; font-weight:600; color:#1e1e2f; }
-.chart-card { background:#fff; padding:20px; border-radius:15px; box-shadow:0 12px 30px rgba(0,0,0,0.12); grid-column:1/-1; }
+.chart-card { background:#fff; padding:20px; border-radius:16px; box-shadow:0 8px 20px rgba(0,0,0,0.05); grid-column:1/-1; }
+.chart-card h3 { margin-bottom:12px; font-size:16px; font-weight:500; color:#666; }
 </style>
 </head>
 <body>
@@ -34,13 +35,11 @@ header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins',sans-serif; }
 </div>
 
 <div class="main">
-<header>
-  <h1>Dashboard</h1>
-</header>
+<header>Dashboard</header>
 
 <div class="dashboard">
   <div class="card">
-    <h3>Total Clientes</h3>
+    <h3>Total de Clientes Ativos</h3>
     <p id="totalClientes">0</p>
   </div>
   <div class="card">
@@ -60,22 +59,18 @@ header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins',sans-serif; }
     <p id="totalFechado">0</p>
   </div>
   <div class="card">
-    <h3>Total Honorários</h3>
+    <h3>Honorários a Receber</h3>
     <p id="totalHonorarios">R$ 0,00</p>
   </div>
-  <div class="card">
-    <h3>Total a Receber</h3>
-    <p id="totalReceber">R$ 0,00</p>
+
+  <div class="chart-card">
+    <h3>Novos Clientes por Mês</h3>
+    <canvas id="clientesMesChart"></canvas>
   </div>
 
   <div class="chart-card">
     <h3>Clientes por Tipo de Processo</h3>
-    <canvas id="processChart"></canvas>
-  </div>
-
-  <div class="chart-card">
-    <h3>Clientes por Status</h3>
-    <canvas id="statusChart"></canvas>
+    <canvas id="processoChart"></canvas>
   </div>
 </div>
 </div>
@@ -88,16 +83,24 @@ function fmtMoney(v){ return 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimu
 function renderDashboard(){
   const clientes=getClientes();
   const totalClientes=clientes.length;
-  const statusCount={ 'lista-fria':0, 'negociacao':0, 'contrato-assinado':0, 'fechado':0 };
+  const statusCount={ 'lista-fria':0,'negociacao':0,'contrato-assinado':0,'fechado':0 };
   const processoCount={};
+  const clientesMes={}; // mês/ano -> quantidade
 
-  let totalHonorarios=0, totalReceber=0;
+  let totalHonorarios=0;
+
+  const months=["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
 
   for(const c of clientes){
     statusCount[c.status] = (statusCount[c.status]||0)+1;
     if(c.processo) processoCount[c.processo] = (processoCount[c.processo]||0)+1;
     totalHonorarios += Number(c.valor||0);
-    totalReceber += Number(c.valor||0); // aqui você pode ajustar se tiver valor pago
+
+    if(c.id){
+      const d = new Date(Number(c.id));
+      const key = `${months[d.getMonth()]} ${d.getFullYear()}`;
+      clientesMes[key] = (clientesMes[key]||0)+1;
+    }
   }
 
   document.getElementById('totalClientes').innerText=totalClientes;
@@ -106,35 +109,38 @@ function renderDashboard(){
   document.getElementById('totalContrato').innerText=statusCount['contrato-assinado'];
   document.getElementById('totalFechado').innerText=statusCount['fechado'];
   document.getElementById('totalHonorarios').innerText=fmtMoney(totalHonorarios);
-  document.getElementById('totalReceber').innerText=fmtMoney(totalReceber);
 
-  // Chart Clientes por Processo
-  const processCtx=document.getElementById('processChart').getContext('2d');
-  new Chart(processCtx,{
+  // Gráfico Novos Clientes por Mês
+  new Chart(document.getElementById('clientesMesChart').getContext('2d'), {
+    type:'line',
+    data:{
+      labels:Object.keys(clientesMes),
+      datasets:[{
+        label:'Novos Clientes',
+        data:Object.values(clientesMes),
+        borderColor:'#3498db',
+        backgroundColor:'rgba(52,152,219,0.1)',
+        fill:true,
+        tension:0.3,
+        pointRadius:4
+      }]
+    },
+    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+  });
+
+  // Gráfico Clientes por Tipo de Processo
+  new Chart(document.getElementById('processoChart').getContext('2d'),{
     type:'bar',
     data:{
       labels:Object.keys(processoCount),
       datasets:[{
         label:'Clientes',
         data:Object.values(processoCount),
-        backgroundColor:'#3498db'
+        backgroundColor:'#2ecc71',
+        borderRadius:6
       }]
     },
-    options:{ responsive:true, plugins:{legend:{display:false}} }
-  });
-
-  // Chart Clientes por Status
-  const statusCtx=document.getElementById('statusChart').getContext('2d');
-  new Chart(statusCtx,{
-    type:'doughnut',
-    data:{
-      labels:Object.keys(statusCount).map(s=>s.replace('-',' ').toUpperCase()),
-      datasets:[{
-        data:Object.values(statusCount),
-        backgroundColor:['#3498db','#f1c40f','#9b59b6','#2ecc71']
-      }]
-    },
-    options:{ responsive:true }
+    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
   });
 }
 

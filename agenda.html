@@ -7,14 +7,62 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:Segoe UI,Roboto,Arial,sans-serif;}
 body{display:flex;height:100vh;background:#f0f2f5;}
-.sidebar{width:220px;background:#fff;border-right:1px solid #ddd;display:flex;flex-direction:column;padding:20px 10px;}
-.sidebar h2{text-align:center;margin-bottom:12px;color:#1e1e2f;}
-.sidebar button{padding:10px;border-radius:6px;border:0;background:#f8f9fa;margin:6px;cursor:pointer;}
-.main{flex:1;display:flex;flex-direction:column;}
-header{height:60px;background:#fff;border-bottom:1px solid #ddd;display:flex;align-items:center;justify-content:space-between;padding:0 20px;}
+
+/* Sidebar moderna */
+.sidebar{
+  width:80px;
+  background:#1e1e2f;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:20px 0;
+  transition:width 0.3s;
+  flex-shrink:0;
+}
+.sidebar:hover{ width:220px; }
+.sidebar .brand{
+  color:#fff;
+  font-family:'Poppins',sans-serif;
+  font-weight:600;
+  font-size:22px;
+  margin-bottom:30px;
+  cursor:pointer;
+  width:100%;
+  text-align:center;
+  white-space:nowrap;
+  overflow:hidden;
+  transition:opacity 0.3s;
+}
+.sidebar button{
+  width:100%;
+  background:transparent;
+  border:none;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  gap:15px;
+  padding:12px 20px;
+  margin:5px 0;
+  cursor:pointer;
+  border-radius:10px;
+  font-size:14px;
+  white-space:nowrap;
+  overflow:hidden;
+  transition:background 0.2s,color 0.2s;
+}
+.sidebar button:hover{ background:#2a2a40; color:#fff; }
+.sidebar button img{ width:24px; height:24px; filter: invert(1); }
+.sidebar button span{ opacity:1; transition:opacity 0.3s; }
+.sidebar:not(:hover) .brand,
+.sidebar:not(:hover) button span{ opacity:0; }
+
+/* Main */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+header{height:72px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid #ddd}
 header h1{font-size:22px;color:#1e1e2f;}
 header button{padding:8px 16px;background:#1e1e2f;color:#fff;border:none;border-radius:6px;cursor:pointer;}
 
+/* Calendar */
 .calendar{padding:20px;display:flex;flex-direction:column;gap:10px;overflow:auto;}
 .calendar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
 .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
@@ -23,6 +71,7 @@ header button{padding:8px 16px;background:#1e1e2f;color:#fff;border:none;border-
 .day-header{font-weight:bold;margin-bottom:5px;font-size:14px;}
 .event{background:#3498db;color:#fff;padding:2px 4px;margin:2px 0;border-radius:4px;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;}
 
+/* Modal */
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.35);display:none;align-items:center;justify-content:center;z-index:50;}
 .modal{background:#fff;padding:18px;border-radius:10px;min-width:320px;max-width:420px;box-shadow:0 8px 30px rgba(0,0,0,.25);}
 .modal h3{margin-bottom:12px;}
@@ -37,10 +86,14 @@ header button{padding:8px 16px;background:#1e1e2f;color:#fff;border:none;border-
 </head>
 <body>
 
+<!-- Sidebar -->
 <div class="sidebar">
-  <h2 style="cursor:pointer;" onclick="window.location.href='crm.html'">AMR ADV</h2>
-  <button onclick="window.location.href='crm.html'">CRM</button>
-  <button onclick="window.location.reload()">Agenda</button>
+  <div class="brand" onclick="window.location.href='crm.html'">AMR ADV</div>
+  <button onclick="window.location.href='crm.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/dashboard.png"><span>CRM</span></button>
+  <button onclick="window.location.reload()"><img src="https://img.icons8.com/ios-filled/50/ffffff/calendar.png"><span>Agenda</span></button>
+  <button onclick="window.location.href='relatorios.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/combo-chart.png"><span>Relatórios</span></button>
+  <button onclick="window.location.href='contatos.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/contacts.png"><span>Contatos</span></button>
+  <button><img src="https://img.icons8.com/ios-filled/50/ffffff/settings.png"><span>Configurações</span></button>
 </div>
 
 <div class="main">
@@ -136,7 +189,6 @@ function renderCalendar(){
   const lastDate = new Date(year,month+1,0).getDate();
   monthYear.innerText = currentDate.toLocaleString('pt-BR',{month:'long',year:'numeric'});
   calendarGrid.innerHTML = '';
-  // dias da semana
   const weekDays = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
   weekDays.forEach(d=>{ const wd = document.createElement('div'); wd.innerText=d; wd.style.fontWeight='bold'; calendarGrid.appendChild(wd); });
   for(let i=0;i<firstDay;i++){ const empty=document.createElement('div'); calendarGrid.appendChild(empty);}

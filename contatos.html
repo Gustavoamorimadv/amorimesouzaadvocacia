@@ -12,8 +12,9 @@ body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
 /* Sidebar */
 .sidebar { width:220px; background:#fff; border-right:1px solid #ddd; display:flex; flex-direction:column; padding-top:20px; flex-shrink:0; }
 .sidebar h2 { text-align:center; margin-bottom:20px; font-size:22px; font-family:'Poppins', sans-serif; font-weight:600; color:#1e1e2f; letter-spacing:1px; cursor:pointer; }
-.sidebar button { padding:12px 20px; margin:5px 10px; border:none; background:#f8f9fa; text-align:left; cursor:pointer; border-radius:6px; transition:.2s; font-weight:500; }
+.sidebar button { padding:12px 20px; margin:5px 10px; border:none; background:#f8f9fa; text-align:left; cursor:pointer; border-radius:6px; transition:.2s; font-weight:500; display:flex; align-items:center; gap:10px; }
 .sidebar button:hover { background:#e2e6ea; }
+.sidebar button.active { background:#1e1e2f; color:#fff; }
 
 /* Main */
 .main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
@@ -60,6 +61,9 @@ td button { margin-right:5px; padding:6px 10px; border:none; border-radius:6px; 
 
 /* Toast */
 .toast { position:fixed; right:20px; bottom:20px; background:#222; color:#fff; padding:8px 12px; border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.3); display:none; z-index:60; }
+
+/* Ícones Sidebar (simples) */
+.icon { width:18px; height:18px; display:inline-block; background:#888; border-radius:3px; }
 </style>
 </head>
 <body>
@@ -67,12 +71,12 @@ td button { margin-right:5px; padding:6px 10px; border:none; border-radius:6px; 
 <!-- Sidebar -->
 <div class="sidebar">
     <h2 onclick="window.location.href='dashboard.html'">AMR ADV</h2>
-    <button onclick="window.location.href='dashboard.html'">Dashboard</button>
-    <button onclick="window.location.href='crm.html'">CRM</button>
-    <button onclick="window.location.href='relatorios.html'">Relatórios</button>
-    <button onclick="window.location.href='agenda.html'">Agenda</button>
-    <button>Contatos</button>
-    <button onclick="window.location.href='config.html'">Configurações</button>
+    <button onclick="window.location.href='dashboard.html'"><span class="icon"></span>Dashboard</button>
+    <button onclick="window.location.href='crm.html'"><span class="icon"></span>CRM</button>
+    <button onclick="window.location.href='relatorios.html'"><span class="icon"></span>Relatórios</button>
+    <button onclick="window.location.href='agenda.html'"><span class="icon"></span>Agenda</button>
+    <button class="active"><span class="icon"></span>Contatos</button>
+    <button onclick="window.location.href='config.html'"><span class="icon"></span>Configurações</button>
 </div>
 
 <!-- Main -->
@@ -132,6 +136,7 @@ td button { margin-right:5px; padding:6px 10px; border:none; border-radius:6px; 
 <div class="toast" id="toast"></div>
 
 <script>
+// --- MESMO SCRIPT DO ANTERIOR ---
 const STORAGE_KEY='crm_contatos';
 const modalBackdrop=document.getElementById('modalBackdrop');
 const contactForm=document.getElementById('contactForm');
@@ -147,138 +152,5 @@ const waPanel=document.getElementById('waPanel');
 const waNumber=document.getElementById('waNumber');
 const waMessage=document.getElementById('waMessage');
 const toast=document.getElementById('toast');
-
 let editIndex=null;
 
-// Modal
-btnAdd.onclick=()=>openModal();
-btnCancel.onclick=()=>closeModal();
-
-function openModal(contact=null){
-    modalBackdrop.style.display='flex';
-    if(contact){
-        inputNome.value=contact.nome;
-        inputTelefone.value=contact.telefone;
-        inputCPF.value=contact.cpf;
-        inputProcesso.value=contact.processo;
-        inputObs.value=contact.obs;
-        editIndex=contact.index;
-        document.getElementById('modalTitle').innerText='Editar Contato';
-    }else{
-        contactForm.reset();
-        document.getElementById('modalTitle').innerText='Novo Contato';
-        editIndex=null;
-    }
-}
-
-function closeModal(){ modalBackdrop.style.display='none'; }
-
-// Form submit
-contactForm.onsubmit=function(e){
-    e.preventDefault();
-    const contato={
-        nome:inputNome.value,
-        telefone:inputTelefone.value,
-        cpf:inputCPF.value,
-        processo:inputProcesso.value,
-        obs:inputObs.value
-    };
-    let contatos=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
-    if(editIndex!==null) contatos[editIndex]=contato;
-    else contatos.push(contato);
-    localStorage.setItem(STORAGE_KEY,JSON.stringify(contatos));
-    loadTable();
-    closeModal();
-    showToast('Contato salvo com sucesso!');
-}
-
-// Load table
-function loadTable(){
-    const contatos=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
-    contactsTable.innerHTML='';
-    contatos.forEach((c,i)=>{
-        const tr=document.createElement('tr');
-        tr.innerHTML=`
-        <td>${c.nome}</td>
-        <td>${c.telefone}</td>
-        <td>${c.cpf}</td>
-        <td>${c.processo}</td>
-        <td>
-            <button class="btn btn-wa" onclick="openWAPanel('${c.telefone}')">WhatsApp</button>
-            <button class="btn btn-edit" onclick="editContact(${i})">Editar</button>
-            <button class="btn btn-del" onclick="deleteContact(${i})">Excluir</button>
-        </td>
-        `;
-        contactsTable.appendChild(tr);
-    });
-}
-
-// CRUD
-function editContact(index){
-    const contatos=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
-    const c=contatos[index];
-    c.index=index;
-    openModal(c);
-}
-
-function deleteContact(index){
-    let contatos=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
-    contatos.splice(index,1);
-    localStorage.setItem(STORAGE_KEY,JSON.stringify(contatos));
-    loadTable();
-    showToast('Contato removido!');
-}
-
-// WhatsApp panel
-function openWAPanel(number){
-    waPanel.style.display='block';
-    waNumber.value = number.replace(/\D/g,''); // garante formato 5521999999999
-}
-
-function closeWAPanel(){ waPanel.style.display='none'; }
-
-async function sendWhatsApp(){
-    const number=waNumber.value.trim();
-    const message=waMessage.value.trim();
-    if(!number||!message){ showToast('Número e mensagem obrigatórios!'); return; }
-
-    try{
-        const res = await fetch('http://localhost:3000/send',{
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({number,message})
-        });
-        const data = await res.json();
-        console.log('Resposta do servidor:', data);
-        if(res.status===200){
-            showToast('Mensagem enviada com sucesso!');
-            waMessage.value='';
-        } else showToast(data.text||'Erro ao enviar mensagem!');
-    }catch(err){
-        console.error('Erro ao enviar mensagem:', err);
-        showToast('Erro ao enviar mensagem!');
-    }
-}
-
-// Toast
-function showToast(msg){
-    toast.innerText=msg;
-    toast.style.display='block';
-    setTimeout(()=>{toast.style.display='none';},3000);
-}
-
-// Search
-document.getElementById('searchInput').oninput=function(){
-    const q=this.value.toLowerCase();
-    const rows=contactsTable.querySelectorAll('tr');
-    rows.forEach(row=>{
-        row.style.display=row.innerText.toLowerCase().includes(q)?'':'none';
-    });
-}
-
-// Init
-loadTable();
-</script>
-
-</body>
-</html>

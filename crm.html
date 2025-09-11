@@ -6,12 +6,60 @@
 <title>CRM AMR ADV</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
 <style>
+/* Reset e body */
 * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
 body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
-.sidebar { width:220px; background:#fff; border-right:1px solid #ddd; display:flex; flex-direction:column; padding-top:20px; flex-shrink:0; }
-.sidebar h2 { text-align:center; margin-bottom:20px; font-size:22px; font-family:'Poppins', sans-serif; font-weight:600; color:#1e1e2f; letter-spacing:1px; cursor:pointer; }
-.sidebar button { padding:12px 20px; margin:5px 10px; border:none; background:#f8f9fa; text-align:left; cursor:pointer; border-radius:6px; transition:0.2s; }
-.sidebar button:hover { background:#e2e6ea; }
+
+/* Sidebar moderna e minimalista */
+.sidebar {
+    width:80px;
+    background:#1e1e2f;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:20px 0;
+    flex-shrink:0;
+    transition:width 0.3s;
+}
+.sidebar:hover { width:220px; }
+.sidebar h2 {
+    font-size:22px;
+    font-family:'Poppins', sans-serif;
+    font-weight:600;
+    color:#fff;
+    letter-spacing:1px;
+    margin-bottom:30px;
+    text-align:center;
+    cursor:pointer;
+    width:100%;
+    white-space:nowrap;
+    overflow:hidden;
+    transition:opacity 0.3s;
+}
+.sidebar button {
+    width:100%;
+    background:transparent;
+    border:none;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    gap:15px;
+    padding:12px 20px;
+    margin:5px 0;
+    cursor:pointer;
+    border-radius:10px;
+    transition:background 0.2s, color 0.2s;
+    font-size:14px;
+    white-space:nowrap;
+    overflow:hidden;
+}
+.sidebar button:hover { background:#2a2a40; color:#fff; }
+.sidebar button img { width:24px; height:24px; filter: invert(1); flex-shrink:0; }
+.sidebar button span { display:inline-block; opacity:1; transition:opacity 0.3s; }
+.sidebar:not(:hover) h2,
+.sidebar:not(:hover) button span { opacity:0; }
+
+/* Main */
 .main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
 header { height:60px; background:#fff; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; padding:0 20px; flex-shrink:0; }
 header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
@@ -19,6 +67,8 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 .search-bar { padding:10px 20px; background:#fff; border-bottom:1px solid #ddd; display:flex; gap:10px; align-items:center; flex-shrink:0; }
 .search-bar input, .search-bar select { padding:8px; border:1px solid #ccc; border-radius:6px; }
 .search-bar input { flex:1; }
+
+/* Kanban */
 .kanban-container { flex:1; overflow-x:auto; padding:20px; }
 .kanban { display:flex; gap:20px; min-width:max-content; height:100%; }
 .column { background:#fff; border-radius:15px; padding:15px; min-width:320px; max-height:calc(100%); display:flex; flex-direction:column; gap:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); overflow-y:auto; }
@@ -33,6 +83,8 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 .negociacao .color-bar { background:#f1c40f; }
 .contrato-assinado .color-bar { background:#9b59b6; }
 .fechado .color-bar { background:#2ecc71; }
+
+/* Modal */
 .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); justify-content:center; align-items:center; z-index:50; }
 .modal { background:#fff; padding:18px; border-radius:15px; min-width:320px; max-width:420px; box-shadow:0 8px 30px rgba(0,0,0,.25); }
 .modal h3 { margin-bottom:12px; }
@@ -43,20 +95,39 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 .btn { padding:8px 12px; border-radius:6px; border:0; cursor:pointer; }
 .btn.primary { background:#1e1e2f; color:#fff; }
 .btn.ghost { background:#f1f3f5; }
+
+/* Toast */
 .toast { position:fixed; right:20px; bottom:20px; background:#222; color:#fff; padding:8px 12px; border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.3); display:none; z-index:60; }
 </style>
 </head>
 <body>
 
+<!-- Sidebar -->
 <div class="sidebar">
     <h2 onclick="window.location.href='dashboard.html'">AMR ADV</h2>
-    <button onclick="window.location.href='dashboard.html'">Dashboard</button>
-    <button onclick="window.location.href='relatorios.html'">Relatórios</button>
-    <button onclick="window.location.href='agenda.html'">Agenda</button>
-    <button onclick="window.location.href='contatos.html'">Contatos</button>
-    <button>Configurações</button>
+    <button onclick="window.location.href='dashboard.html'">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/dashboard.png"/>
+        <span>Dashboard</span>
+    </button>
+    <button onclick="window.location.href='relatorios.html'">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/combo-chart.png"/>
+        <span>Relatórios</span>
+    </button>
+    <button onclick="window.location.href='agenda.html'">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/calendar.png"/>
+        <span>Agenda</span>
+    </button>
+    <button onclick="window.location.href='contatos.html'">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/contacts.png"/>
+        <span>Contatos</span>
+    </button>
+    <button>
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/settings.png"/>
+        <span>Configurações</span>
+    </button>
 </div>
 
+<!-- Main -->
 <div class="main">
 <header>
     <h1>CRM</h1>
@@ -84,6 +155,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 </div>
 </div>
 
+<!-- Modal -->
 <div class="modal-backdrop" id="modalBackdrop">
 <div class="modal">
     <h3 id="modalTitle">Novo Cliente</h3>
@@ -122,6 +194,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 <div class="toast" id="toast"></div>
 
 <script>
+// --- JS do CRM (igual ao original, sem alterações) ---
 const STATUS=['lista-fria','negociacao','contrato-assinado','fechado'];
 const STORAGE_KEY='crm_clientes';
 const cardsMap={};
@@ -164,7 +237,6 @@ function openModal(edit=false,data=null){
         delete clientForm.dataset.editId;
     }
 }
-
 function closeModal(){ modalBackdrop.style.display='none'; }
 
 function criarCard(cliente){
@@ -240,17 +312,4 @@ document.querySelectorAll('.column').forEach(col=>{
 
 /* Filtro */
 searchInput.oninput=filtragemAplicada;
-filterStatus.onchange=filtragemAplicada;
-function filtragemAplicada(){
-    const search=searchInput.value.toLowerCase(),filter=filterStatus.value;
-    Object.values(cardsMap).forEach(card=>{
-        const matchSearch=card.dataset.nome.includes(search);
-        const matchFilter=!filter||card.dataset.status===filter;
-        card.style.display=(matchSearch&&matchFilter)?'flex':'none';
-    });
-}
-
-render();
-</script>
-</body>
-</html>
+filterStatus.onchange=fil

@@ -7,9 +7,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; } /* sem scroll horizontal */
+body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
 .sidebar { width:220px; background:#fff; border-right:1px solid #ddd; display:flex; flex-direction:column; padding-top:20px; flex-shrink:0; }
-.sidebar h2 { text-align:center; margin-bottom:20px; font-size:22px; font-family:'Poppins', sans-serif; font-weight:600; color:#1e1e2f; letter-spacing:1px; }
+.sidebar h2 { text-align:center; margin-bottom:20px; font-size:22px; font-family:'Poppins', sans-serif; font-weight:600; color:#1e1e2f; letter-spacing:1px; cursor:pointer; }
 .sidebar button { padding:12px 20px; margin:5px 10px; border:none; background:#f8f9fa; text-align:left; cursor:pointer; border-radius:6px; transition:0.2s; }
 .sidebar button:hover { background:#e2e6ea; }
 .main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
@@ -19,11 +19,11 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 .search-bar { padding:10px 20px; background:#fff; border-bottom:1px solid #ddd; display:flex; gap:10px; align-items:center; flex-shrink:0; }
 .search-bar input, .search-bar select { padding:8px; border:1px solid #ccc; border-radius:6px; }
 .search-bar input { flex:1; }
-.kanban-container { flex:1; overflow-x:auto; padding:20px; } /* rolagem horizontal do kanban */
-.kanban { display:flex; gap:20px; min-width:max-content; height:100%; } /* colunas lado a lado */
+.kanban-container { flex:1; overflow-x:auto; padding:20px; }
+.kanban { display:flex; gap:20px; min-width:max-content; height:100%; }
 .column { background:#fff; border-radius:15px; padding:15px; min-width:320px; max-height:calc(100%); display:flex; flex-direction:column; gap:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); overflow-y:auto; }
 .column h2 { margin-bottom:10px; font-size:18px; color:#1e1e2f; text-transform:uppercase; }
-.card { display:flex; background:#fff; border-radius:15px; box-shadow:0 12px 30px rgba(0,0,0,0.12); cursor:pointer; overflow:hidden; transition:0.3s; min-height:150px; flex-direction:row; }
+.card { display:flex; background:#fff; border-radius:15px; box-shadow:0 12px 30px rgba(0,0,0,0.12); cursor:pointer; overflow:hidden; transition:0.3s; min-height:160px; flex-direction:row; }
 .card:hover { transform:scale(1.03); }
 .card .color-bar { width:8px; height:100%; border-radius:15px 0 0 15px; }
 .card-content { padding:20px; flex:1; display:flex; flex-direction:column; justify-content:center; }
@@ -49,7 +49,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 <body>
 
 <div class="sidebar">
-    <h2 style="cursor:pointer;" onclick="window.location.href='crm.html'">AMR ADV</h2>
+    <h2 onclick="window.location.href='crm.html'">AMR ADV</h2>
     <button onclick="window.location.href='relatorios.html'">Relatórios</button>
     <button onclick="window.location.href='agenda.html'">Agenda</button>
     <button onclick="window.location.href='contatos.html'">Contatos</button>
@@ -91,6 +91,14 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
         <div class="row"><label>CPF</label><input id="inputCPF" placeholder="000.000.000-00" /></div>
         <div class="row"><label>Números</label><input id="inputNumeros" placeholder="Ex: (21) 99999-9999" /></div>
         <div class="row"><label>Número do Processo</label><input id="inputProcesso" placeholder="0000000-00.0000.0.00.0000" /></div>
+        <div class="row"><label>Classe Processual</label>
+            <select id="inputClasse">
+                <option value="Busca e Apreensão">Busca e Apreensão</option>
+                <option value="Execução de Título">Execução de Título</option>
+                <option value="Processo Comum Cível">Processo Comum Cível</option>
+                <option value="Outros">Outros</option>
+            </select>
+        </div>
         <div class="row"><label>Valor da Causa</label><input id="inputValor" type="number" placeholder="Ex: 10000" /></div>
         <div class="row"><label>Observação</label><textarea id="inputObs" maxlength="300"></textarea></div>
         <div class="row">
@@ -124,6 +132,7 @@ const inputObs=document.getElementById('inputObs');
 const inputStatus=document.getElementById('inputStatus');
 const inputNumeros=document.getElementById('inputNumeros');
 const inputProcesso=document.getElementById('inputProcesso');
+const inputClasse=document.getElementById('inputClasse');
 const inputValor=document.getElementById('inputValor');
 const btnAdd=document.getElementById('btnAdd');
 const btnCancel=document.getElementById('btnCancel');
@@ -145,11 +154,12 @@ function openModal(edit=false,data=null){
         inputStatus.value=data.status;
         inputNumeros.value=data.numeros||"";
         inputProcesso.value=data.processo||"";
+        inputClasse.value=data.classe||"Outros";
         inputValor.value=data.valor||"";
         clientForm.dataset.editId=data.id;
     }else{
         inputNome.value=""; inputCPF.value=""; inputObs.value=""; inputStatus.value="lista-fria";
-        inputNumeros.value=""; inputProcesso.value=""; inputValor.value="";
+        inputNumeros.value=""; inputProcesso.value=""; inputClasse.value="Outros"; inputValor.value="";
         delete clientForm.dataset.editId;
     }
 }
@@ -168,6 +178,7 @@ function criarCard(cliente){
         <div class="card-content">
             <h3>${cliente.nome}</h3>
             <p>CPF: ${cliente.cpf||'-'}</p>
+            <p>Classe: ${cliente.classe||'-'}</p>
             <p>Processo: ${cliente.processo||'-'}</p>
             <p>Valor: R$ ${cliente.valor||0}</p>
         </div>`;
@@ -192,7 +203,7 @@ clientForm.onsubmit=function(e){
         nome, cpf:inputCPF.value.trim(),
         obs:inputObs.value.trim().substring(0,300),
         status:inputStatus.value, numeros:inputNumeros.value,
-        processo:inputProcesso.value, valor:inputValor.value
+        processo:inputProcesso.value, classe:inputClasse.value, valor:inputValor.value
     };
     let clientes=getClientes();
     if(clientForm.dataset.editId){
@@ -208,13 +219,6 @@ clientForm.onsubmit=function(e){
 
 btnAdd.onclick=()=>openModal();
 btnCancel.onclick=()=>closeModal();
-
-function deleteCliente(id){
-    if(confirm("Deseja excluir este cliente?")){
-        saveClientes(getClientes().filter(c=>c.id!=id));
-        render(); showToast("Cliente excluído");
-    }
-}
 
 /* Drag & Drop */
 let draggedCard=null;

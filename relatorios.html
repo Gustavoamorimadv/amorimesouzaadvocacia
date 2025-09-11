@@ -7,73 +7,92 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-:root {
-  --bg:#f7f8fa; --card:#ffffff; --accent:#1e1e2f; --muted:#6b7280; --border:#e6e9ee;
-}
-*{box-sizing:border-box;margin:0;padding:0;font-family:Inter, "Segoe UI", Roboto, sans-serif}
-body{background:var(--bg);min-height:100vh;display:flex;gap:20px}
+/* Reset e body */
+* { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+body { display:flex; background:#f0f2f5; min-height:100vh; overflow:hidden; }
 
-/* Sidebar */
-.sidebar{
-  width:80px;
-  background:var(--card);
-  border-right:1px solid rgba(0,0,0,.04);
-  padding:20px 0;
-  flex-shrink:0;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  transition:width 0.3s;
+/* Sidebar moderna e minimalista */
+.sidebar {
+    width:80px;
+    background:#1e1e2f;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:20px 0;
+    flex-shrink:0;
+    transition:width 0.3s;
 }
-.sidebar:hover{width:220px;}
-.sidebar .brand{
-  font-family:'Poppins',sans-serif;font-weight:600;color:var(--accent);
-  font-size:18px;cursor:pointer;margin-bottom:20px;width:100%;text-align:center;
-  white-space:nowrap;overflow:hidden;transition:opacity 0.3s;
+.sidebar:hover { width:220px; }
+.sidebar h2, .sidebar .brand {
+    font-size:22px;
+    font-family:'Poppins', sans-serif;
+    font-weight:600;
+    color:#fff;
+    letter-spacing:1px;
+    margin-bottom:30px;
+    text-align:center;
+    cursor:pointer;
+    width:100%;
+    white-space:nowrap;
+    overflow:hidden;
+    transition:opacity 0.3s;
 }
-.sidebar button{
-  width:100%;border:none;background:transparent;color:var(--muted);
-  display:flex;align-items:center;gap:12px;padding:10px 20px;margin:5px 0;
-  cursor:pointer;border-radius:8px;font-size:14px;overflow:hidden;white-space:nowrap;
-  transition:background 0.2s,color 0.2s;
+.sidebar button {
+    width:100%;
+    background:transparent;
+    border:none;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    gap:15px;
+    padding:12px 20px;
+    margin:5px 0;
+    cursor:pointer;
+    border-radius:10px;
+    transition:background 0.2s, color 0.2s;
+    font-size:14px;
+    white-space:nowrap;
+    overflow:hidden;
 }
-.sidebar button:hover{background:#f5f5f5;color:var(--accent);}
-.sidebar button span{opacity:1;transition:opacity 0.3s;}
+.sidebar button:hover { background:#2a2a40; color:#fff; }
+.sidebar button img { width:24px; height:24px; filter: invert(1); flex-shrink:0; }
+.sidebar button span { display:inline-block; opacity:1; transition:opacity 0.3s; }
+.sidebar:not(:hover) h2,
 .sidebar:not(:hover) .brand,
-.sidebar:not(:hover) button span{opacity:0;}
+.sidebar:not(:hover) button span { opacity:0; }
 
 /* Main */
-.main{flex:1;display:flex;flex-direction:column;min-height:100vh;}
-header{height:72px;background:var(--card);display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid rgba(0,0,0,.04);}
-header h1{font-family:'Poppins',sans-serif;color:var(--accent);font-size:20px}
-.btn{padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--accent);cursor:pointer}
-.btn:hover{background:#f9f9f9}
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+header{height:72px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid #ddd}
+header h1{font-family:'Poppins',sans-serif;color:#1e1e2f;font-size:20px}
+.btn{padding:8px 12px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#1e1e2f;cursor:pointer}
+.btn:hover{background:#f5f5f5}
 .content{padding:20px;overflow:auto}
 
 /* Form */
-.card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 8px 30px rgba(16,24,40,0.04);margin-bottom:18px}
+.card{background:#fff;padding:18px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.04);margin-bottom:18px}
 form.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;align-items:end}
-form input, form select{padding:10px;border-radius:8px;border:1px solid var(--border);background:transparent}
+form input, form select{padding:10px;border-radius:8px;border:1px solid #ddd;background:transparent}
 form .full{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px}
 
 /* Table */
 .table-wrap{overflow:auto}
-table{width:100%;border-collapse:collapse;background:var(--card);border-radius:10px;overflow:hidden;box-shadow:0 8px 24px rgba(16,24,40,0.04)}
-thead th{padding:12px;text-align:left;font-weight:600;color:var(--muted);border-bottom:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.04)}
+thead th{padding:12px;text-align:left;font-weight:600;color:#6b7280;border-bottom:1px solid #e6e9ee}
 tbody td{padding:12px;border-bottom:1px solid #f3f4f6;color:#333;vertical-align:middle}
-.muted{color:var(--muted);font-size:13px}
+.muted{color:#6b7280;font-size:13px}
 .row-actions{display:flex;gap:8px;align-items:center;justify-content:flex-end}
 
 /* Icon Buttons */
-.icon-btn{width:32px;height:32px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);background:#fff;cursor:pointer}
+.icon-btn{width:32px;height:32px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #ddd;background:#fff;cursor:pointer}
 .icon-btn:hover{background:#f5f5f5}
-.icon-btn svg{width:16px;height:16px;stroke:var(--accent)}
+.icon-btn svg{width:16px;height:16px;stroke:#1e1e2f}
 
 /* Chart */
-#chartBox{margin-top:18px;height:360px;background:var(--card);padding:16px;border-radius:12px;box-shadow:0 8px 30px rgba(16,24,40,0.04);display:flex;flex-direction:column}
+#chartBox{margin-top:18px;height:360px;background:#fff;padding:16px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.04);display:flex;flex-direction:column}
 #pagamentosChart{flex:1}
 .totals {display:flex;gap:16px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
-.total-box{background:#fafafa;padding:10px 12px;border-radius:10px;border:1px solid var(--border);font-weight:600;color:var(--accent)}
+.total-box{background:#fafafa;padding:10px 12px;border-radius:10px;border:1px solid #e6e9ee;font-weight:600;color:#1e1e2f}
 
 /* Toast */
 .toast{position:fixed;right:22px;bottom:22px;background:#111;color:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.25);display:none;z-index:9999}
@@ -81,71 +100,166 @@ tbody td{padding:12px;border-bottom:1px solid #f3f4f6;color:#333;vertical-align:
 </head>
 <body>
 
-<aside class="sidebar">
-  <div class="brand" onclick="location.href='crm.html'">AMR ADV</div>
-  <button onclick="location.href='crm.html'"><span>CRM</span></button>
-  <button onclick="location.href='relatorios.html'"><span>Relatórios</span></button>
-  <button onclick="location.href='agenda.html'"><span>Agenda</span></button>
-  <button onclick="location.href='contatos.html'"><span>Contatos</span></button>
-</aside>
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="brand" onclick="location.href='crm.html'">AMR ADV</div>
+    <button onclick="location.href='crm.html'">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/dashboard.png"/>
+        <span>CRM</span>
+    </button>
+    <button onclick="location.href='relatorios.html'">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/combo-chart.png"/>
+        <span>Relatórios</span>
+    </button>
+    <button onclick="location.href='agenda.html'">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/calendar.png"/>
+        <span>Agenda</span>
+    </button>
+    <button onclick="location.href='contatos.html'">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/contacts.png"/>
+        <span>Contatos</span>
+    </button>
+    <button>
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/settings.png"/>
+        <span>Configurações</span>
+    </button>
+</div>
 
 <main class="main">
 <header>
-<h1>Relatórios Financeiros</h1>
-<button class="btn" id="btnNovo">Novo Cliente</button>
+    <h1>Relatórios Financeiros</h1>
+    <button class="btn" id="btnNovo">Novo Cliente</button>
 </header>
-
 <div class="content">
-<!-- Formulário e tabela existentes permanecem exatamente como estão -->
-<section class="card" id="formCard">
-<form id="clienteForm" class="grid" autocomplete="off">
-<input type="text" id="nomeCliente" placeholder="Nome do cliente" required>
-<input type="number" id="honorarios" placeholder="Honorários (R$)" min="0" step="0.01" required>
-<input type="number" id="valorPago" placeholder="Valor Pago (R$)" min="0" step="0.01" required>
-<input type="number" id="valorReceber" placeholder="Valor a Receber (R$)" min="0" step="0.01" required>
-<select id="statusCliente">
-<option value="Não iniciado">Não iniciado</option>
-<option value="Em andamento">Em andamento</option>
-<option value="Concluído">Concluído</option>
-</select>
-<div class="full">
-<button type="button" class="btn" id="btnCancelar" style="display:none">Cancelar</button>
-<button type="submit" class="btn" id="btnSalvar">Adicionar</button>
-</div>
-</form>
-</section>
-
-<section class="card table-wrap">
-<table>
-<thead>
-<tr>
-<th>Cliente</th>
-<th>Honorários</th>
-<th>Pago</th>
-<th>A Receber</th>
-<th>Status</th>
-<th style="text-align:right">Ações</th>
-</tr>
-</thead>
-<tbody id="clientesTable"></tbody>
-</table>
-</section>
-
-<section id="chartBox" class="card">
-<div class="totals">
-<div class="total-box" id="totalReceberBox">Total a Receber: R$ 0,00</div>
-<div class="total-box" id="totalHonorariosBox">Total Honorários: R$ 0,00</div>
-</div>
-<canvas id="pagamentosChart"></canvas>
-</section>
+    <section class="card" id="formCard">
+        <form id="clienteForm" class="grid" autocomplete="off">
+            <input type="text" id="nomeCliente" placeholder="Nome do cliente" required>
+            <input type="number" id="honorarios" placeholder="Honorários (R$)" min="0" step="0.01" required>
+            <input type="number" id="valorPago" placeholder="Valor Pago (R$)" min="0" step="0.01" required>
+            <input type="number" id="valorReceber" placeholder="Valor a Receber (R$)" min="0" step="0.01" required>
+            <select id="statusCliente">
+                <option value="Não iniciado">Não iniciado</option>
+                <option value="Em andamento">Em andamento</option>
+                <option value="Concluído">Concluído</option>
+            </select>
+            <div class="full">
+                <button type="button" class="btn" id="btnCancelar" style="display:none">Cancelar</button>
+                <button type="submit" class="btn" id="btnSalvar">Adicionar</button>
+            </div>
+        </form>
+    </section>
+    <section class="card table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Honorários</th>
+                    <th>Pago</th>
+                    <th>A Receber</th>
+                    <th>Status</th>
+                    <th style="text-align:right">Ações</th>
+                </tr>
+            </thead>
+            <tbody id="clientesTable"></tbody>
+        </table>
+    </section>
+    <section id="chartBox" class="card">
+        <div class="totals">
+            <div class="total-box" id="totalReceberBox">Total a Receber: R$ 0,00</div>
+            <div class="total-box" id="totalHonorariosBox">Total Honorários: R$ 0,00</div>
+        </div>
+        <canvas id="pagamentosChart"></canvas>
+    </section>
 </div>
 </main>
 
 <div class="toast" id="toast"></div>
 
-<!-- Script existente permanece igual -->
 <script>
-// Seu script de CRUD e gráficos permanece exatamente como está
+(() => {
+const STORAGE_KEY = 'rel_clientes_v1';
+let clientes = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+const form = document.getElementById('clienteForm');
+const nomeEl = document.getElementById('nomeCliente');
+const honorEl = document.getElementById('honorarios');
+const pagoEl = document.getElementById('valorPago');
+const recvEl = document.getElementById('valorReceber');
+const statusEl = document.getElementById('statusCliente');
+const tabela = document.getElementById('clientesTable');
+const toastEl = document.getElementById('toast');
+const btnSalvar = document.getElementById('btnSalvar');
+const btnCancelar = document.getElementById('btnCancelar');
+const btnNovo = document.getElementById('btnNovo');
+const formCard = document.getElementById('formCard');
+const totalReceberBox = document.getElementById('totalReceberBox');
+const totalHonorariosBox = document.getElementById('totalHonorariosBox');
+const ctx = document.getElementById('pagamentosChart').getContext('2d');
+const chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: [],
+        datasets: [
+            { label: 'Honorários', data: [], backgroundColor: 'rgba(0,0,0,0.7)' },
+            { label: 'Valor Pago', data: [], backgroundColor: 'rgba(0,0,0,0.4)' },
+            { label: 'A Receber', data: [], backgroundColor: 'rgba(0,0,0,0.2)' }
+        ]
+    },
+    options: {
+        maintainAspectRatio: false,
+        responsive: true,
+        plugins: { legend: { position: 'top' } },
+        scales: { y: { beginAtZero: true, ticks: { callback: v => 'R$ ' + Number(v).toLocaleString('pt-BR') } } }
+    }
+});
+function showToast(msg){ toastEl.textContent=msg; toastEl.style.display='block'; clearTimeout(toastEl._t); toastEl._t=setTimeout(()=> toastEl.style.display='none',2500); }
+function saveAll(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(clientes)); }
+function fmt(v){ return 'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2}); }
+function renderTable(){
+    tabela.innerHTML='';
+    if(!clientes.length){ tabela.innerHTML='<tr><td colspan="6" class="muted" style="text-align:center;padding:18px">Nenhum cliente cadastrado</td></tr>'; return; }
+    clientes.forEach(c=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${c.nome}</strong></td>
+            <td>${fmt(c.honorarios)}</td>
+            <td>${fmt(c.valorPago)}</td>
+            <td>${fmt(c.valorReceber)}</td>
+            <td class="muted">${c.status}</td>
+            <td style="text-align:right">
+                <button class="icon-btn" onclick="editClient('${c.id}')">✏️</button>
+                <button class="icon-btn" onclick="deleteClient('${c.id}')">🗑</button>
+            </td>`;
+        tabela.appendChild(tr);
+    });
+}
+function renderChart(){
+    chart.data.labels = clientes.map(c=>c.nome);
+    chart.data.datasets[0].data = clientes.map(c=>c.honorarios);
+    chart.data.datasets[1].data = clientes.map(c=>c.valorPago);
+    chart.data.datasets[2].data = clientes.map(c=>c.valorReceber);
+    chart.update();
+    totalReceberBox.textContent = `Total a Receber: ${fmt(clientes.reduce((t,c)=>t+c.valorReceber,0))}`;
+    totalHonorariosBox.textContent = `Total Honorários: ${fmt(clientes.reduce((t,c)=>t+c.honorarios,0))}`;
+}
+form.addEventListener('submit', e=>{
+    e.preventDefault();
+    const data = { id: form.dataset.editId || Date.now().toString(), nome: nomeEl.value.trim(),
+        honorarios: parseFloat(honorEl.value)||0,
+        valorPago: parseFloat(pagoEl.value)||0,
+        valorReceber: parseFloat(recvEl.value)||0,
+        status: statusEl.value
+    };
+    if(form.dataset.editId){ clientes = clientes.map(c=>c.id===data.id?data:c); showToast('Cliente atualizado'); }
+    else { clientes.push(data); showToast('Cliente adicionado'); }
+    saveAll(); form.reset(); delete form.dataset.editId; btnSalvar.textContent='Adicionar'; btnCancelar.style.display='none';
+    renderTable(); renderChart();
+});
+btnCancelar.onclick=()=>{ form.reset(); delete form.dataset.editId; btnSalvar.textContent='Adicionar'; btnCancelar.style.display='none'; };
+window.editClient=id=>{ const c = clientes.find(x=>x.id===id); if(!c)return; nomeEl.value=c.nome; honorEl.value=c.honorarios; pagoEl.value=c.valorPago; recvEl.value=c.valorReceber; statusEl.value=c.status; form.dataset.editId=id; btnSalvar.textContent='Atualizar'; btnCancelar.style.display='inline-block'; formCard.scrollIntoView({behavior:'smooth'}); };
+window.deleteClient=id=>{ if(!confirm('Excluir cliente?'))return; clientes=clientes.filter(c=>c.id!==id); saveAll(); renderTable(); renderChart(); showToast('Cliente excluído'); };
+btnNovo.onclick=()=>{ form.reset(); delete form.dataset.editId; btnSalvar.textContent='Adicionar'; btnCancelar.style.display='none'; formCard.scrollIntoView({behavior:'smooth'}); };
+renderTable(); renderChart();
+})();
 </script>
 
 </body>

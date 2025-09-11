@@ -6,59 +6,147 @@
   <title>Contato - Amorim & Souza Advocacia</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body { font-family: 'Roboto', sans-serif; background: #ffffff; color: #333; }
-    header { background-image: url('https://images.squarespace-cdn.com/content/v1/581c7148be6594d155f50234/1581617132961-PNOIJYH2ZYILG6JP9XRV/macroarq_arquitetura_interiores_corporativo_projeto_escritorio_advocacia_hall_entrada_piso_elevado_carpete_madeira_cumaru_divisoria_serralheria_vidro_funcional_clean.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat; color: white; padding: 120px 20px 80px; text-align: center; position: relative; }
-    header::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3); z-index: 1; }
+    /* Reset e body */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { display:flex; font-family: 'Roboto', sans-serif; background:#f0f2f5; height:100vh; overflow:hidden; }
+
+    /* Sidebar moderna e minimalista */
+    .sidebar {
+        width:80px;
+        background:#1e1e2f;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        padding:20px 0;
+        flex-shrink:0;
+        transition:width 0.3s;
+    }
+    .sidebar:hover { width:220px; }
+    .sidebar h2 {
+        font-size:22px;
+        font-family:'Montserrat', sans-serif;
+        font-weight:700;
+        color:#fff;
+        letter-spacing:1px;
+        margin-bottom:30px;
+        text-align:center;
+        cursor:pointer;
+        width:100%;
+        white-space:nowrap;
+        overflow:hidden;
+        transition:opacity 0.3s;
+    }
+    .sidebar button {
+        width:100%;
+        background:transparent;
+        border:none;
+        color:#fff;
+        display:flex;
+        align-items:center;
+        gap:15px;
+        padding:12px 20px;
+        margin:5px 0;
+        cursor:pointer;
+        border-radius:10px;
+        transition:background 0.2s, color 0.2s;
+        font-size:14px;
+        white-space:nowrap;
+        overflow:hidden;
+    }
+    .sidebar button:hover { background:#2a2a40; color:#fff; }
+    .sidebar button img { width:24px; height:24px; filter: invert(1); flex-shrink:0; }
+    .sidebar button span { display:inline-block; opacity:1; transition:opacity 0.3s; }
+    .sidebar:not(:hover) h2,
+    .sidebar:not(:hover) button span { opacity:0; }
+
+    /* Main */
+    .main { flex:1; overflow-y:auto; display:flex; flex-direction:column; }
+
+    /* Header da página */
+    header {
+        background-image: url('https://images.squarespace-cdn.com/content/v1/581c7148be6594d155f50234/1581617132961-PNOIJYH2ZYILG6JP9XRV/macroarq_arquitetura_interiores_corporativo_projeto_escritorio_advocacia_hall_entrada_piso_elevado_carpete_madeira_cumaru_divisoria_serralheria_vidro_funcional_clean.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        color: white;
+        padding: 120px 20px 80px;
+        text-align: center;
+        position: relative;
+    }
+    header::after {
+        content: "";
+        position: absolute;
+        top: 0; left:0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.3);
+        z-index: 1;
+    }
     header h1, header p { position: relative; z-index: 2; }
-    header h1 a { color: white; text-decoration: none; font-size: 2.8em; font-family: 'Montserrat', sans-serif; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; transition: color 0.3s, transform 0.3s; display: inline-flex; align-items: center; gap: 10px; }
-    header h1 a:hover { color: #ccc; transform: scale(1.05); }
-    header img { width: 45px; }
-    header p { margin-top: 12px; font-size: 18px; }
-    nav { background: #002244; text-align: center; position: sticky; top: 0; z-index: 999; }
-    nav a { display: inline-block; padding: 15px 20px; color: white; text-decoration: none; transition: background 0.3s; }
-    nav a:hover { background: #004080; }
-    section { padding: 80px 20px; text-align: center; }
-    h2 { font-size: 32px; color: #003366; margin-bottom: 30px; }
-    form { max-width: 600px; margin: 0 auto; background: #f2f2f2; padding: 40px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    input, textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
-    button { background: #003366; color: white; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; transition: background 0.3s; }
-    button:hover { background: #0055aa; }
-    footer { background: #003366; color: white; text-align: center; padding: 50px 20px; font-size: 14px; margin-top: 40px; }
-    footer a { color: white; text-decoration: underline; }
+    header h1 a { color:white; text-decoration:none; font-size:2.8em; font-family:'Montserrat', sans-serif; font-weight:700; letter-spacing:1px; display:inline-flex; align-items:center; gap:10px; }
+    header h1 a:hover { color:#ccc; transform: scale(1.05); transition:0.3s; }
+    header img { width:45px; }
+    header p { margin-top:12px; font-size:18px; }
+
+    /* Seção de contato */
+    section { padding:80px 20px; text-align:center; }
+    h2 { font-size:32px; color:#003366; margin-bottom:30px; }
+    form { max-width:600px; margin:0 auto; background:#f2f2f2; padding:40px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
+    input, textarea { width:100%; padding:12px; margin:10px 0; border-radius:8px; border:1px solid #ccc; font-size:16px; }
+    button { background:#003366; color:white; padding:12px 20px; border:none; border-radius:8px; cursor:pointer; font-size:16px; transition:0.3s; }
+    button:hover { background:#0055aa; }
+
+    /* Footer */
+    footer { background:#003366; color:white; text-align:center; padding:50px 20px; font-size:14px; margin-top:40px; }
+    footer a { color:white; text-decoration:underline; }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>
-      <img src="https://img.icons8.com/ios-filled/50/ffffff/scales.png" alt="Balança da Justiça">
-      <a href="index.html">AMORIM & SOUZA ADVOCACIA</a>
-    </h1>
-    <p>Excelência e ética em primeiro lugar</p>
-  </header>
+  <!-- Sidebar -->
+  <div class="sidebar">
+      <h2 onclick="window.location.href='index.html'">AMR ADV</h2>
+      <button onclick="window.location.href='index.html'">
+          <img src="https://img.icons8.com/ios-filled/50/ffffff/home.png"/>
+          <span>Início</span>
+      </button>
+      <button onclick="window.location.href='sobre.html'">
+          <img src="https://img.icons8.com/ios-filled/50/ffffff/info.png"/>
+          <span>Sobre</span>
+      </button>
+      <button onclick="window.location.href='contato.html'">
+          <img src="https://img.icons8.com/ios-filled/50/ffffff/contacts.png"/>
+          <span>Contato</span>
+      </button>
+      <button onclick="window.location.href='enderecos.html'">
+          <img src="https://img.icons8.com/ios-filled/50/ffffff/map-marker.png"/>
+          <span>Endereços</span>
+      </button>
+  </div>
 
-  <nav>
-    <a href="index.html">Início</a>
-    <a href="sobre.html">Sobre</a>
-    <a href="contato.html">Contato</a>
-    <a href="enderecos.html">Endereços</a>
-  </nav>
+  <!-- Main Content -->
+  <div class="main">
+    <header>
+      <h1>
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/scales.png" alt="Balança da Justiça">
+        <a href="index.html">AMORIM & SOUZA ADVOCACIA</a>
+      </h1>
+      <p>Excelência e ética em primeiro lugar</p>
+    </header>
 
-  <section>
-    <h2>Entre em Contato</h2>
-    <form action="#" method="post">
-      <input type="text" name="nome" placeholder="Seu nome" required>
-      <input type="email" name="email" placeholder="Seu e-mail" required>
-      <textarea name="mensagem" rows="6" placeholder="Sua mensagem" required></textarea>
-      <button type="submit">Enviar</button>
-    </form>
-  </section>
+    <section>
+      <h2>Entre em Contato</h2>
+      <form action="#" method="post">
+        <input type="text" name="nome" placeholder="Seu nome" required>
+        <input type="email" name="email" placeholder="Seu e-mail" required>
+        <textarea name="mensagem" rows="6" placeholder="Sua mensagem" required></textarea>
+        <button type="submit">Enviar</button>
+      </form>
+    </section>
 
-  <footer>
-    <p>&copy; 2025 Amorim & Souza Advocacia. Todos os direitos reservados.<br>CNPJ: 60.546.044/0001-43</p>
-  </footer>
+    <footer>
+      <p>&copy; 2025 Amorim & Souza Advocacia. Todos os direitos reservados.<br>CNPJ: 60.546.044/0001-43</p>
+    </footer>
+  </div>
 
 </body>
 </html>

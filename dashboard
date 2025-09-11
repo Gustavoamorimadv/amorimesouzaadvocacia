@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard - AMR ADV</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
+.sidebar { width:220px; background:#fff; border-right:1px solid #ddd; display:flex; flex-direction:column; padding-top:20px; flex-shrink:0; }
+.sidebar h2 { text-align:center; margin-bottom:20px; font-size:22px; font-family:'Poppins', sans-serif; font-weight:600; color:#1e1e2f; letter-spacing:1px; cursor:pointer; }
+.sidebar button { padding:12px 20px; margin:5px 10px; border:none; background:#f8f9fa; text-align:left; cursor:pointer; border-radius:6px; transition:0.2s; }
+.sidebar button:hover { background:#e2e6ea; }
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+header { height:60px; background:#fff; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; padding:0 20px; flex-shrink:0; }
+header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins',sans-serif; }
+.dashboard { padding:20px; flex:1; overflow:auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px; }
+.card { background:#fff; padding:20px; border-radius:15px; box-shadow:0 12px 30px rgba(0,0,0,0.12); display:flex; flex-direction:column; justify-content:center; }
+.card h3 { font-size:18px; margin-bottom:10px; color:#333; }
+.card p { font-size:24px; font-weight:600; color:#1e1e2f; }
+.chart-card { background:#fff; padding:20px; border-radius:15px; box-shadow:0 12px 30px rgba(0,0,0,0.12); grid-column:1/-1; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <h2 onclick="window.location.href='dashboard.html'">AMR ADV</h2>
+  <button onclick="window.location.href='crm.html'">CRM</button>
+  <button onclick="window.location.href='relatorios.html'">Relatórios</button>
+  <button onclick="window.location.href='agenda.html'">Agenda</button>
+  <button onclick="window.location.href='contatos.html'">Contatos</button>
+</div>
+
+<div class="main">
+<header>
+  <h1>Dashboard</h1>
+</header>
+
+<div class="dashboard">
+  <div class="card">
+    <h3>Total Clientes</h3>
+    <p id="totalClientes">0</p>
+  </div>
+  <div class="card">
+    <h3>Lista Fria</h3>
+    <p id="totalListaFria">0</p>
+  </div>
+  <div class="card">
+    <h3>Negociação</h3>
+    <p id="totalNegociacao">0</p>
+  </div>
+  <div class="card">
+    <h3>Contrato Assinado</h3>
+    <p id="totalContrato">0</p>
+  </div>
+  <div class="card">
+    <h3>Fechado</h3>
+    <p id="totalFechado">0</p>
+  </div>
+  <div class="card">
+    <h3>Total Honorários</h3>
+    <p id="totalHonorarios">R$ 0,00</p>
+  </div>
+  <div class="card">
+    <h3>Total a Receber</h3>
+    <p id="totalReceber">R$ 0,00</p>
+  </div>
+
+  <div class="chart-card">
+    <h3>Clientes por Tipo de Processo</h3>
+    <canvas id="processChart"></canvas>
+  </div>
+
+  <div class="chart-card">
+    <h3>Clientes por Status</h3>
+    <canvas id="statusChart"></canvas>
+  </div>
+</div>
+</div>
+
+<script>
+const STORAGE_KEY='crm_clientes';
+function getClientes(){ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); }
+function fmtMoney(v){ return 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+function renderDashboard(){
+  const clientes=getClientes();
+  const totalClientes=clientes.length;
+  const statusCount={ 'lista-fria':0, 'negociacao':0, 'contrato-assinado':0, 'fechado':0 };
+  const processoCount={};
+
+  let totalHonorarios=0, totalReceber=0;
+
+  for(const c of clientes){
+    statusCount[c.status] = (statusCount[c.status]||0)+1;
+    if(c.processo) processoCount[c.processo] = (processoCount[c.processo]||0)+1;
+    totalHonorarios += Number(c.valor||0);
+    totalReceber += Number(c.valor||0); // aqui você pode ajustar se tiver valor pago
+  }
+
+  document.getElementById('totalClientes').innerText=totalClientes;
+  document.getElementById('totalListaFria').innerText=statusCount['lista-fria'];
+  document.getElementById('totalNegociacao').innerText=statusCount['negociacao'];
+  document.getElementById('totalContrato').innerText=statusCount['contrato-assinado'];
+  document.getElementById('totalFechado').innerText=statusCount['fechado'];
+  document.getElementById('totalHonorarios').innerText=fmtMoney(totalHonorarios);
+  document.getElementById('totalReceber').innerText=fmtMoney(totalReceber);
+
+  // Chart Clientes por Processo
+  const processCtx=document.getElementById('processChart').getContext('2d');
+  new Chart(processCtx,{
+    type:'bar',
+    data:{
+      labels:Object.keys(processoCount),
+      datasets:[{
+        label:'Clientes',
+        data:Object.values(processoCount),
+        backgroundColor:'#3498db'
+      }]
+    },
+    options:{ responsive:true, plugins:{legend:{display:false}} }
+  });
+
+  // Chart Clientes por Status
+  const statusCtx=document.getElementById('statusChart').getContext('2d');
+  new Chart(statusCtx,{
+    type:'doughnut',
+    data:{
+      labels:Object.keys(statusCount).map(s=>s.replace('-',' ').toUpperCase()),
+      datasets:[{
+        data:Object.values(statusCount),
+        backgroundColor:['#3498db','#f1c40f','#9b59b6','#2ecc71']
+      }]
+    },
+    options:{ responsive:true }
+  });
+}
+
+renderDashboard();
+</script>
+</body>
+</html>

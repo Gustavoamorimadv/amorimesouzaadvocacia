@@ -179,6 +179,7 @@ tbody td{padding:12px;border-bottom:1px solid #f3f4f6;color:#333;vertical-align:
 (() => {
 const STORAGE_KEY = 'rel_clientes_v1';
 let clientes = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+
 const form = document.getElementById('clienteForm');
 const nomeEl = document.getElementById('nomeCliente');
 const honorEl = document.getElementById('honorarios');
@@ -193,6 +194,7 @@ const btnNovo = document.getElementById('btnNovo');
 const formCard = document.getElementById('formCard');
 const totalReceberBox = document.getElementById('totalReceberBox');
 const totalHonorariosBox = document.getElementById('totalHonorariosBox');
+
 const ctx = document.getElementById('pagamentosChart').getContext('2d');
 const chart = new Chart(ctx, {
     type: 'bar',
@@ -211,12 +213,24 @@ const chart = new Chart(ctx, {
         scales: { y: { beginAtZero: true, ticks: { callback: v => 'R$ ' + Number(v).toLocaleString('pt-BR') } } }
     }
 });
-function showToast(msg){ toastEl.textContent=msg; toastEl.style.display='block'; clearTimeout(toastEl._t); toastEl._t=setTimeout(()=> toastEl.style.display='none',2500); }
+
+function showToast(msg){
+    toastEl.textContent = msg; 
+    toastEl.style.display='block'; 
+    clearTimeout(toastEl._t); 
+    toastEl._t=setTimeout(()=> toastEl.style.display='none',2500);
+}
+
 function saveAll(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(clientes)); }
+
 function fmt(v){ return 'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2}); }
+
 function renderTable(){
     tabela.innerHTML='';
-    if(!clientes.length){ tabela.innerHTML='<tr><td colspan="6" class="muted" style="text-align:center;padding:18px">Nenhum cliente cadastrado</td></tr>'; return; }
+    if(!clientes.length){
+        tabela.innerHTML='<tr><td colspan="6" class="muted" style="text-align:center;padding:18px">Nenhum cliente cadastrado</td></tr>';
+        return;
+    }
     clientes.forEach(c=>{
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -232,6 +246,7 @@ function renderTable(){
         tabela.appendChild(tr);
     });
 }
+
 function renderChart(){
     chart.data.labels = clientes.map(c=>c.nome);
     chart.data.datasets[0].data = clientes.map(c=>c.honorarios);
@@ -241,24 +256,73 @@ function renderChart(){
     totalReceberBox.textContent = `Total a Receber: ${fmt(clientes.reduce((t,c)=>t+c.valorReceber,0))}`;
     totalHonorariosBox.textContent = `Total Honorários: ${fmt(clientes.reduce((t,c)=>t+c.honorarios,0))}`;
 }
+
 form.addEventListener('submit', e=>{
     e.preventDefault();
-    const data = { id: form.dataset.editId || Date.now().toString(), nome: nomeEl.value.trim(),
+    const data = { 
+        id: form.dataset.editId || Date.now().toString(), 
+        nome: nomeEl.value.trim(),
         honorarios: parseFloat(honorEl.value)||0,
         valorPago: parseFloat(pagoEl.value)||0,
         valorReceber: parseFloat(recvEl.value)||0,
         status: statusEl.value
     };
-    if(form.dataset.editId){ clientes = clientes.map(c=>c.id===data.id?data:c); showToast('Cliente atualizado'); }
-    else { clientes.push(data); showToast('Cliente adicionado'); }
-    saveAll(); form.reset(); delete form.dataset.editId; btnSalvar.textContent='Adicionar'; btnCancelar.style.display='none';
-    renderTable(); renderChart();
+    if(form.dataset.editId){
+        clientes = clientes.map(c=>c.id===data.id?data:c); 
+        showToast('Cliente atualizado');
+    } else { 
+        clientes.push(data); 
+        showToast('Cliente adicionado'); 
+    }
+    saveAll(); 
+    form.reset(); 
+    delete form.dataset.editId; 
+    btnSalvar.textContent='Adicionar'; 
+    btnCancelar.style.display='none';
+    renderTable(); 
+    renderChart();
 });
-btnCancelar.onclick=()=>{ form.reset(); delete form.dataset.editId; btnSalvar.textContent='Adicionar'; btnCancelar.style.display='none'; };
-window.editClient=id=>{ const c = clientes.find(x=>x.id===id); if(!c)return; nomeEl.value=c.nome; honorEl.value=c.honorarios; pagoEl.value=c.valorPago; recvEl.value=c.valorReceber; statusEl.value=c.status; form.dataset.editId=id; btnSalvar.textContent='Atualizar'; btnCancelar.style.display='inline-block'; formCard.scrollIntoView({behavior:'smooth'}); };
-window.deleteClient=id=>{ if(!confirm('Excluir cliente?'))return; clientes=clientes.filter(c=>c.id!==id); saveAll(); renderTable(); renderChart(); showToast('Cliente excluído'); };
-btnNovo.onclick=()=>{ form.reset(); delete form.dataset.editId; btnSalvar.textContent='Adicionar'; btnCancelar.style.display='none'; formCard.scrollIntoView({behavior:'smooth'}); };
-renderTable(); renderChart();
+
+btnCancelar.onclick=()=>{ 
+    form.reset(); 
+    delete form.dataset.editId; 
+    btnSalvar.textContent='Adicionar'; 
+    btnCancelar.style.display='none'; 
+};
+
+window.editClient=id=>{ 
+    const c = clientes.find(x=>x.id===id); 
+    if(!c)return; 
+    nomeEl.value=c.nome; 
+    honorEl.value=c.honorarios; 
+    pagoEl.value=c.valorPago; 
+    recvEl.value=c.valorReceber; 
+    statusEl.value=c.status; 
+    form.dataset.editId=id; 
+    btnSalvar.textContent='Atualizar'; 
+    btnCancelar.style.display='inline-block'; 
+    formCard.scrollIntoView({behavior:'smooth'}); 
+};
+
+window.deleteClient=id=>{ 
+    if(!confirm('Excluir cliente?'))return; 
+    clientes=clientes.filter(c=>c.id!==id); 
+    saveAll(); 
+    renderTable(); 
+    renderChart(); 
+    showToast('Cliente excluído'); 
+};
+
+btnNovo.onclick=()=>{ 
+    form.reset(); 
+    delete form.dataset.editId; 
+    btnSalvar.textContent='Adicionar'; 
+    btnCancelar.style.display='none'; 
+    formCard.scrollIntoView({behavior:'smooth'}); 
+};
+
+renderTable(); 
+renderChart();
 })();
 </script>
 

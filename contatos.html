@@ -49,7 +49,7 @@ td button { margin-right:5px; padding:6px 10px; border:none; border-radius:6px; 
 .modal textarea { min-height:80px; resize:vertical; }
 .modal .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
 
-/* Painel Venom */
+/* Painel WhatsApp */
 #waPanel { display:none; margin:20px; background:#fff; padding:15px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.08); max-width:500px; }
 #waPanel input, #waPanel textarea { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; margin-bottom:10px; }
 #waPanel textarea { min-height:80px; }
@@ -136,7 +136,7 @@ td button { margin-right:5px; padding:6px 10px; border:none; border-radius:6px; 
 <div class="toast" id="toast"></div>
 
 <script>
-// --- MESMO SCRIPT DO ANTERIOR ---
+// --- Script de Contatos ---
 const STORAGE_KEY='crm_contatos';
 const modalBackdrop=document.getElementById('modalBackdrop');
 const contactForm=document.getElementById('contactForm');
@@ -154,3 +154,86 @@ const waMessage=document.getElementById('waMessage');
 const toast=document.getElementById('toast');
 let editIndex=null;
 
+function showToast(msg){ toast.innerText=msg; toast.style.display='block'; clearTimeout(toast._t); toast._t=setTimeout(()=>toast.style.display='none',3000); }
+function getContacts(){ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); }
+function saveContacts(c){ localStorage.setItem(STORAGE_KEY,JSON.stringify(c)); renderTable(); }
+function renderTable(){
+    const contacts=getContacts();
+    contactsTable.innerHTML='';
+    contacts.forEach((c,i)=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${c.nome}</td><td>${c.telefone||''}</td><td>${c.cpf||''}</td><td>${c.processo||''}</td>
+        <td>
+            <button class="btn btn-wa" onclick="openWAPanel('${c.telefone||''}')">WA</button>
+            <button class="btn btn-edit" onclick="editContact(${i})">Editar</button>
+            <button class="btn btn-del" onclick="deleteContact(${i})">Excluir</button>
+        </td>`;
+        contactsTable.appendChild(tr);
+    });
+}
+
+function openModal(){ modalBackdrop.style.display='flex'; }
+function closeModal(){ modalBackdrop.style.display='none'; contactForm.reset(); editIndex=null; }
+
+btnAdd.addEventListener('click',()=>{ openModal(); });
+btnCancel.addEventListener('click',()=>{ closeModal(); });
+
+contactForm.addEventListener('submit',(e)=>{
+    e.preventDefault();
+    const contacts=getContacts();
+    const newContact={ nome: inputNome.value, telefone: inputTelefone.value, cpf: inputCPF.value, processo: inputProcesso.value, obs: inputObs.value };
+    if(editIndex!==null){ contacts[editIndex]=newContact; editIndex=null; showToast('Contato atualizado'); }
+    else{ contacts.push(newContact); showToast('Contato adicionado'); }
+    saveContacts(contacts);
+    closeModal();
+});
+
+function editContact(i){
+    const contacts=getContacts();
+    const c=contacts[i];
+    inputNome.value=c.nome;
+    inputTelefone.value=c.telefone;
+    inputCPF.value=c.cpf;
+    inputProcesso.value=c.processo;
+    inputObs.value=c.obs;
+    editIndex=i;
+    openModal();
+}
+
+function deleteContact(i){
+    if(confirm('Deseja realmente excluir este contato?')){
+        const contacts=getContacts();
+        contacts.splice(i,1);
+        saveContacts(contacts);
+        showToast('Contato excluído');
+    }
+}
+
+function openWAPanel(number){
+    waPanel.style.display='block';
+    waNumber.value=number;
+    waMessage.value='';
+}
+
+function closeWAPanel(){ waPanel.style.display='none'; }
+
+function sendWhatsApp(){
+    const num=waNumber.value.trim();
+    const msg=encodeURIComponent(waMessage.value.trim());
+    if(!num||!msg){ alert('Preencha número e mensagem'); return; }
+    window.open(`https://wa.me/${num}?text=${msg}`,'_blank');
+    closeWAPanel();
+}
+
+document.getElementById('searchInput').addEventListener('input',function(){
+    const val=this.value.toLowerCase();
+    document.querySelectorAll('#contactsTable tbody tr').forEach(tr=>{
+        tr.style.display=Array.from(tr.children).slice(0,4).some(td=>td.innerText.toLowerCase().includes(val))?'':'none';
+    });
+});
+
+renderTable();
+</script>
+
+</body>
+</html>

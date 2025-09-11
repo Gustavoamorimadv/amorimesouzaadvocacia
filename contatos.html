@@ -7,19 +7,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', sans-serif; }
-body { display:flex; background:#f0f2f5; height:100vh; }
+body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
 
 /* Sidebar */
-.sidebar { width:220px; background:#fff; border-right:1px solid #ddd; display:flex; flex-direction:column; padding-top:20px; }
+.sidebar { width:220px; background:#fff; border-right:1px solid #ddd; display:flex; flex-direction:column; padding-top:20px; flex-shrink:0; }
 .sidebar h2 { text-align:center; margin-bottom:20px; font-size:22px; font-family:'Poppins', sans-serif; font-weight:600; color:#1e1e2f; letter-spacing:1px; cursor:pointer; }
-.sidebar button { padding:12px 20px; margin:5px 10px; border:none; background:#f8f9fa; text-align:left; cursor:pointer; border-radius:6px; transition:.2s; }
+.sidebar button { padding:12px 20px; margin:5px 10px; border:none; background:#f8f9fa; text-align:left; cursor:pointer; border-radius:6px; transition:.2s; font-weight:500; }
 .sidebar button:hover { background:#e2e6ea; }
 
 /* Main */
-.main { flex:1; display:flex; flex-direction:column; }
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
 
 /* Header */
-header { height:60px; background:#fff; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; padding:0 20px; }
+header { height:60px; background:#fff; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; padding:0 20px; flex-shrink:0; }
 header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
 header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
 
@@ -66,11 +66,13 @@ td button { margin-right:5px; padding:6px 10px; border:none; border-radius:6px; 
 
 <!-- Sidebar -->
 <div class="sidebar">
-    <h2 onclick="window.location.href='crm.html'">AMR ADV</h2>
+    <h2 onclick="window.location.href='dashboard.html'">AMR ADV</h2>
+    <button onclick="window.location.href='dashboard.html'">Dashboard</button>
+    <button onclick="window.location.href='crm.html'">CRM</button>
     <button onclick="window.location.href='relatorios.html'">Relatórios</button>
     <button onclick="window.location.href='agenda.html'">Agenda</button>
     <button>Contatos</button>
-    <button>Configurações</button>
+    <button onclick="window.location.href='config.html'">Configurações</button>
 </div>
 
 <!-- Main -->

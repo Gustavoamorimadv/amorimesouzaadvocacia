@@ -1,180 +1,311 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Relatórios - AMR ADV</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-body { display:flex; background:#f0f2f5; height:100vh; }
-
-/* Sidebar */
-.sidebar { width:220px; background:#fff; border-right:1px solid #ddd; display:flex; flex-direction:column; padding-top:20px; }
-.sidebar h2 { text-align:center; margin-bottom:20px; font-size:22px; font-family:'Poppins', sans-serif; font-weight:600; color:#1e1e2f; letter-spacing:1px; cursor:pointer;}
-.sidebar button { padding:12px 20px; margin:5px 10px; border:none; background:#f8f9fa; text-align:left; cursor:pointer; border-radius:6px; transition:0.2s; }
-.sidebar button:hover { background:#e2e6ea; }
-
-/* Main */
-.main { flex:1; display:flex; flex-direction:column; }
-
-header { height:60px; background:#fff; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; padding:0 20px; }
-header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
-
-.content { padding:20px; flex:1; overflow-y:auto; }
-
-form { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:15px; background:#fff; padding:20px; border-radius:10px; margin-bottom:20px; box-shadow:0 4px 12px rgba(0,0,0,0.05);}
-form input, form select { padding:10px; border-radius:6px; border:1px solid #ccc; }
-form button { grid-column:1/-1; padding:12px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
-
-table { width:100%; border-collapse:collapse; background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.05);}
-th, td { padding:12px; text-align:center; border-bottom:1px solid #ddd; }
-th { background:#1e1e2f; color:#fff; }
-
-#chartContainer { margin-top:30px; background:#fff; padding:20px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.05); }
-
-.btn { cursor:pointer; border:none; border-radius:6px; padding:6px 10px; }
-.btn.edit { background:#3498db; color:#fff; }
-.btn.delete { background:#e74c3c; color:#fff; }
+  :root{
+    --bg:#f3f6f9;
+    --card:#ffffff;
+    --accent:#1e1e2f;
+    --muted:#6b7280;
+    --success:#2ecc71;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:Inter, "Segoe UI", Roboto, sans-serif}
+  body{background:var(--bg);min-height:100vh;display:flex;gap:20px}
+  /* sidebar */
+  .sidebar{width:220px;background:var(--card);border-right:1px solid rgba(0,0,0,.06);padding:22px 14px;flex-shrink:0}
+  .brand{font-family:'Poppins',sans-serif;font-weight:600;color:var(--accent);font-size:18px;cursor:pointer;margin-bottom:18px}
+  .sidebar button{display:block;width:100%;text-align:left;padding:10px 12px;border-radius:8px;border:0;background:transparent;color:var(--muted);cursor:pointer;margin-bottom:8px}
+  .sidebar button:hover{background:#eef2f7;color:var(--accent)}
+  /* main */
+  .main{flex:1;display:flex;flex-direction:column;min-height:100vh}
+  header{height:72px;background:var(--card);display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid rgba(0,0,0,.06)}
+  header h1{font-family:'Poppins',sans-serif;color:var(--accent);font-size:20px}
+  .actions{display:flex;gap:10px;align-items:center}
+  .btn{padding:8px 12px;border-radius:8px;border:0;cursor:pointer;background:var(--accent);color:#fff}
+  .content{padding:22px;overflow:auto}
+  /* form */
+  .card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 8px 30px rgba(16,24,40,0.06);margin-bottom:18px}
+  form.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;align-items:end}
+  form input, form select{padding:10px;border-radius:8px;border:1px solid #e6e9ee;background:transparent}
+  form .full{grid-column:1/-1}
+  .btn.ghost{background:transparent;color:var(--accent);border:1px solid #e6e9ee}
+  /* table */
+  .table-wrap{overflow:auto}
+  table{width:100%;border-collapse:collapse;background:var(--card);border-radius:10px;overflow:hidden;box-shadow:0 8px 24px rgba(16,24,40,0.04)}
+  thead th{background:linear-gradient(180deg,#16202b 0,#15303c 100%);color:#fff;padding:12px;text-align:left;font-weight:600}
+  tbody td{padding:12px;border-bottom:1px solid #f1f3f6;color:#333}
+  .muted{color:var(--muted);font-size:13px}
+  .row-actions{display:flex;gap:8px;align-items:center}
+  .btn-small{padding:6px 8px;border-radius:8px;border:0;cursor:pointer;font-size:13px}
+  .edit{background:#2563eb;color:#fff}
+  .del{background:#ef4444;color:#fff}
+  /* chart */
+  #chartBox{margin-top:18px;height:340px;background:var(--card);padding:16px;border-radius:12px;box-shadow:0 8px 30px rgba(16,24,40,0.04)}
+  #pagamentosChart{width:100%;height:100%}
+  /* toast */
+  .toast{position:fixed;right:22px;bottom:22px;background:#111;color:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.25);display:none;z-index:9999}
+  /* responsive */
+  @media (max-width:900px){
+    body{flex-direction:column}
+    .sidebar{width:100%;display:flex;flex-direction:row;gap:8px;overflow:auto;padding:10px}
+    .main{width:100%}
+  }
 </style>
 </head>
 <body>
 
-<div class="sidebar">
-    <h2 onclick="window.location.href='crm.html'">AMR ADV</h2>
-    <button onclick="window.location.href='relatorios.html'">Relatórios</button>
-    <button onclick="window.location.href='agenda.html'">Agenda</button>
+  <aside class="sidebar">
+    <div class="brand" onclick="location.href='crm.html'">AMR ADV</div>
+    <button onclick="location.href='crm.html'">CRM</button>
+    <button onclick="location.href='relatorios.html'">Relatórios</button>
+    <button onclick="location.href='agenda.html'">Agenda</button>
     <button>Contatos</button>
-    <button>Configurações</button>
-</div>
+  </aside>
 
-<div class="main">
-<header>
-    <h1>Relatórios</h1>
-</header>
+  <main class="main">
+    <header>
+      <h1>Relatórios Financeiros</h1>
+      <div class="actions">
+        <button class="btn" id="btnNovo">Novo Cliente</button>
+      </div>
+    </header>
 
-<div class="content">
-    <form id="clienteForm">
-        <input type="text" id="nomeCliente" placeholder="Nome do Cliente" required>
-        <input type="number" id="honorarios" placeholder="Honorários" min="0" required>
-        <input type="number" id="valorPago" placeholder="Valor Pago" min="0" required>
-        <input type="number" id="valorReceber" placeholder="Valor a Receber" min="0" required>
-        <select id="statusCliente">
+    <div class="content">
+
+      <!-- FORM -->
+      <section class="card" id="formCard">
+        <form id="clienteForm" class="grid" autocomplete="off">
+          <input type="text" id="nomeCliente" placeholder="Nome do cliente" required>
+          <input type="number" id="honorarios" placeholder="Honorários (R$)" min="0" step="0.01" required>
+          <input type="number" id="valorPago" placeholder="Valor Pago (R$)" min="0" step="0.01" required>
+          <input type="number" id="valorReceber" placeholder="Valor a Receber (R$)" min="0" step="0.01" required>
+          <select id="statusCliente">
             <option value="Não iniciado">Não iniciado</option>
             <option value="Em andamento">Em andamento</option>
             <option value="Concluído">Concluído</option>
-        </select>
-        <button type="submit">Adicionar Cliente</button>
-    </form>
+          </select>
 
-    <table>
-        <thead>
+          <div class="full" style="display:flex;gap:8px;justify-content:flex-end">
+            <button type="button" class="btn ghost" id="btnCancelar" style="display:none">Cancelar</button>
+            <button type="submit" class="btn" id="btnSalvar">Adicionar</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- TABELA -->
+      <section class="card table-wrap">
+        <table aria-describedby="lista-clientes">
+          <thead>
             <tr>
-                <th>Nome</th>
-                <th>Honorários</th>
-                <th>Valor Pago</th>
-                <th>Valor a Receber</th>
-                <th>Status</th>
-                <th>Ações</th>
+              <th>Cliente</th>
+              <th>Honorários</th>
+              <th>Pago</th>
+              <th>A Receber</th>
+              <th>Status</th>
+              <th style="text-align:right">Ações</th>
             </tr>
-        </thead>
-        <tbody id="clientesTable"></tbody>
-    </table>
+          </thead>
+          <tbody id="clientesTable">
+            <!-- preenchido por JS -->
+          </tbody>
+        </table>
+      </section>
 
-    <div id="chartContainer">
-        <h2>Resumo Financeiro</h2>
+      <!-- GRÁFICO -->
+      <section id="chartBox" class="card">
+        <h3 style="margin-bottom:8px;color:var(--accent)">Visão Geral (por cliente)</h3>
         <canvas id="pagamentosChart"></canvas>
+      </section>
     </div>
-</div>
-</div>
+  </main>
+
+  <div class="toast" id="toast"></div>
 
 <script>
-let clientes = JSON.parse(localStorage.getItem('clientes')||'[]');
-const form = document.getElementById('clienteForm');
-const tabela = document.getElementById('clientesTable');
-const ctx = document.getElementById('pagamentosChart').getContext('2d');
+(() => {
+  const STORAGE_KEY = 'rel_clientes_v1'; // chave específica para relatórios
+  let clientes = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
 
-let chart = new Chart(ctx, {
+  // DOM refs
+  const form = document.getElementById('clienteForm');
+  const nomeEl = document.getElementById('nomeCliente');
+  const honorEl = document.getElementById('honorarios');
+  const pagoEl = document.getElementById('valorPago');
+  const recvEl = document.getElementById('valorReceber');
+  const statusEl = document.getElementById('statusCliente');
+  const tabela = document.getElementById('clientesTable');
+  const toastEl = document.getElementById('toast');
+  const btnSalvar = document.getElementById('btnSalvar');
+  const btnCancelar = document.getElementById('btnCancelar');
+  const btnNovo = document.getElementById('btnNovo');
+  const formCard = document.getElementById('formCard');
+
+  // Chart.js init
+  const ctx = document.getElementById('pagamentosChart').getContext('2d');
+  const chart = new Chart(ctx, {
     type: 'bar',
-    data: { 
-        labels: [], 
-        datasets: [
-            { label: 'Honorários', data: [], backgroundColor: 'rgba(54, 162, 235, 0.6)' },
-            { label: 'Valor Pago', data: [], backgroundColor: 'rgba(75, 192, 192, 0.6)' },
-            { label: 'Valor a Receber', data: [], backgroundColor: 'rgba(255, 99, 132, 0.6)' }
-        ] 
+    data: {
+      labels: [],
+      datasets: [
+        { label: 'Honorários', data: [], backgroundColor: 'rgba(54, 162, 235, 0.7)' },
+        { label: 'Valor Pago', data: [], backgroundColor: 'rgba(75, 192, 192, 0.7)' },
+        { label: 'Valor a Receber', data: [], backgroundColor: 'rgba(255, 99, 132, 0.7)' }
+      ]
     },
-    options: { responsive:true, scales:{y:{beginAtZero:true}} }
-});
+    options: {
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'top' } },
+      responsive: true,
+      scales: {
+        y: { beginAtZero: true, ticks: { callback: v => 'R$ ' + Number(v).toLocaleString('pt-BR') } }
+      }
+    }
+  });
 
-function atualizarTabela(){
-    tabela.innerHTML='';
-    clientes.forEach((c,index)=>{
-        const row = tabela.insertRow();
-        row.insertCell(0).innerText = c.nome;
-        row.insertCell(1).innerText = 'R$ '+c.honorarios.toFixed(2);
-        row.insertCell(2).innerText = 'R$ '+c.valorPago.toFixed(2);
-        row.insertCell(3).innerText = 'R$ '+c.valorReceber.toFixed(2);
-        row.insertCell(4).innerText = c.status;
-        row.insertCell(5).innerHTML = `<button class="btn edit" onclick="editarCliente(${index})">Editar</button>
-                                       <button class="btn delete" onclick="deletarCliente(${index})">Excluir</button>`;
+  /* ---------- helpers ---------- */
+  function showToast(msg, ms = 2500){
+    toastEl.textContent = msg;
+    toastEl.style.display = 'block';
+    clearTimeout(toastEl._t);
+    toastEl._t = setTimeout(()=> toastEl.style.display = 'none', ms);
+  }
+  function saveAll(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(clientes)); }
+  function currency(v){ return 'R$ ' + Number(v || 0).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+  /* ---------- render tabela e gráfico ---------- */
+  function renderTable(){
+    tabela.innerHTML = '';
+    if(!clientes.length){
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td colspan="6" class="muted" style="padding:18px;text-align:center">Nenhum cliente cadastrado</td>';
+      tabela.appendChild(tr);
+      return;
+    }
+    clientes.forEach(c => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="min-width:180px"><strong>${escapeHtml(c.nome)}</strong></td>
+        <td>${currency(c.honorarios)}</td>
+        <td>${currency(c.valorPago)}</td>
+        <td>${currency(c.valorReceber)}</td>
+        <td class="muted">${escapeHtml(c.status)}</td>
+        <td style="text-align:right">
+          <div class="row-actions">
+            <button class="btn-small edit" data-id="${c.id}">Editar</button>
+            <button class="btn-small del" data-id="${c.id}">Excluir</button>
+          </div>
+        </td>
+      `;
+      tabela.appendChild(tr);
     });
-}
 
-function atualizarGrafico(){
-    chart.data.labels = clientes.map(c=>c.nome);
-    chart.data.datasets[0].data = clientes.map(c=>c.honorarios);
-    chart.data.datasets[1].data = clientes.map(c=>c.valorPago);
-    chart.data.datasets[2].data = clientes.map(c=>c.valorReceber);
+    // delegação de eventos simples
+    tabela.querySelectorAll('.edit').forEach(btn => btn.onclick = () => startEdit(btn.dataset.id));
+    tabela.querySelectorAll('.del').forEach(btn => btn.onclick = () => doDelete(btn.dataset.id));
+  }
+
+  function renderChart(){
+    chart.data.labels = clientes.map(c => c.nome);
+    chart.data.datasets[0].data = clientes.map(c => Number(c.honorarios) || 0);
+    chart.data.datasets[1].data = clientes.map(c => Number(c.valorPago) || 0);
+    chart.data.datasets[2].data = clientes.map(c => Number(c.valorReceber) || 0);
     chart.update();
-}
+  }
 
-form.addEventListener('submit', e=>{
-    e.preventDefault();
-    const novoCliente = {
-        nome: document.getElementById('nomeCliente').value,
-        honorarios: parseFloat(document.getElementById('honorarios').value),
-        valorPago: parseFloat(document.getElementById('valorPago').value),
-        valorReceber: parseFloat(document.getElementById('valorReceber').value),
-        status: document.getElementById('statusCliente').value
-    };
-
-    const editIndex = form.dataset.editIndex;
-    if(editIndex !== undefined){
-        clientes[editIndex] = novoCliente;
-        delete form.dataset.editIndex;
-    } else {
-        clientes.push(novoCliente);
-    }
-
-    localStorage.setItem('clientes', JSON.stringify(clientes));
+  /* ---------- form logic ---------- */
+  function resetForm(){
     form.reset();
-    atualizarTabela();
-    atualizarGrafico();
-});
+    delete form.dataset.editId;
+    btnSalvar.textContent = 'Adicionar';
+    btnCancelar.style.display = 'none';
+  }
 
-function editarCliente(index){
-    const c = clientes[index];
-    document.getElementById('nomeCliente').value = c.nome;
-    document.getElementById('honorarios').value = c.honorarios;
-    document.getElementById('valorPago').value = c.valorPago;
-    document.getElementById('valorReceber').value = c.valorReceber;
-    document.getElementById('statusCliente').value = c.status;
-    form.dataset.editIndex = index;
-}
+  function startEdit(id){
+    const c = clientes.find(x => x.id === id);
+    if(!c) return;
+    nomeEl.value = c.nome;
+    honorEl.value = Number(c.honorarios).toFixed(2);
+    pagoEl.value = Number(c.valorPago).toFixed(2);
+    recvEl.value = Number(c.valorReceber).toFixed(2);
+    statusEl.value = c.status;
+    form.dataset.editId = id;
+    btnSalvar.textContent = 'Atualizar';
+    btnCancelar.style.display = 'inline-block';
+    formCard.scrollIntoView({behavior:'smooth', block:'center'});
+  }
 
-function deletarCliente(index){
-    if(confirm('Deseja realmente excluir este cliente?')){
-        clientes.splice(index,1);
-        localStorage.setItem('clientes', JSON.stringify(clientes));
-        atualizarTabela();
-        atualizarGrafico();
+  function doDelete(id){
+    if(!confirm('Deseja realmente excluir este cliente?')) return;
+    clientes = clientes.filter(c => c.id !== id);
+    saveAll();
+    renderTable();
+    renderChart();
+    showToast('Cliente excluído');
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const nome = nomeEl.value.trim();
+    const honor = parseFloat(honorEl.value) || 0;
+    const pago = parseFloat(pagoEl.value) || 0;
+    const recv = parseFloat(recvEl.value) || 0;
+    const status = statusEl.value;
+
+    if(!nome){
+      showToast('Nome é obrigatório');
+      return;
     }
-}
+    if(honor < 0 || pago < 0 || recv < 0){
+      showToast('Valores não podem ser negativos');
+      return;
+    }
 
-atualizarTabela();
-atualizarGrafico();
+    const editId = form.dataset.editId;
+    if(editId){
+      // atualizar
+      clientes = clientsReplace(clientes, editId, {
+        id: editId,
+        nome, honorarios: round2(honor), valorPago: round2(pago), valorReceber: round2(recv), status
+      });
+      showToast('Cliente atualizado');
+    } else {
+      // novo
+      const novo = { id: String(Date.now()) , nome, honorarios: round2(honor), valorPago: round2(pago), valorReceber: round2(recv), status };
+      clientes.push(novo);
+      showToast('Cliente adicionado');
+    }
+    saveAll();
+    resetForm();
+    renderTable();
+    renderChart();
+  });
+
+  btnCancelar.onclick = () => { resetForm(); };
+
+  btnNovo.onclick = () => {
+    resetForm();
+    formCard.scrollIntoView({behavior:'smooth', block:'center'});
+  };
+
+  /* ---------- utilities ---------- */
+  function clientsReplace(arr, id, newObj){
+    return arr.map(a => a.id === id ? newObj : a);
+  }
+  function round2(n){ return Math.round((Number(n) || 0) * 100) / 100; }
+  function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+  /* ---------- init ---------- */
+  renderTable();
+  renderChart();
+
+  // expose small helpers for debugging (optional)
+  window.REL_CLIENTES = { get: () => clientes, clear: () => { clientes = []; saveAll(); renderTable(); renderChart(); } };
+})();
 </script>
 </body>
 </html>

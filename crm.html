@@ -9,9 +9,7 @@
 * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
 body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
 
-.sidebar {
-    width:80px; background:#1e1e2f; display:flex; flex-direction:column; align-items:center; padding:20px 0; flex-shrink:0; transition:width 0.3s;
-}
+.sidebar { width:80px; background:#1e1e2f; display:flex; flex-direction:column; align-items:center; padding:20px 0; flex-shrink:0; transition:width 0.3s; }
 .sidebar:hover { width:220px; }
 .sidebar h2 { font-size:22px; font-family:'Poppins', sans-serif; font-weight:600; color:#fff; letter-spacing:1px; margin-bottom:30px; text-align:center; cursor:pointer; width:100%; white-space:nowrap; overflow:hidden; transition:opacity 0.3s; }
 .sidebar button { width:100%; background:transparent; border:none; color:#fff; display:flex; align-items:center; gap:15px; padding:12px 20px; margin:5px 0; cursor:pointer; border-radius:10px; transition:background 0.2s, color 0.2s; font-size:14px; white-space:nowrap; overflow:hidden; }
@@ -62,9 +60,29 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 
 .toast { position:fixed; right:20px; bottom:20px; background:#222; color:#fff; padding:8px 12px; border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.3); display:none; z-index:60; }
 </style>
-</head>
-<body>
 
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
+    authDomain: "dapapp-38637.firebaseapp.com",
+    projectId: "dapapp-38637",
+    storageBucket: "dapapp-38637.appspot.com",
+    messagingSenderId: "628852295313",
+    appId: "1:628852295313:web:INSERIR_SEU_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+window.firebaseDB = db;
+</script>
+</head>
+
+<body>
+<!-- ... Mantenha seu HTML do body igual ... -->
 <div class="sidebar">
 <h2 onclick="window.location.href='dashboard.html'">AMR ADV</h2>
 <button onclick="window.location.href='dashboard.html'">
@@ -146,9 +164,10 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 
 <div class="toast" id="toast"></div>
 
-<script>
+<script type="module">
+import { collection, addDoc, getDocs, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+
 const STATUS=['lista-fria','negociacao','contrato-assinado','fechado'];
-const STORAGE_KEY='crm_clientes';
 const cardsMap={};
 const modalBackdrop=document.getElementById('modalBackdrop');
 const clientForm=document.getElementById('clientForm');
@@ -167,8 +186,21 @@ const filterStatus=document.getElementById('filterStatus');
 const toastEl=document.getElementById('toast');
 
 function showToast(msg){ toastEl.innerText=msg; toastEl.style.display='block'; clearTimeout(toastEl._t); toastEl._t=setTimeout(()=>toastEl.style.display='none',3000); }
-function getClientes(){ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); }
-function saveClientes(c){ localStorage.setItem(STORAGE_KEY, JSON.stringify(c)); }
+
+async function getClientes(){
+    const snapshot = await getDocs(collection(firebaseDB,"clientes"));
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+}
+
+async function saveCliente(cliente){
+    if(cliente.id && isNaN(cliente.id)){
+        const docRef = doc(firebaseDB, "clientes", cliente.id);
+        await setDoc(docRef, cliente);
+    } else {
+        const docRef = await addDoc(collection(firebaseDB,"clientes"), cliente);
+        cliente.id = docRef.id;
+    }
+}
 
 function openModal(edit=false,data=null){
     modalBackdrop.style.display='flex';
@@ -193,7 +225,7 @@ function closeModal(){ modalBackdrop.style.display='none'; }
 
 function criarCard(cliente){
     const col=document.getElementById(cliente.status);
-    if(!col) return; // evita status inválido
+    if(!col) return;
     const card=document.createElement('div');
     card.className=`card ${cliente.status}`;
     card.dataset.id=cliente.id;
@@ -231,36 +263,43 @@ function criarCard(cliente){
 function ligar(numero){ if(!numero){ showToast("Número não informado"); return; } window.open(`tel:${numero.replace(/\D/g,'')}`); }
 function whatsapp(numero){ if(!numero){ showToast("Número não informado"); return; } const num=numero.replace(/\D/g,''); window.open(`https://wa.me/55${num}`,'_blank'); }
 
-function render(){
+async function render(){
     STATUS.forEach(s=>{
         const col=document.getElementById(s);
         col.innerHTML=`<h2>${s.replace('-',' ').toUpperCase()}</h2>`;
     });
     for(const k in cardsMap) delete cardsMap[k];
-    for(const c of getClientes()) criarCard(c);
+    const clientes = await getClientes();
+    for(const c of clientes) criarCard(c);
     filtragemAplicada();
 }
 
-clientForm.onsubmit=function(e){
+clientForm.onsubmit = async function(e){
     e.preventDefault();
-    const nome=inputNome.value.trim();
+    const nome = inputNome.value.trim();
     if(!nome){ showToast("Nome obrigatório"); return; }
-    const novo={
-        id:clientForm.dataset.editId||Date.now(),
-        nome, cpf:inputCPF.value.trim(),
-        obs:inputObs.value.trim().substring(0,300),
-        status:inputStatus.value, numeros:inputNumeros.value,
-        processo:inputProcesso.value, classe:inputClasse.value, valor:inputValor.value
+
+    const novo = {
+        nome, cpf: inputCPF.value.trim(),
+        obs: inputObs.value.trim().substring(0,300),
+        status: inputStatus.value,
+        numeros: inputNumeros.value,
+        processo: inputProcesso.value,
+        classe: inputClasse.value,
+        valor: inputValor.value
     };
-    let clientes=getClientes();
+
     if(clientForm.dataset.editId){
-        clientes=clientes.map(c=>c.id==novo.id?novo:c);
+        novo.id = clientForm.dataset.editId;
+        await saveCliente(novo);
         showToast("Cliente atualizado!");
-    }else{
-        clientes.push(novo);
+    } else {
+        await saveCliente(novo);
         showToast("Cliente adicionado!");
     }
-    saveClientes(clientes); closeModal(); render();
+
+    closeModal();
+    render();
 };
 
 btnAdd.onclick=()=>openModal();
@@ -273,25 +312,27 @@ function addDragEvents(card){
 }
 document.querySelectorAll('.column').forEach(col=>{
     col.addEventListener('dragover', e=>e.preventDefault());
-    col.addEventListener('drop', ()=>{
+    col.addEventListener('drop', async ()=>{
         if(!draggedCard) return;
-        const id=draggedCard.dataset.id;
-        const status=col.id;
-        const clientes=getClientes().map(c=>c.id==id?{...c,status}:c);
-        saveClientes(clientes); render(); showToast("Status atualizado");
+        const id = draggedCard.dataset.id;
+        const status = col.id;
+        const docRef = doc(firebaseDB,"clientes",id);
+        await updateDoc(docRef,{status});
+        render(); showToast("Status atualizado");
     });
 });
 
-searchInput.oninput=filtragemAplicada;
-filterStatus.onchange=filtragemAplicada;
 function filtragemAplicada(){
-    const search=searchInput.value.toLowerCase(), filter=filterStatus.value;
+    const q = searchInput.value.toLowerCase();
+    const filterS = filterStatus.value;
     Object.values(cardsMap).forEach(card=>{
-        const matchSearch=card.dataset.nome.includes(search);
-        const matchFilter=!filter||card.dataset.status===filter;
-        card.style.display=(matchSearch&&matchFilter)?'flex':'none';
+        const matchSearch = card.dataset.nome.includes(q);
+        const matchStatus = !filterS || card.dataset.status===filterS;
+        card.style.display=(matchSearch && matchStatus)?'flex':'none';
     });
 }
+searchInput.oninput=filtragemAplicada;
+filterStatus.onchange=filtragemAplicada;
 
 render();
 </script>

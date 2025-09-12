@@ -72,7 +72,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 .kanban-container { flex:1; overflow-x:auto; padding:20px; }
 .kanban { display:flex; gap:20px; min-width:max-content; height:100%; }
 .column { background:#fff; border-radius:15px; padding:15px; min-width:320px; max-height:calc(100%); display:flex; flex-direction:column; gap:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); overflow-y:auto; }
-.column h2 { margin-bottom:10px; font-size:18px; color:#1e1e2f; text-transform:uppercase; }
+.column h2 { margin-bottom:10px; font-size:18px; color:#1e1e2f; text-transform:uppercase; display:flex; justify-content:space-between; align-items:center; }
 .card { display:flex; background:#fff; border-radius:15px; box-shadow:0 12px 30px rgba(0,0,0,0.12); cursor:pointer; overflow:hidden; transition:0.3s; min-height:160px; flex-direction:row; position:relative; }
 .card:hover { transform:scale(1.03); }
 .card .color-bar { width:8px; height:100%; border-radius:15px 0 0 15px; }
@@ -80,6 +80,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 .card h3 { font-size:20px; margin-bottom:6px; color:#333; }
 .card p { font-size:14px; color:#555; margin:3px 0; }
 .lista-fria .color-bar { background:#3498db; }
+.primeiro-contato .color-bar { background:#1abc9c; }
 .negociacao .color-bar { background:#f1c40f; }
 .contrato-assinado .color-bar { background:#9b59b6; }
 .fechado .color-bar { background:#2ecc71; }
@@ -161,6 +162,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
     <select id="filterStatus">
         <option value="">Todos os status</option>
         <option value="lista-fria">Lista Fria</option>
+        <option value="primeiro-contato">Primeiro Contato</option>
         <option value="negociacao">Negociação</option>
         <option value="contrato-assinado">Contrato Assinado</option>
         <option value="fechado">Fechado</option>
@@ -170,6 +172,11 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 <div class="kanban-container">
 <main class="kanban" id="kanban">
     <div class="column" id="lista-fria"><h2>Lista Fria</h2></div>
+    <div class="column" id="primeiro-contato">
+        <h2>Primeiro Contato 
+            <button id="btnWhatsappTodos" style="padding:4px 8px; font-size:12px; border-radius:6px; border:none; background:#25D366; color:#fff; cursor:pointer;">Enviar WhatsApp</button>
+        </h2>
+    </div>
     <div class="column" id="negociacao"><h2>Negociação</h2></div>
     <div class="column" id="contrato-assinado"><h2>Contrato Assinado</h2></div>
     <div class="column" id="fechado"><h2>Fechado</h2></div>
@@ -200,6 +207,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
             <label>Status</label>
             <select id="inputStatus">
                 <option value="lista-fria">Lista Fria</option>
+                <option value="primeiro-contato">Primeiro Contato</option>
                 <option value="negociacao">Negociação</option>
                 <option value="contrato-assinado">Contrato Assinado</option>
                 <option value="fechado">Fechado</option>
@@ -216,7 +224,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 <div class="toast" id="toast"></div>
 
 <script>
-const STATUS=['lista-fria','negociacao','contrato-assinado','fechado'];
+const STATUS=['lista-fria','primeiro-contato','negociacao','contrato-assinado','fechado'];
 const STORAGE_KEY='crm_clientes';
 const cardsMap={};
 const modalBackdrop=document.getElementById('modalBackdrop');
@@ -300,9 +308,40 @@ function whatsapp(numero){
     window.open(`https://wa.me/55${num}`,'_blank');
 }
 
+document.getElementById('btnWhatsappTodos')?.addEventListener('click', ()=>{
+    const coluna=document.getElementById('primeiro-contato');
+    const cards=coluna.querySelectorAll('.card');
+    if(cards.length===0){ showToast("Nenhum cliente nesta coluna"); return; }
+    cards.forEach(card=>{
+        const nome=card.querySelector('h3')?.innerText||'';
+        const numeros=card.dataset.numeros||'';
+        if(numeros){
+            const num=numeros.replace(/\D/g,'');
+            const mensagem=encodeURIComponent(`Bom dia, ${nome}`);
+            window.open(`https://wa.me/55${num}?text=${mensagem}`,'_blank');
+        }
+    });
+    showToast("Mensagens abertas no WhatsApp");
+});
+
 function render(){
-    STATUS.forEach(s=>document.getElementById(s).innerHTML=`<h2>${s.replace('-',' ').toUpperCase()}</h2>`);
+    STATUS.forEach(s=>document.getElementById(s).innerHTML=`<h2>${s.replace('-',' ').toUpperCase()}${s==='primeiro-contato'?` <button id="btnWhatsappTodos" style="padding:4px 8px; font-size:12px; border-radius:6px; border:none; background:#25D366; color:#fff; cursor:pointer;">Enviar WhatsApp</button>`:''}</h2>`);
     for(const c of getClientes()) criarCard(c);
+    document.getElementById('btnWhatsappTodos')?.addEventListener('click', ()=>{
+        const coluna=document.getElementById('primeiro-contato');
+        const cards=coluna.querySelectorAll('.card');
+        if(cards.length===0){ showToast("Nenhum cliente nesta coluna"); return; }
+        cards.forEach(card=>{
+            const nome=card.querySelector('h3')?.innerText||'';
+            const numeros=card.dataset.numeros||'';
+            if(numeros){
+                const num=numeros.replace(/\D/g,'');
+                const mensagem=encodeURIComponent(`Bom dia, ${nome}`);
+                window.open(`https://wa.me/55${num}?text=${mensagem}`,'_blank');
+            }
+        });
+        showToast("Mensagens abertas no WhatsApp");
+    });
     filtragemAplicada();
 }
 

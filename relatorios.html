@@ -27,8 +27,8 @@ header h1{font-family:'Poppins',sans-serif;color:#1e1e2f;font-size:20px}
 table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.04)}
 thead th{padding:12px;text-align:left;font-weight:600;color:#6b7280;border-bottom:1px solid #e6e9ee}
 tbody td{padding:12px;border-bottom:1px solid #f3f4f6;color:#333;vertical-align:middle}
-input.editable{width:100%;border:none;background:transparent;text-align:right;font-weight:500;color:#1e1e2f}
-input.editable:focus{outline:none;background:#f5f5f5;border-radius:4px;padding:2px}
+tbody td input{width:100%;border:none;background:transparent;text-align:right;font-weight:500;color:#1e1e2f;font-size:14px}
+tbody td input:focus{outline:none;background:#f5f5f5;border-radius:4px;padding:2px}
 /* Totals */
 .totals {display:flex;gap:16px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
 .total-box{background:#fafafa;padding:10px 12px;border-radius:10px;border:1px solid #e6e9ee;font-weight:600;color:#1e1e2f; min-width:150px; text-align:right}
@@ -128,18 +128,19 @@ async function carregarClientes(){
     } catch(e){ console.error(e); showToast('Erro ao carregar clientes'); }
 }
 
-function formatBRL(value){
-    return Number(value||0).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
-}
+// Formata número para R$
+function formatBRL(value){ return Number(value||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
 
-function maskInput(el){
+// Aplica máscara em tempo real enquanto digita
+function applyMaskInput(el){
     el.addEventListener('input',()=>{
         let val = el.value.replace(/\D/g,'');
         val = (val/100).toFixed(2);
-        el.value = formatBRL(val).replace('R$','').trim();
+        el.value = val.replace('.',',');
     });
 }
 
+// Renderiza tabela
 function renderTabela(){
     tabela.innerHTML='';
     if(!clientesData.length){ tabela.innerHTML='<tr><td colspan="4" style="text-align:center;padding:18px" class="muted">Nenhum cliente fechado</td></tr>'; return; }
@@ -147,18 +148,18 @@ function renderTabela(){
     clientesData.forEach(c=>{
         const tr = document.createElement('tr');
         tr.innerHTML=`
-        <td>${c.nome||'-'}</td>
-        <td><input class="editable" type="text" value="${c.honorarios||0}" onfocus="this.select()" onblur="updateValorMask('${c.id}','honorarios',this)"></td>
-        <td><input class="editable" type="text" value="${c.valorPago||0}" onfocus="this.select()" onblur="updateValorMask('${c.id}','valorPago',this)"></td>
-        <td><input class="editable" type="text" value="${c.valorReceber||0}" onfocus="this.select()" onblur="updateValorMask('${c.id}','valorReceber',this)"></td>
+            <td>${c.nome||'-'}</td>
+            <td><input type="text" value="${(c.honorarios||0).toFixed(2).replace('.',',')}" onfocus="this.select()" onblur="updateValorRealtime('${c.id}','honorarios',this)"></td>
+            <td><input type="text" value="${(c.valorPago||0).toFixed(2).replace('.',',')}" onfocus="this.select()" onblur="updateValorRealtime('${c.id}','valorPago',this)"></td>
+            <td><input type="text" value="${(c.valorReceber||0).toFixed(2).replace('.',',')}" onfocus="this.select()" onblur="updateValorRealtime('${c.id}','valorReceber',this)"></td>
         `;
         tabela.appendChild(tr);
-        tr.querySelectorAll('input').forEach(maskInput);
+        tr.querySelectorAll('input').forEach(applyMaskInput);
     });
-
     atualizarTotais();
 }
 
+// Atualiza gráficos
 function renderChart(){
     chart.data.labels = clientesData.map(c=>c.nome||'-');
     chart.data.datasets[0].data = clientesData.map(c=>Number(c.honorarios||0));
@@ -167,6 +168,7 @@ function renderChart(){
     chart.update();
 }
 
+// Atualiza totais
 function atualizarTotais(){
     const totalH = clientesData.reduce((acc,c)=>acc+Number(c.honorarios||0),0);
     const totalP = clientesData.reduce((acc,c)=>acc+Number(c.valorPago||0),0);
@@ -176,16 +178,16 @@ function atualizarTotais(){
     totalReceber.textContent = `Total a Receber: ${formatBRL(totalR)}`;
 }
 
-// Atualiza valor no Firebase com máscara
-window.updateValorMask = async (id, campo, el) => {
+// Atualiza valor no Firebase
+window.updateValorRealtime = async (id,campo,el)=>{
     try{
         let valor = el.value.replace(/\./g,'').replace(',','.');
         valor = parseFloat(valor)||0;
-        el.value = (valor).toLocaleString('pt-BR',{minimumFractionDigits:2});
+        el.value = valor.toLocaleString('pt-BR',{minimumFractionDigits:2});
         const cliente = clientesData.find(c=>c.id===id);
         if(!cliente) return;
-        cliente[campo] = valor;
-        await updateDoc(doc(db,"clientes",id), {[campo]: valor});
+        cliente[campo]=valor;
+        await updateDoc(doc(db,"clientes",id),{[campo]:valor});
         atualizarTotais();
         renderChart();
         showToast('Atualizado com sucesso');

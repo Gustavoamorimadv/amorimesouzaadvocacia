@@ -20,23 +20,14 @@ body { margin:0; font-family:'Segoe UI', sans-serif; background:#f0f2f5; display
 .main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
 header{height:72px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid #ddd}
 header h1{font-family:'Poppins',sans-serif;color:#1e1e2f;font-size:20px}
-.btn{padding:8px 12px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#1e1e2f;cursor:pointer}
-.btn:hover{background:#f5f5f5}
 .content{padding:20px; overflow:auto}
 .card{background:#fff;padding:18px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.04);margin-bottom:18px}
-/* Form */
-form.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;align-items:end}
-form input, form select{padding:10px;border-radius:8px;border:1px solid #ddd;background:transparent}
-form .full{grid-column:1/-1;display:flex;justify-content:flex-end;gap:8px}
 /* Table */
 .table-wrap{overflow:auto}
 table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.04)}
 thead th{padding:12px;text-align:left;font-weight:600;color:#6b7280;border-bottom:1px solid #e6e9ee}
 tbody td{padding:12px;border-bottom:1px solid #f3f4f6;color:#333;vertical-align:middle}
 .muted{color:#6b7280;font-size:13px}
-/* Buttons table */
-.icon-btn{width:32px;height:32px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #ddd;background:#fff;cursor:pointer}
-.icon-btn:hover{background:#f5f5f5}
 /* Chart */
 #chartBox{margin-top:18px;height:360px;background:#fff;padding:16px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.04);display:flex;flex-direction:column}
 #pagamentosChart{flex:1}
@@ -55,43 +46,21 @@ tbody td{padding:12px;border-bottom:1px solid #f3f4f6;color:#333;vertical-align:
     <button onclick="location.href='relatorios.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/combo-chart.png"/><span>Relatórios</span></button>
     <button onclick="location.href='agenda.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/calendar.png"/><span>Agenda</span></button>
     <button onclick="location.href='contatos.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/contacts.png"/><span>Contatos</span></button>
-    <button><img src="https://img.icons8.com/ios-filled/50/ffffff/settings.png"/><span>Configurações</span></button>
 </div>
 
 <main class="main">
 <header>
     <h1>Relatórios Financeiros</h1>
-    <button class="btn" id="btnNovo">Novo Cliente</button>
 </header>
 <div class="content">
-    <section class="card" id="formCard">
-        <form id="clienteForm" class="grid" autocomplete="off">
-            <input type="text" id="nomeCliente" placeholder="Nome do cliente" required>
-            <input type="number" id="honorarios" placeholder="Honorários (R$)" min="0" step="0.01" required>
-            <input type="number" id="valorPago" placeholder="Valor Pago (R$)" min="0" step="0.01" required>
-            <input type="number" id="valorReceber" placeholder="Valor a Receber (R$)" min="0" step="0.01" required>
-            <select id="statusCliente">
-                <option value="Não iniciado">Não iniciado</option>
-                <option value="Em andamento">Em andamento</option>
-                <option value="Concluído">Concluído</option>
-            </select>
-            <div class="full">
-                <button type="button" class="btn" id="btnCancelar" style="display:none">Cancelar</button>
-                <button type="submit" class="btn" id="btnSalvar">Adicionar</button>
-            </div>
-        </form>
-    </section>
-
     <section class="card table-wrap">
         <table>
             <thead>
                 <tr>
                     <th>Cliente</th>
-                    <th>Honorários</th>
-                    <th>Pago</th>
-                    <th>A Receber</th>
-                    <th>Status</th>
-                    <th style="text-align:right">Ações</th>
+                    <th>Classe</th>
+                    <th>Processo</th>
+                    <th>Valor</th>
                 </tr>
             </thead>
             <tbody id="clientesTable"></tbody>
@@ -100,8 +69,7 @@ tbody td{padding:12px;border-bottom:1px solid #f3f4f6;color:#333;vertical-align:
 
     <section id="chartBox" class="card">
         <div class="totals">
-            <div class="total-box" id="totalReceberBox">Total a Receber: R$ 0,00</div>
-            <div class="total-box" id="totalHonorariosBox">Total Honorários: R$ 0,00</div>
+            <div class="total-box" id="totalValorBox">Total Valor: R$ 0,00</div>
         </div>
         <canvas id="pagamentosChart"></canvas>
     </section>
@@ -110,128 +78,67 @@ tbody td{padding:12px;border-bottom:1px solid #f3f4f6;color:#333;vertical-align:
 
 <div class="toast" id="toast"></div>
 
-<script>
-(() => {
-const STORAGE_KEY = 'rel_clientes_v2';
-let clientes = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
-const form = document.getElementById('clienteForm');
-const nomeEl = document.getElementById('nomeCliente');
-const honorEl = document.getElementById('honorarios');
-const pagoEl = document.getElementById('valorPago');
-const recvEl = document.getElementById('valorReceber');
-const statusEl = document.getElementById('statusCliente');
+const firebaseConfig = {
+    apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
+    authDomain: "dapapp-38637.firebaseapp.com",
+    projectId: "dapapp-38637",
+    storageBucket: "dapapp-38637.appspot.com",
+    messagingSenderId: "628852295313",
+    appId: "1:628852295313:web:INSERIR_SEU_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 const tabela = document.getElementById('clientesTable');
 const toastEl = document.getElementById('toast');
-const btnSalvar = document.getElementById('btnSalvar');
-const btnCancelar = document.getElementById('btnCancelar');
-const btnNovo = document.getElementById('btnNovo');
-const formCard = document.getElementById('formCard');
-const totalReceberBox = document.getElementById('totalReceberBox');
-const totalHonorariosBox = document.getElementById('totalHonorariosBox');
-
+const totalValorBox = document.getElementById('totalValorBox');
 const ctx = document.getElementById('pagamentosChart').getContext('2d');
+
 const chart = new Chart(ctx, {
-    type:'bar',
-    data:{ labels:[], datasets:[
-        {label:'Honorários', data:[], backgroundColor:'rgba(0,0,0,0.7)'},
-        {label:'Valor Pago', data:[], backgroundColor:'rgba(0,0,0,0.4)'},
-        {label:'A Receber', data:[], backgroundColor:'rgba(0,0,0,0.2)'}
-    ]},
-    options:{
-        responsive:true,
-        maintainAspectRatio:false,
-        plugins:{legend:{position:'top'}},
-        scales:{ y:{ beginAtZero:true, ticks:{ callback: v=>'R$ '+Number(v).toLocaleString('pt-BR') } } }
-    }
+    type: 'bar',
+    data: { labels: [], datasets: [{ label: 'Valor', data: [], backgroundColor: 'rgba(54,162,235,0.7)' }] },
+    options: { responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true, ticks:{ callback:v=>'R$ '+Number(v).toLocaleString('pt-BR') } } } }
 });
 
 function showToast(msg){ toastEl.textContent=msg; toastEl.style.display='block'; clearTimeout(toastEl._t); toastEl._t=setTimeout(()=>toastEl.style.display='none',2500); }
-function saveAll(){ localStorage.setItem(STORAGE_KEY,JSON.stringify(clientes)); }
-function fmt(v){ return 'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2}); }
 
-function renderTable(){
+async function carregarClientes(){
+    try{
+        const q = query(collection(db,"clientes"), where("status","==","fechado"));
+        const snapshot = await getDocs(q);
+        const clientes = snapshot.docs.map(d=>({id:d.id, ...d.data()}));
+        renderTabela(clientes);
+        renderChart(clientes);
+    } catch(e){ console.error(e); showToast('Erro ao carregar clientes'); }
+}
+
+function renderTabela(clientes){
     tabela.innerHTML='';
-    if(!clientes.length){ tabela.innerHTML='<tr><td colspan="6" style="text-align:center;padding:18px" class="muted">Nenhum cliente cadastrado</td></tr>'; return; }
+    if(!clientes.length){ tabela.innerHTML='<tr><td colspan="4" style="text-align:center;padding:18px" class="muted">Nenhum cliente fechado</td></tr>'; return; }
     clientes.forEach(c=>{
         const tr=document.createElement('tr');
-        tr.innerHTML=`<td><strong>${c.nome}</strong></td>
-        <td>${fmt(c.honorarios)}</td>
-        <td>${fmt(c.valorPago)}</td>
-        <td>${fmt(c.valorReceber)}</td>
-        <td class="muted">${c.status}</td>
-        <td style="text-align:right">
-            <button class="icon-btn" onclick="editClient('${c.id}')">✏️</button>
-            <button class="icon-btn" onclick="deleteClient('${c.id}')">🗑</button>
-        </td>`;
+        tr.innerHTML=`<td>${c.nome||'-'}</td>
+        <td>${c.classe||'-'}</td>
+        <td>${c.processo||'-'}</td>
+        <td>R$ ${Number(c.valor||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>`;
         tabela.appendChild(tr);
     });
 }
 
-function renderChart(){
-    chart.data.labels = clientes.map(c=>c.nome);
-    chart.data.datasets[0].data = clientes.map(c=>c.honorarios);
-    chart.data.datasets[1].data = clientes.map(c=>c.valorPago);
-    chart.data.datasets[2].data = clientes.map(c=>c.valorReceber);
+function renderChart(clientes){
+    chart.data.labels = clientes.map(c=>c.nome||'-');
+    chart.data.datasets[0].data = clientes.map(c=>Number(c.valor||0));
     chart.update();
-
-    const totalReceber = clientes.reduce((acc,c)=>acc+c.valorReceber,0);
-    const totalHonorarios = clientes.reduce((acc,c)=>acc+c.honorarios,0);
-    totalReceberBox.textContent = `Total a Receber: ${fmt(totalReceber)}`;
-    totalHonorariosBox.textContent = `Total Honorários: ${fmt(totalHonorarios)}`;
+    const total = clientes.reduce((acc,c)=>acc+Number(c.valor||0),0);
+    totalValorBox.textContent = `Total Valor: R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
 }
 
-form.addEventListener('submit',e=>{
-    e.preventDefault();
-    const data = {
-        id: form.dataset.editId || Date.now().toString(),
-        nome: nomeEl.value.trim(),
-        honorarios: parseFloat(honorEl.value)||0,
-        valorPago: parseFloat(pagoEl.value)||0,
-        valorReceber: parseFloat(recvEl.value)||0,
-        status: statusEl.value
-    };
-    if(form.dataset.editId){ 
-        clientes = clientes.map(c=>c.id===data.id?data:c);
-        showToast('Cliente atualizado');
-    } else { 
-        clientes.push(data);
-        showToast('Cliente adicionado');
-    }
-    saveAll();
-    form.reset(); delete form.dataset.editId; btnSalvar.textContent='Adicionar'; btnCancelar.style.display='none';
-    renderTable(); renderChart();
-});
-
-btnCancelar.onclick=()=>{ form.reset(); delete form.dataset.editId; btnSalvar.textContent='Adicionar'; btnCancelar.style.display='none'; };
-btnNovo.onclick=()=>{ form.reset(); delete form.dataset.editId; btnSalvar.textContent='Adicionar'; btnCancelar.style.display='none'; formCard.scrollIntoView({behavior:'smooth'}); };
-
-window.editClient=id=>{
-    const c = clientes.find(x=>x.id===id);
-    if(!c)return;
-    nomeEl.value=c.nome;
-    honorEl.value=c.honorarios;
-    pagoEl.value=c.valorPago;
-    recvEl.value=c.valorReceber;
-    statusEl.value=c.status;
-    form.dataset.editId=id;
-    btnSalvar.textContent='Atualizar';
-    btnCancelar.style.display='inline-block';
-    formCard.scrollIntoView({behavior:'smooth'});
-};
-
-window.deleteClient=id=>{
-    if(!confirm('Excluir cliente?')) return;
-    clientes = clientes.filter(c=>c.id!==id);
-    saveAll();
-    renderTable();
-    renderChart();
-    showToast('Cliente excluído');
-};
-
-renderTable();
-renderChart();
-})();
+carregarClientes();
 </script>
 
 </body>

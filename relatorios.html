@@ -27,19 +27,20 @@ header h1{font-family:'Poppins',sans-serif;color:#1e1e2f;font-size:20px}
 table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.04)}
 thead th{padding:12px;text-align:left;font-weight:600;color:#6b7280;border-bottom:1px solid #e6e9ee}
 tbody td{padding:12px;border-bottom:1px solid #f3f4f6;color:#333;vertical-align:middle}
-.muted{color:#6b7280;font-size:13px}
+input.editable{width:100%;border:none;background:transparent;text-align:right;font-weight:500;color:#1e1e2f}
+input.editable:focus{outline:none;background:#f5f5f5;border-radius:4px;padding:2px}
+/* Totals */
+.totals {display:flex;gap:16px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.total-box{background:#fafafa;padding:10px 12px;border-radius:10px;border:1px solid #e6e9ee;font-weight:600;color:#1e1e2f; min-width:150px; text-align:right}
 /* Chart */
 #chartBox{margin-top:18px;height:360px;background:#fff;padding:16px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.04);display:flex;flex-direction:column}
 #pagamentosChart{flex:1}
-.totals {display:flex;gap:16px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
-.total-box{background:#fafafa;padding:10px 12px;border-radius:10px;border:1px solid #e6e9ee;font-weight:600;color:#1e1e2f}
 /* Toast */
 .toast{position:fixed;right:22px;bottom:22px;background:#111;color:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.25);display:none;z-index:9999}
 </style>
 </head>
 <body>
 
-<!-- Sidebar -->
 <div class="sidebar">
     <div class="brand" onclick="location.href='crm.html'">AMR ADV</div>
     <button onclick="location.href='crm.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/dashboard.png"/><span>CRM</span></button>
@@ -58,9 +59,9 @@ tbody td{padding:12px;border-bottom:1px solid #f3f4f6;color:#333;vertical-align:
             <thead>
                 <tr>
                     <th>Cliente</th>
-                    <th>Classe</th>
-                    <th>Processo</th>
-                    <th>Valor</th>
+                    <th>Honorários</th>
+                    <th>Pago</th>
+                    <th>A Receber</th>
                 </tr>
             </thead>
             <tbody id="clientesTable"></tbody>
@@ -69,7 +70,9 @@ tbody td{padding:12px;border-bottom:1px solid #f3f4f6;color:#333;vertical-align:
 
     <section id="chartBox" class="card">
         <div class="totals">
-            <div class="total-box" id="totalValorBox">Total Valor: R$ 0,00</div>
+            <div class="total-box" id="totalHonorarios">Total Honorários: R$ 0,00</div>
+            <div class="total-box" id="totalPago">Total Pago: R$ 0,00</div>
+            <div class="total-box" id="totalReceber">Total a Receber: R$ 0,00</div>
         </div>
         <canvas id="pagamentosChart"></canvas>
     </section>
@@ -80,29 +83,37 @@ tbody td{padding:12px;border-bottom:1px solid #f3f4f6;color:#333;vertical-align:
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, where, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
+// Config Firebase
 const firebaseConfig = {
-    apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
-    authDomain: "dapapp-38637.firebaseapp.com",
-    projectId: "dapapp-38637",
-    storageBucket: "dapapp-38637.appspot.com",
-    messagingSenderId: "628852295313",
-    appId: "1:628852295313:web:INSERIR_SEU_APP_ID"
+    apiKey: "SUA_API_KEY",
+    authDomain: "SEU_AUTH_DOMAIN",
+    projectId: "SEU_PROJECT_ID",
+    storageBucket: "SEU_STORAGE_BUCKET",
+    messagingSenderId: "SEU_MESSAGING_ID",
+    appId: "SEU_APP_ID"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const tabela = document.getElementById('clientesTable');
 const toastEl = document.getElementById('toast');
-const totalValorBox = document.getElementById('totalValorBox');
+const totalHonorarios = document.getElementById('totalHonorarios');
+const totalPago = document.getElementById('totalPago');
+const totalReceber = document.getElementById('totalReceber');
 const ctx = document.getElementById('pagamentosChart').getContext('2d');
+
+let clientesData = [];
 
 const chart = new Chart(ctx, {
     type: 'bar',
-    data: { labels: [], datasets: [{ label: 'Valor', data: [], backgroundColor: 'rgba(54,162,235,0.7)' }] },
-    options: { responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true, ticks:{ callback:v=>'R$ '+Number(v).toLocaleString('pt-BR') } } } }
+    data: { labels: [], datasets: [
+        {label:'Honorários', data:[], backgroundColor:'rgba(0,0,0,0.7)'},
+        {label:'Pago', data:[], backgroundColor:'rgba(0,0,0,0.4)'},
+        {label:'A Receber', data:[], backgroundColor:'rgba(0,0,0,0.2)'}
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{ beginAtZero:true, ticks:{ callback: v=>'R$ '+Number(v).toLocaleString('pt-BR') } } } }
 });
 
 function showToast(msg){ toastEl.textContent=msg; toastEl.style.display='block'; clearTimeout(toastEl._t); toastEl._t=setTimeout(()=>toastEl.style.display='none',2500); }
@@ -111,32 +122,60 @@ async function carregarClientes(){
     try{
         const q = query(collection(db,"clientes"), where("status","==","fechado"));
         const snapshot = await getDocs(q);
-        const clientes = snapshot.docs.map(d=>({id:d.id, ...d.data()}));
-        renderTabela(clientes);
-        renderChart(clientes);
+        clientesData = snapshot.docs.map(d=>({id:d.id, ...d.data()}));
+        renderTabela();
+        renderChart();
     } catch(e){ console.error(e); showToast('Erro ao carregar clientes'); }
 }
 
-function renderTabela(clientes){
+function renderTabela(){
     tabela.innerHTML='';
-    if(!clientes.length){ tabela.innerHTML='<tr><td colspan="4" style="text-align:center;padding:18px" class="muted">Nenhum cliente fechado</td></tr>'; return; }
-    clientes.forEach(c=>{
-        const tr=document.createElement('tr');
-        tr.innerHTML=`<td>${c.nome||'-'}</td>
-        <td>${c.classe||'-'}</td>
-        <td>${c.processo||'-'}</td>
-        <td>R$ ${Number(c.valor||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>`;
+    if(!clientesData.length){ tabela.innerHTML='<tr><td colspan="4" style="text-align:center;padding:18px" class="muted">Nenhum cliente fechado</td></tr>'; return; }
+
+    clientesData.forEach(c=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML=`
+        <td>${c.nome||'-'}</td>
+        <td><input class="editable" type="number" value="${c.honorarios||0}" step="0.01" onblur="updateValor('${c.id}','honorarios',this.value)"></td>
+        <td><input class="editable" type="number" value="${c.valorPago||0}" step="0.01" onblur="updateValor('${c.id}','valorPago',this.value)"></td>
+        <td><input class="editable" type="number" value="${c.valorReceber||0}" step="0.01" onblur="updateValor('${c.id}','valorReceber',this.value)"></td>
+        `;
         tabela.appendChild(tr);
     });
+
+    atualizarTotais();
 }
 
-function renderChart(clientes){
-    chart.data.labels = clientes.map(c=>c.nome||'-');
-    chart.data.datasets[0].data = clientes.map(c=>Number(c.valor||0));
+function renderChart(){
+    chart.data.labels = clientesData.map(c=>c.nome||'-');
+    chart.data.datasets[0].data = clientesData.map(c=>Number(c.honorarios||0));
+    chart.data.datasets[1].data = clientesData.map(c=>Number(c.valorPago||0));
+    chart.data.datasets[2].data = clientesData.map(c=>Number(c.valorReceber||0));
     chart.update();
-    const total = clientes.reduce((acc,c)=>acc+Number(c.valor||0),0);
-    totalValorBox.textContent = `Total Valor: R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
 }
+
+function atualizarTotais(){
+    const totalH = clientesData.reduce((acc,c)=>acc+Number(c.honorarios||0),0);
+    const totalP = clientesData.reduce((acc,c)=>acc+Number(c.valorPago||0),0);
+    const totalR = clientesData.reduce((acc,c)=>acc+Number(c.valorReceber||0),0);
+    totalHonorarios.textContent = `Total Honorários: R$ ${totalH.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+    totalPago.textContent = `Total Pago: R$ ${totalP.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+    totalReceber.textContent = `Total a Receber: R$ ${totalR.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+}
+
+// Atualiza valor no Firebase
+window.updateValor = async (id, campo, valor) => {
+    try{
+        valor = parseFloat(valor)||0;
+        const cliente = clientesData.find(c=>c.id===id);
+        if(!cliente) return;
+        cliente[campo] = valor;
+        await updateDoc(doc(db,"clientes",id), {[campo]: valor});
+        atualizarTotais();
+        renderChart();
+        showToast('Atualizado com sucesso');
+    } catch(e){ console.error(e); showToast('Erro ao atualizar'); }
+};
 
 carregarClientes();
 </script>

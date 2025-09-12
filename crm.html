@@ -10,7 +10,7 @@
 * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
 body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
 
-/* Sidebar moderna e minimalista */
+/* Sidebar */
 .sidebar {
     width:80px;
     background:#1e1e2f;
@@ -84,13 +84,14 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 .contrato-assinado .color-bar { background:#9b59b6; }
 .fechado .color-bar { background:#2ecc71; }
 
-/* Botões de ação no topo esquerdo do card */
+/* Botões de ação no card */
 .card-actions {
     position:absolute;
-    top:8px;
-    left:10px;
+    top:10px;
+    right:10px;
     display:flex;
     gap:10px;
+    z-index:10;
 }
 .card-actions button {
     background:none;
@@ -235,7 +236,13 @@ const searchInput=document.getElementById('searchInput');
 const filterStatus=document.getElementById('filterStatus');
 const toastEl=document.getElementById('toast');
 
-function showToast(msg){ toastEl.innerText=msg; toastEl.style.display='block'; clearTimeout(toastEl._t); toastEl._t=setTimeout(()=>toastEl.style.display='none',3000); }
+function showToast(msg){ 
+    toastEl.innerText=msg; 
+    toastEl.style.display='block'; 
+    clearTimeout(toastEl._t); 
+    toastEl._t=setTimeout(()=>toastEl.style.display='none',3000); 
+}
+
 function getClientes(){ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); }
 function saveClientes(c){ localStorage.setItem(STORAGE_KEY, JSON.stringify(c)); }
 
@@ -270,10 +277,10 @@ function criarCard(cliente){
     card.innerHTML=`
         <div class="color-bar"></div>
         <div class="card-actions">
-            <button onclick="event.stopPropagation(); ligar('${cliente.numeros||''}')">
+            <button type="button" onclick="event.stopPropagation(); ligar('${cliente.numeros||''}')">
                 <img src="https://img.icons8.com/ios-glyphs/30/000000/phone.png"/>
             </button>
-            <button onclick="event.stopPropagation(); whatsapp('${cliente.numeros||''}')">
+            <button type="button" onclick="event.stopPropagation(); whatsapp('${cliente.numeros||''}')">
                 <img src="https://img.icons8.com/ios-glyphs/30/000000/whatsapp.png"/>
             </button>
         </div>
@@ -301,7 +308,10 @@ function whatsapp(numero){
 }
 
 function render(){
-    STATUS.forEach(s=>document.getElementById(s).innerHTML=`<h2>${s.replace('-',' ').toUpperCase()}</h2>`);
+    STATUS.forEach(s=>{
+        const col=document.getElementById(s);
+        col.innerHTML=`<h2>${s.replace('-',' ').toUpperCase()}</h2>`;
+    });
     for(const c of getClientes()) criarCard(c);
     filtragemAplicada();
 }

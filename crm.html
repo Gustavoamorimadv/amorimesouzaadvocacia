@@ -61,6 +61,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 .toast { position:fixed; right:20px; bottom:20px; background:#222; color:#fff; padding:8px 12px; border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.3); display:none; z-index:60; }
 </style>
 
+<!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
@@ -77,22 +78,94 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 window.firebaseDB = db;
+</script>
+</head>
 
-// URL do seu webhook n8n
-const N8N_WEBHOOK_URL = "https://amorimia.app.n8n.cloud/webhook-test/e42a83d0-1a12-46dd-81d6-14f7fca92d23";
+<body>
+<!-- ... Mantenha seu HTML do body igual ... -->
+<div class="sidebar">
+<h2 onclick="window.location.href='dashboard.html'">AMR ADV</h2>
+<button onclick="window.location.href='dashboard.html'">
+<img src="https://img.icons8.com/ios-filled/50/ffffff/dashboard.png"/><span>Dashboard</span>
+</button>
+<button onclick="window.location.href='relatorios.html'">
+<img src="https://img.icons8.com/ios-filled/50/ffffff/combo-chart.png"/><span>Relatórios</span>
+</button>
+<button onclick="window.location.href='agenda.html'">
+<img src="https://img.icons8.com/ios-filled/50/ffffff/calendar.png"/><span>Agenda</span>
+</button>
+<button onclick="window.location.href='contatos.html'">
+<img src="https://img.icons8.com/ios-filled/50/ffffff/contacts.png"/><span>Contatos</span>
+</button>
+<button><img src="https://img.icons8.com/ios-filled/50/ffffff/settings.png"/><span>Configurações</span></button>
+</div>
 
-function showToast(msg){ document.getElementById('toast').innerText=msg; document.getElementById('toast').style.display='block'; clearTimeout(document.getElementById('toast')._t); document.getElementById('toast')._t=setTimeout(()=>document.getElementById('toast').style.display='none',3000); }
+<div class="main">
+<header>
+<h1>CRM</h1>
+<button id="btnAdd" class="btn primary">Adicionar Cliente</button>
+</header>
 
-async function enviarParaN8N(cliente){
-    try{
-        await fetch(N8N_WEBHOOK_URL,{
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body: JSON.stringify(cliente)
-        });
-        console.log("Enviado para n8n:",cliente);
-    } catch(e){ console.error("Erro ao enviar para n8n:",e); }
-}
+<div class="search-bar">
+<input id="searchInput" placeholder="Buscar cliente..." />
+<select id="filterStatus">
+<option value="">Todos os status</option>
+<option value="lista-fria">Lista Fria</option>
+<option value="negociacao">Negociação</option>
+<option value="contrato-assinado">Contrato Assinado</option>
+<option value="fechado">Fechado</option>
+</select>
+</div>
+
+<div class="kanban-container">
+<main class="kanban" id="kanban">
+<div class="column" id="lista-fria"><h2>Lista Fria</h2></div>
+<div class="column" id="negociacao"><h2>Negociação</h2></div>
+<div class="column" id="contrato-assinado"><h2>Contrato Assinado</h2></div>
+<div class="column" id="fechado"><h2>Fechado</h2></div>
+</main>
+</div>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+<div class="modal">
+<h3 id="modalTitle">Novo Cliente</h3>
+<form id="clientForm">
+<div class="row"><label>Nome</label><input id="inputNome" required /></div>
+<div class="row"><label>CPF</label><input id="inputCPF" placeholder="000.000.000-00" /></div>
+<div class="row"><label>Números</label><input id="inputNumeros" placeholder="Ex: (21) 99999-9999" /></div>
+<div class="row"><label>Número do Processo</label><input id="inputProcesso" placeholder="0000000-00.0000.0.00.0000" /></div>
+<div class="row"><label>Classe Processual</label>
+<select id="inputClasse">
+<option value="Busca e Apreensão">Busca e Apreensão</option>
+<option value="Execução de Título">Execução de Título</option>
+<option value="Processo Comum Cível">Processo Comum Cível</option>
+<option value="Outros">Outros</option>
+</select>
+</div>
+<div class="row"><label>Valor da Causa</label><input id="inputValor" type="number" placeholder="Ex: 10000" /></div>
+<div class="row"><label>Observação</label><textarea id="inputObs" maxlength="300"></textarea></div>
+<div class="row">
+<label>Status</label>
+<select id="inputStatus">
+<option value="lista-fria">Lista Fria</option>
+<option value="negociacao">Negociação</option>
+<option value="contrato-assinado">Contrato Assinado</option>
+<option value="fechado">Fechado</option>
+</select>
+</div>
+<div class="actions">
+<button type="button" class="btn ghost" id="btnCancel">Cancelar</button>
+<button type="submit" class="btn primary">Salvar</button>
+</div>
+</form>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { collection, addDoc, getDocs, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
 const STATUS=['lista-fria','negociacao','contrato-assinado','fechado'];
 const cardsMap={};
@@ -110,21 +183,23 @@ const btnAdd=document.getElementById('btnAdd');
 const btnCancel=document.getElementById('btnCancel');
 const searchInput=document.getElementById('searchInput');
 const filterStatus=document.getElementById('filterStatus');
+const toastEl=document.getElementById('toast');
+
+function showToast(msg){ toastEl.innerText=msg; toastEl.style.display='block'; clearTimeout(toastEl._t); toastEl._t=setTimeout(()=>toastEl.style.display='none',3000); }
 
 async function getClientes(){
-    const snapshot = await getDocs(collection(db,"clientes"));
+    const snapshot = await getDocs(collection(firebaseDB,"clientes"));
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
 
 async function saveCliente(cliente){
     if(cliente.id && isNaN(cliente.id)){
-        const docRef = doc(db,"clientes",cliente.id);
+        const docRef = doc(firebaseDB, "clientes", cliente.id);
         await setDoc(docRef, cliente);
     } else {
-        const docRef = await addDoc(collection(db,"clientes"), cliente);
+        const docRef = await addDoc(collection(firebaseDB,"clientes"), cliente);
         cliente.id = docRef.id;
     }
-    await enviarParaN8N(cliente);
 }
 
 function openModal(edit=false,data=null){
@@ -140,16 +215,17 @@ function openModal(edit=false,data=null){
         inputClasse.value=data.classe||"Outros";
         inputValor.value=data.valor||"";
         clientForm.dataset.editId=data.id;
-    } else {
-        inputNome.value=""; inputCPF.value=""; inputObs.value="";
-        inputStatus.value="lista-fria"; inputNumeros.value=""; inputProcesso.value="";
-        inputClasse.value="Outros"; inputValor.value=""; delete clientForm.dataset.editId;
+    }else{
+        inputNome.value=""; inputCPF.value=""; inputObs.value=""; inputStatus.value="lista-fria";
+        inputNumeros.value=""; inputProcesso.value=""; inputClasse.value="Outros"; inputValor.value="";
+        delete clientForm.dataset.editId;
     }
 }
 function closeModal(){ modalBackdrop.style.display='none'; }
 
 function criarCard(cliente){
-    const col=document.getElementById(cliente.status); if(!col) return;
+    const col=document.getElementById(cliente.status);
+    if(!col) return;
     const card=document.createElement('div');
     card.className=`card ${cliente.status}`;
     card.dataset.id=cliente.id;
@@ -234,18 +310,15 @@ function addDragEvents(card){
     card.addEventListener('dragstart',()=>{ draggedCard=card; card.style.opacity='.5'; });
     card.addEventListener('dragend',()=>{ draggedCard=null; card.style.opacity='1'; });
 }
-
 document.querySelectorAll('.column').forEach(col=>{
     col.addEventListener('dragover', e=>e.preventDefault());
     col.addEventListener('drop', async ()=>{
         if(!draggedCard) return;
         const id = draggedCard.dataset.id;
         const status = col.id;
-        const docRef = doc(db,"clientes",id);
+        const docRef = doc(firebaseDB,"clientes",id);
         await updateDoc(docRef,{status});
-        await enviarParaN8N({ id, status });
-        showToast("Status atualizado");
-        render();
+        render(); showToast("Status atualizado");
     });
 });
 

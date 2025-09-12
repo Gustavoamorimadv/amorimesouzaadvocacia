@@ -87,12 +87,12 @@ import { getFirestore, collection, getDocs, query, where, doc, updateDoc } from 
 
 // Config Firebase
 const firebaseConfig = {
-    apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
-    authDomain: "dapapp-38637.firebaseapp.com",
-    projectId: "dapapp-38637",
-    storageBucket: "dapapp-38637.appspot.com",
-    messagingSenderId: "628852295313",
-    appId: "1:628852295313:web:INSERIR_SEU_APP_ID"
+    apiKey: "SUA_API_KEY",
+    authDomain: "SEU_AUTH_DOMAIN",
+    projectId: "SEU_PROJECT_ID",
+    storageBucket: "SEU_STORAGE_BUCKET",
+    messagingSenderId: "SEU_MESSAGING_ID",
+    appId: "SEU_APP_ID"
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -128,6 +128,18 @@ async function carregarClientes(){
     } catch(e){ console.error(e); showToast('Erro ao carregar clientes'); }
 }
 
+function formatBRL(value){
+    return Number(value||0).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+}
+
+function maskInput(el){
+    el.addEventListener('input',()=>{
+        let val = el.value.replace(/\D/g,'');
+        val = (val/100).toFixed(2);
+        el.value = formatBRL(val).replace('R$','').trim();
+    });
+}
+
 function renderTabela(){
     tabela.innerHTML='';
     if(!clientesData.length){ tabela.innerHTML='<tr><td colspan="4" style="text-align:center;padding:18px" class="muted">Nenhum cliente fechado</td></tr>'; return; }
@@ -136,11 +148,12 @@ function renderTabela(){
         const tr = document.createElement('tr');
         tr.innerHTML=`
         <td>${c.nome||'-'}</td>
-        <td><input class="editable" type="number" value="${c.honorarios||0}" step="0.01" onblur="updateValor('${c.id}','honorarios',this.value)"></td>
-        <td><input class="editable" type="number" value="${c.valorPago||0}" step="0.01" onblur="updateValor('${c.id}','valorPago',this.value)"></td>
-        <td><input class="editable" type="number" value="${c.valorReceber||0}" step="0.01" onblur="updateValor('${c.id}','valorReceber',this.value)"></td>
+        <td><input class="editable" type="text" value="${c.honorarios||0}" onfocus="this.select()" onblur="updateValorMask('${c.id}','honorarios',this)"></td>
+        <td><input class="editable" type="text" value="${c.valorPago||0}" onfocus="this.select()" onblur="updateValorMask('${c.id}','valorPago',this)"></td>
+        <td><input class="editable" type="text" value="${c.valorReceber||0}" onfocus="this.select()" onblur="updateValorMask('${c.id}','valorReceber',this)"></td>
         `;
         tabela.appendChild(tr);
+        tr.querySelectorAll('input').forEach(maskInput);
     });
 
     atualizarTotais();
@@ -158,15 +171,17 @@ function atualizarTotais(){
     const totalH = clientesData.reduce((acc,c)=>acc+Number(c.honorarios||0),0);
     const totalP = clientesData.reduce((acc,c)=>acc+Number(c.valorPago||0),0);
     const totalR = clientesData.reduce((acc,c)=>acc+Number(c.valorReceber||0),0);
-    totalHonorarios.textContent = `Total Honorários: R$ ${totalH.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
-    totalPago.textContent = `Total Pago: R$ ${totalP.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
-    totalReceber.textContent = `Total a Receber: R$ ${totalR.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+    totalHonorarios.textContent = `Total Honorários: ${formatBRL(totalH)}`;
+    totalPago.textContent = `Total Pago: ${formatBRL(totalP)}`;
+    totalReceber.textContent = `Total a Receber: ${formatBRL(totalR)}`;
 }
 
-// Atualiza valor no Firebase
-window.updateValor = async (id, campo, valor) => {
+// Atualiza valor no Firebase com máscara
+window.updateValorMask = async (id, campo, el) => {
     try{
+        let valor = el.value.replace(/\./g,'').replace(',','.');
         valor = parseFloat(valor)||0;
+        el.value = (valor).toLocaleString('pt-BR',{minimumFractionDigits:2});
         const cliente = clientesData.find(c=>c.id===id);
         if(!cliente) return;
         cliente[campo] = valor;

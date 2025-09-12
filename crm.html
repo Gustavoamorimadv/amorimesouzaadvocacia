@@ -82,7 +82,6 @@ window.firebaseDB = db;
 </head>
 
 <body>
-<!-- ... Mantenha seu HTML do body igual ... -->
 <div class="sidebar">
 <h2 onclick="window.location.href='dashboard.html'">AMR ADV</h2>
 <button onclick="window.location.href='dashboard.html'">
@@ -296,6 +295,20 @@ clientForm.onsubmit = async function(e){
     } else {
         await saveCliente(novo);
         showToast("Cliente adicionado!");
+    }
+
+    // 🔹 Disparo para webhook n8n se status for lista-fria
+    if(novo.status==='lista-fria'){
+        try{
+            await fetch('https://amorimia.app.n8n.cloud/webhook-test/e42a83d0-1a12-46dd-81d6-14f7fca92d23',{
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body: JSON.stringify(novo)
+            });
+            console.log("Webhook n8n acionado com sucesso!");
+        }catch(err){
+            console.error("Erro ao acionar webhook n8n:",err);
+        }
     }
 
     closeModal();

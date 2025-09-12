@@ -192,6 +192,8 @@ function openModal(edit=false,data=null){
 function closeModal(){ modalBackdrop.style.display='none'; }
 
 function criarCard(cliente){
+    const col=document.getElementById(cliente.status);
+    if(!col) return; // evita status inválido
     const card=document.createElement('div');
     card.className=`card ${cliente.status}`;
     card.dataset.id=cliente.id;
@@ -199,30 +201,20 @@ function criarCard(cliente){
     card.dataset.nome=cliente.nome.toLowerCase();
     card.draggable=true;
 
-    // Conteúdo do card
-    const colorBar=document.createElement('div');
-    colorBar.className='color-bar';
-    card.appendChild(colorBar);
+    const colorBar=document.createElement('div'); colorBar.className='color-bar'; card.appendChild(colorBar);
 
-    const actionsDiv=document.createElement('div');
-    actionsDiv.className='card-actions';
-
+    const actionsDiv=document.createElement('div'); actionsDiv.className='card-actions';
     const btnCall=document.createElement('button');
     btnCall.onclick=(e)=>{ e.stopPropagation(); ligar(cliente.numeros||''); };
     const imgCall=document.createElement('img'); imgCall.src="https://img.icons8.com/ios-glyphs/30/000000/phone.png";
     btnCall.appendChild(imgCall);
-
     const btnWa=document.createElement('button');
     btnWa.onclick=(e)=>{ e.stopPropagation(); whatsapp(cliente.numeros||''); };
     const imgWa=document.createElement('img'); imgWa.src="https://img.icons8.com/ios-glyphs/30/000000/whatsapp.png";
     btnWa.appendChild(imgWa);
+    actionsDiv.appendChild(btnCall); actionsDiv.appendChild(btnWa); card.appendChild(actionsDiv);
 
-    actionsDiv.appendChild(btnCall);
-    actionsDiv.appendChild(btnWa);
-    card.appendChild(actionsDiv);
-
-    const contentDiv=document.createElement('div');
-    contentDiv.className='card-content';
+    const contentDiv=document.createElement('div'); contentDiv.className='card-content';
     contentDiv.innerHTML=`<h3>${cliente.nome}</h3>
         <p>CPF: ${cliente.cpf||'-'}</p>
         <p>Classe: ${cliente.classe||'-'}</p>
@@ -232,7 +224,7 @@ function criarCard(cliente){
 
     card.onclick=()=>openModal(true,cliente);
     addDragEvents(card);
-    document.getElementById(cliente.status).appendChild(card);
+    col.appendChild(card);
     cardsMap[cliente.id]=card;
 }
 
@@ -244,7 +236,7 @@ function render(){
         const col=document.getElementById(s);
         col.innerHTML=`<h2>${s.replace('-',' ').toUpperCase()}</h2>`;
     });
-    cardsMap && Object.keys(cardsMap).forEach(k=>delete cardsMap[k]);
+    for(const k in cardsMap) delete cardsMap[k];
     for(const c of getClientes()) criarCard(c);
     filtragemAplicada();
 }
@@ -268,8 +260,7 @@ clientForm.onsubmit=function(e){
         clientes.push(novo);
         showToast("Cliente adicionado!");
     }
-    saveClientes(clientes);
-    closeModal(); render();
+    saveClientes(clientes); closeModal(); render();
 };
 
 btnAdd.onclick=()=>openModal();

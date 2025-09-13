@@ -61,7 +61,6 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 .toast { position:fixed; right:20px; bottom:20px; background:#222; color:#fff; padding:8px 12px; border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.3); display:none; z-index:60; }
 </style>
 
-<!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
@@ -162,7 +161,6 @@ window.firebaseDB = db;
 </div>
 
 <div class="toast" id="toast"></div>
-
 <audio id="coinSound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_8a3d7f1e1b.mp3?filename=coin-collect-retro-8-bit-sound-effect-145251.mp3" preload="auto"></audio>
 
 <script type="module">
@@ -253,7 +251,8 @@ function criarCard(cliente){
         <p>CPF: ${cliente.cpf||'-'}</p>
         <p>Classe: ${cliente.classe||'-'}</p>
         <p>Processo: ${cliente.processo||'-'}</p>
-        <p>Valor: R$ ${cliente.valor||0}</p>`;
+        <p>Valor: R$ ${cliente.valor||0}</p>
+        ${cliente.ultimaOferta ? `<p>Última proposta: R$ ${cliente.ultimaOferta}</p>` : ''}`;
     card.appendChild(contentDiv);
 
     card.onclick=()=>openModal(true,cliente);

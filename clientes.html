@@ -13,29 +13,31 @@ h1 { font-family:'Poppins', sans-serif; color:#1e1e2f; margin-bottom:20px; }
 .card {
   background:#fff; padding:20px; border-radius:12px;
   box-shadow:0 6px 18px rgba(0,0,0,0.1);
-  width:320px; cursor:pointer; transition: transform 0.2s;
+  width:320px; flex:1; cursor:pointer;
 }
-.card:hover { transform: translateY(-5px); }
 .card h2 { font-size:18px; margin-bottom:10px; }
 .card p { font-size:14px; margin:4px 0; color:#333; }
+input { width:100%; padding:8px; margin-top:5px; margin-bottom:10px; border:1px solid #ccc; border-radius:6px; }
+button { padding:8px 12px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-top:8px; }
+button:hover { background:#2a2a40; }
+.processo { margin-top:10px; padding:10px; background:#f9f9f9; border-radius:8px; }
+.processo strong { color:#1e1e2f; }
 
 /* Modal */
-#modalCliente {
+#modalForm {
   display:none;
   position:fixed;
   top:0; left:0; width:100%; height:100%;
   background:rgba(0,0,0,0.5);
   justify-content:center; align-items:center;
-  z-index:1000;
 }
 .modal-content {
   background:#fff; padding:20px; border-radius:12px;
   width:400px; max-height:90vh; overflow-y:auto;
 }
 .modal-content h3 { margin-bottom:15px; }
-.modal-content input { width:100%; padding:8px; margin-bottom:10px; border:1px solid #ccc; border-radius:6px; }
-.modal-content button { padding:8px 12px; margin-right:10px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
-.modal-content button:hover { background:#2a2a40; }
+.modal-content input { margin-bottom:10px; }
+.modal-content button { margin-right:10px; }
 </style>
 </head>
 <body>
@@ -43,12 +45,13 @@ h1 { font-family:'Poppins', sans-serif; color:#1e1e2f; margin-bottom:20px; }
 <h1>Clientes Fechados</h1>
 <div class="container" id="clientesContainer"></div>
 
-<!-- Modal Cliente -->
-<div id="modalCliente">
+<!-- Modal -->
+<div id="modalForm">
   <div class="modal-content" id="modalContent">
     <h3 id="modalTitle">Cliente</h3>
-    <div id="modalBody"></div>
-    <button id="saveBtn">Salvar</button>
+    <div id="processosInputs"></div>
+    <div id="boletosInputs"></div>
+    <button id="confirmBtn">Salvar e Gerar Boletos</button>
     <button onclick="fecharModal()">Cancelar</button>
   </div>
 </div>
@@ -58,12 +61,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebas
 import { getFirestore, collection, query, where, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
-    authDomain: "dapapp-38637.firebaseapp.com",
-    projectId: "dapapp-38637",
-    storageBucket: "dapapp-38637.appspot.com",
-    messagingSenderId: "628852295313",
-    appId: "1:628852295313:web:INSERIR_SEU_APP_ID"
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_AUTH_DOMAIN",
+  projectId: "SEU_PROJECT_ID"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -88,53 +88,47 @@ async function carregarClientesFechados() {
     const id = docSnap.id;
     const card = document.createElement("div");
     card.className = "card";
-    card.innerHTML = `<h2>${cliente.nome || "Cliente sem nome"}</h2>
-                      <p><strong>CPF:</strong> ${cliente.cpf || "-"}</p>`;
+    card.innerHTML = `<h2>${cliente.nome || "Cliente sem nome"}</h2><p><strong>CPF:</strong> ${cliente.cpf || "-"}</p>`;
     card.onclick = () => abrirModal(cliente, id);
     container.appendChild(card);
   });
 }
 
-// Modal
-const modal = document.getElementById('modalCliente');
+const modal = document.getElementById('modalForm');
+const processosInputs = document.getElementById('processosInputs');
+const boletosInputs = document.getElementById('boletosInputs');
+const confirmBtn = document.getElementById('confirmBtn');
 const modalTitle = document.getElementById('modalTitle');
-const modalBody = document.getElementById('modalBody');
-const saveBtn = document.getElementById('saveBtn');
 
 function abrirModal(cliente, id) {
-  clienteAtual = { ...cliente, id };
-  modalTitle.textContent = cliente.nome || "Cliente";
-  modalBody.innerHTML = "";
-
-  // Valor dos honorários
-  modalBody.innerHTML += `<label>Honorários:</label>
-                          <input type="text" id="inputHonorarios" value="${cliente.honorarios || ''}">`;
-
-  // Parcelamento
-  modalBody.innerHTML += `<label>Parcelas:</label>
-                          <input type="number" id="inputParcelas" value="${cliente.parcelamento || 1}" min="1">`;
+  clienteAtual = {...cliente, id};
+  modalTitle.innerText = cliente.nome;
+  processosInputs.innerHTML = "";
+  boletosInputs.innerHTML = "";
 
   // Processos
-  modalBody.innerHTML += `<h4>Processos</h4>`;
   if (cliente.processos && Array.isArray(cliente.processos)) {
-    cliente.processos.forEach((proc, i) => {
-      modalBody.innerHTML += `<label>Processo ${i+1} - Número:</label>
-                              <input type="text" id="proc-num-${i}" value="${proc.numero || ''}">
-                              <label>Valor da causa:</label>
-                              <input type="text" id="proc-valor-${i}" value="${proc.valorCausa || ''}"><hr>`;
+    cliente.processos.forEach((p, i) => {
+      processosInputs.innerHTML += `
+        <div class="processo">
+          <p><strong>Processo:</strong> ${p.numero || "Sem número"}</p>
+          <label>Valor da causa:</label>
+          <input type="text" id="proc-${i}" value="${p.valorCausa || ""}">
+        </div>
+      `;
     });
-  } else {
-    modalBody.innerHTML += "<p>Nenhum processo cadastrado.</p>";
   }
 
   // Boletos
-  modalBody.innerHTML += `<h4>Boletos</h4>`;
-  let parcelas = parseInt(cliente.parcelamento) || 1;
-  for (let i=0; i<parcelas; i++) {
-    modalBody.innerHTML += `<label>Boleto ${i+1} - Valor:</label>
-                            <input type="text" id="boleto-valor-${i}" placeholder="Ex: 1000">
-                            <label>Vencimento:</label>
-                            <input type="date" id="boleto-venc-${i}" value="${new Date().toISOString().split('T')[0]}"><hr>`;
+  const numParcelas = parseInt(cliente.parcelamento) || 1;
+  for (let i=0; i<numParcelas; i++) {
+    boletosInputs.innerHTML += `
+      <label>Boleto ${i+1} - Valor:</label>
+      <input type="text" id="valor-${i}" placeholder="Ex: 1000">
+      <label>Vencimento:</label>
+      <input type="date" id="vencimento-${i}" value="${new Date().toISOString().split('T')[0]}">
+      <hr>
+    `;
   }
 
   modal.style.display = "flex";
@@ -145,58 +139,50 @@ function fecharModal() {
   clienteAtual = null;
 }
 
-saveBtn.onclick = async function() {
+confirmBtn.onclick = async function() {
   if (!clienteAtual) return;
 
-  // Atualizar honorários e parcelamento
-  const honorarios = document.getElementById('inputHonorarios').value;
-  const parcelamento = document.getElementById('inputParcelas').value;
-  await updateDoc(doc(db, "clientes", clienteAtual.id), { honorarios, parcelamento });
+  // Salvar valores de processos
+  const processos = clienteAtual.processos || [];
+  processos.forEach((p, i) => {
+    const val = document.getElementById(`proc-${i}`).value;
+    p.valorCausa = val;
+  });
 
-  // Atualizar processos
-  if (clienteAtual.processos && Array.isArray(clienteAtual.processos)) {
-    clienteAtual.processos.forEach(async (proc, i) => {
-      const numero = document.getElementById(`proc-num-${i}`).value;
-      const valorCausa = document.getElementById(`proc-valor-${i}`).value;
-      proc.numero = numero;
-      proc.valorCausa = valorCausa;
-    });
-    await updateDoc(doc(db, "clientes", clienteAtual.id), { processos: clienteAtual.processos });
-  }
+  await updateDoc(doc(db, "clientes", clienteAtual.id), { processos });
 
-  // Gerar boletos via API
+  // Preparar boletos
   const boletos = [];
-  let parcelas = parseInt(parcelamento) || 1;
-  for (let i=0; i<parcelas; i++) {
-    const valor = document.getElementById(`boleto-valor-${i}`).value;
-    const venc = document.getElementById(`boleto-venc-${i}`).value;
-    if (valor && venc) boletos.push({ valor, vencimento: venc });
+  const numParcelas = parseInt(clienteAtual.parcelamento) || 1;
+  for (let i=0; i<numParcelas; i++) {
+    const valor = document.getElementById(`valor-${i}`).value;
+    const vencimento = document.getElementById(`vencimento-${i}`).value;
+    if (valor && vencimento) boletos.push({ valor, vencimento });
   }
 
-  if (boletos.length > 0) {
-    try {
-      const res = await fetch('http://localhost:3000/api/gerarBoletos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          clienteId: clienteAtual.id,
-          nome: clienteAtual.nome,
-          cpf: clienteAtual.cpf,
-          email: clienteAtual.email,
-          boletos
-        })
-      });
-      const data = await res.json();
-      if (data.sucesso) alert("Boletos gerados com sucesso!");
-      else alert("Erro ao gerar boletos: " + JSON.stringify(data.erro));
-    } catch(err) {
-      alert("Erro ao conectar ao servidor: " + err.message);
+  // Chamar servidor para gerar boletos
+  try {
+    const res = await fetch("http://localhost:3000/api/gerarBoletos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        nome: clienteAtual.nome,
+        cpf: clienteAtual.cpf,
+        email: clienteAtual.email,
+        boletos
+      })
+    });
+    const data = await res.json();
+    if (data.sucesso) {
+      alert("Boletos gerados com sucesso!");
+      fecharModal();
+    } else {
+      alert("Erro ao gerar boletos: " + JSON.stringify(data.erro));
     }
+  } catch(err) {
+    alert("Erro ao conectar ao servidor: " + err.message);
   }
-
-  fecharModal();
-  carregarClientesFechados();
-}
+};
 
 carregarClientesFechados();
 </script>

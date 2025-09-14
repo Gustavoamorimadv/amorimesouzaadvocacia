@@ -23,18 +23,16 @@ header { height:60px; background:#fff; border-bottom:1px solid #ddd; display:fle
 header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
 header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
 
-.search-bar { padding:10px 20px; background:#fff; border-bottom:1px solid #ddd; display:flex; gap:10px; align-items:center; flex-shrink:0; }
-.search-bar input { padding:8px; border:1px solid #ccc; border-radius:6px; flex:1; }
+.cards-wrapper { flex:1; display:flex; gap:20px; padding:20px; overflow-y:auto; }
+.column { flex:1; display:flex; flex-direction:column; gap:15px; }
+.column h2 { font-size:18px; color:#1e1e2f; margin-bottom:10px; text-align:center; }
+.cards-container { display:flex; flex-wrap:wrap; gap:15px; justify-content:center; }
 
-.cards-container { flex:1; overflow-y:auto; padding:20px; display:flex; flex-wrap:wrap; gap:15px; }
-
-.card { background:#fff; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.1); cursor:pointer; transition:0.3s; width:220px; min-height:120px; display:flex; flex-direction:column; position:relative; }
-.card:hover { transform:scale(1.02); }
-.card .color-bar { width:6px; height:100%; border-radius:12px 0 0 12px; background:#2ecc71; position:absolute; left:0; top:0; }
-.card-content { padding:12px; flex:1; display:flex; flex-direction:column; justify-content:center; }
-.card-content h3 { font-size:16px; margin-bottom:4px; color:#333; }
-.card-content p { font-size:12px; color:#555; margin:2px 0; }
-.boleto { background:#f1f3f5; border-radius:6px; padding:3px 6px; margin-top:2px; font-size:11px; }
+.card { background:#fff; width:150px; height:150px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.1); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; cursor:pointer; transition:0.3s; }
+.card:hover { transform:scale(1.05); }
+.card h3 { font-size:14px; color:#333; margin-bottom:4px; }
+.card p { font-size:12px; color:#555; margin:2px 0; }
+.boleto { font-size:11px; background:#f1f3f5; padding:2px 6px; border-radius:6px; margin-top:2px; }
 
 .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); justify-content:center; align-items:center; z-index:50; }
 .modal { background:#fff; padding:18px; border-radius:15px; min-width:320px; max-width:500px; box-shadow:0 8px 30px rgba(0,0,0,.25); }
@@ -50,129 +48,64 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 </style>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, setDoc, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, addDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
+ apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
     authDomain: "dapapp-38637.firebaseapp.com",
     projectId: "dapapp-38637",
     storageBucket: "dapapp-38637.appspot.com",
     messagingSenderId: "628852295313",
     appId: "1:628852295313:web:INSERIR_SEU_APP_ID"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const cardsContainer = document.querySelector('.cards-container');
+const colEmDia = document.getElementById('emDia');
+const colEmAtraso = document.getElementById('emAtraso');
 const modalBackdrop = document.getElementById('modalBackdrop');
 const clientForm = document.getElementById('clientForm');
 const toastEl = document.getElementById('toast');
 
 function showToast(msg){ toastEl.innerText=msg; toastEl.style.display='block'; clearTimeout(toastEl._t); toastEl._t=setTimeout(()=>toastEl.style.display='none',3000); }
 
-let clienteAtual=null;
-
-function abrirModal(cliente=null){
-  modalBackdrop.style.display='flex';
-  clienteAtual = cliente;
-  clientForm.reset();
-  if(cliente){
-    clientForm.nome.value = cliente.nome;
-    clientForm.cpf.value = cliente.cpf;
-    clientForm.email.value = cliente.email;
-    clientForm.telefone.value = cliente.telefone||'';
-    clientForm.cep.value = cliente.cep||'';
-    clientForm.endereco.value = cliente.endereco||'';
-    clientForm.cidade.value = cliente.cidade||'';
-    clientForm.estado.value = cliente.estado||'';
-    clientForm.valor.value = cliente.boletos && cliente.boletos[cliente.boletos.length-1]?.valor || '';
-    clientForm.vencimento.value = cliente.boletos && cliente.boletos[cliente.boletos.length-1]?.vencimento || '';
-  }
-}
-
+function abrirModal(){ modalBackdrop.style.display='flex'; }
 function fecharModal(){ modalBackdrop.style.display='none'; }
 
 async function carregarClientes(){
-  cardsContainer.innerHTML='';
+  colEmDia.querySelector('.cards-container').innerHTML='';
+  colEmAtraso.querySelector('.cards-container').innerHTML='';
   const snapshot = await getDocs(collection(db,"clientes"));
   snapshot.docs.forEach(docSnap=>{
-    const cliente = docSnap.data();
-    cliente.id = docSnap.id;
-    if(cliente.status!=='fechado') return;
-
-    const card = document.createElement('div');
-    card.className='card';
-    const colorBar = document.createElement('div'); colorBar.className='color-bar'; card.appendChild(colorBar);
-
-    const content = document.createElement('div'); content.className='card-content';
-    content.innerHTML = `<h3>${cliente.nome}</h3>
-                         <p>CPF: ${cliente.cpf||'-'}</p>
-                         <div id="boletos-${cliente.id}">
-                           ${(cliente.boletos||[]).map(b=>`<div class="boleto">R$${b.valor} - ${b.vencimento}</div>`).join('')}
-                         </div>`;
-    card.appendChild(content);
-    card.onclick = ()=>abrirModal(cliente);
-    cardsContainer.appendChild(card);
+    const cliente = docSnap.data(); cliente.id = docSnap.id;
+    if(cliente.status !== 'fechado') return;
+    const card = document.createElement('div'); card.className='card';
+    card.innerHTML = `<h3>${cliente.nome}</h3>
+                      <p>CPF: ${cliente.cpf}</p>
+                      ${(cliente.boletos||[]).map(b=>`<div class="boleto">R$${b.valor} - ${b.vencimento}</div>`).join('')}`;
+    if(cliente.boletos && cliente.boletos.some(b=>new Date(b.vencimento) < new Date())){
+      colEmAtraso.querySelector('.cards-container').appendChild(card);
+    } else {
+      colEmDia.querySelector('.cards-container').appendChild(card);
+    }
+    card.onclick = ()=>abrirModal();
   });
 }
 
 clientForm.onsubmit = async (e)=>{
   e.preventDefault();
   const nome = clientForm.nome.value.trim();
-  if(!nome){ showToast("Nome obrigatório"); return; }
-  const clienteData = {
-    nome,
-    cpf: clientForm.cpf.value.trim(),
-    email: clientForm.email.value.trim(),
-    telefone: clientForm.telefone.value.trim(),
-    cep: clientForm.cep.value.trim(),
-    endereco: clientForm.endereco.value.trim(),
-    cidade: clientForm.cidade.value.trim(),
-    estado: clientForm.estado.value.trim(),
-    status: 'fechado',
-    boletos: clienteAtual?.boletos || []
-  };
+  const cpf = clientForm.cpf.value.trim();
+  const email = clientForm.email.value.trim();
   const valor = clientForm.valor.value.trim();
   const vencimento = clientForm.vencimento.value;
+  if(!nome||!cpf||!email||!valor||!vencimento){ showToast("Preencha todos os campos!"); return; }
 
-  try{
-    const res = await fetch("http://localhost:3000/api/gerarBoletos",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        nome, cpf: clienteData.cpf, email: clienteData.email,
-        telefone: clienteData.telefone,
-        cep: clienteData.cep,
-        endereco: clienteData.endereco,
-        cidade: clienteData.cidade,
-        estado: clienteData.estado,
-        boletos:[{ valor, vencimento }]
-      })
-    });
-    const data = await res.json();
-    if(data.sucesso){
-      showToast("Boleto gerado!");
-      const novosBoletos = clienteData.boletos;
-      novosBoletos.push({ valor, vencimento });
-      clienteData.boletos = novosBoletos;
-      if(clienteAtual && clienteAtual.id){
-        await updateDoc(doc(db,"clientes",clienteAtual.id), { boletos: novosBoletos });
-      } else {
-        const docRef = await addDoc(collection(db,"clientes"), clienteData);
-        clienteAtual = {...clienteData, id:docRef.id};
-      }
-      fecharModal();
-      carregarClientes();
-    } else {
-      showToast("Erro ao gerar boleto");
-    }
-  }catch(err){
-    showToast("Erro: "+err.message);
-  }
+  const clienteData = { nome, cpf, email, status:'fechado', boletos:[{valor,vencimento}] };
+  await addDoc(collection(db,"clientes"),clienteData);
+  fecharModal(); carregarClientes(); showToast("Boleto gerado!");
 };
 
-document.getElementById('btnAddCliente').onclick = ()=>abrirModal();
 window.onload = carregarClientes;
 </script>
 </head>
@@ -181,15 +114,23 @@ window.onload = carregarClientes;
 <h2 onclick="window.location.href='dashboard.html'">AMR ADV</h2>
 <button onclick="window.location.href='dashboard.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/dashboard.png"/><span>Dashboard</span></button>
 </div>
+
 <div class="main">
 <header>
 <h1>Clientes Fechados</h1>
-<button id="btnAddCliente" class="btn primary">Gerar Boleto</button>
+<button class="btn primary" onclick="abrirModal()">Gerar Boleto</button>
 </header>
-<div class="search-bar">
-<input id="searchInput" placeholder="Buscar cliente...">
-</div>
+
+<div class="cards-wrapper">
+<div class="column" id="emDia">
+<h2>Em Dia</h2>
 <div class="cards-container"></div>
+</div>
+<div class="column" id="emAtraso">
+<h2>Em Atraso</h2>
+<div class="cards-container"></div>
+</div>
+</div>
 
 <div class="modal-backdrop" id="modalBackdrop">
 <div class="modal">
@@ -198,20 +139,16 @@ window.onload = carregarClientes;
 <div class="row"><label>Nome</label><input name="nome" required></div>
 <div class="row"><label>CPF/CNPJ</label><input name="cpf" required></div>
 <div class="row"><label>Email</label><input name="email" type="email" required></div>
-<div class="row"><label>Telefone</label><input name="telefone"></div>
-<div class="row"><label>CEP</label><input name="cep"></div>
-<div class="row"><label>Endereço</label><input name="endereco"></div>
-<div class="row"><label>Cidade</label><input name="cidade"></div>
-<div class="row"><label>Estado</label><input name="estado"></div>
 <div class="row"><label>Valor do Boleto</label><input name="valor" type="number" required></div>
 <div class="row"><label>Data de Vencimento</label><input name="vencimento" type="date" required></div>
 <div class="actions">
-<button type="button" class="btn ghost" onclick="document.getElementById('modalBackdrop').style.display='none'">Cancelar</button>
+<button type="button" class="btn ghost" onclick="fecharModal()">Cancelar</button>
 <button type="submit" class="btn primary">Gerar</button>
 </div>
 </form>
 </div>
 </div>
+
 <div class="toast" id="toast"></div>
 </body>
 </html>

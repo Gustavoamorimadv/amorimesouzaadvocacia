@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Clientes - Boletos</title>
+<title>Clientes Fechados - Boletos</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
@@ -33,7 +33,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 
 .card { display:flex; flex-direction:column; background:#fff; border-radius:15px; box-shadow:0 12px 30px rgba(0,0,0,0.12); cursor:pointer; transition:0.3s; position:relative; padding:20px; }
 .card:hover { transform:scale(1.03); }
-.card .color-bar { width:8px; height:100%; border-radius:15px 0 0 15px; position:absolute; left:0; top:0; }
+.card .color-bar { width:8px; height:100%; border-radius:15px 0 0 15px; position:absolute; left:0; top:0; background:#2ecc71; }
 .card-content { padding-left:12px; display:flex; flex-direction:column; }
 .card h3 { font-size:18px; color:#1e1e2f; margin-bottom:6px; }
 .card p { font-size:14px; color:#555; margin:2px 0; }
@@ -65,7 +65,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 
 <div class="main">
 <header>
-<h1>Clientes</h1>
+<h1>Clientes Fechados</h1>
 <button class="btn primary" id="btnAddCliente">Novo Boleto</button>
 </header>
 
@@ -154,6 +154,7 @@ async function carregarClientes(){
   snapshot.forEach(docSnap=>{
     const cliente = docSnap.data();
     cliente.id = docSnap.id;
+    if(cliente.status!=="fechado") return; // MOSTRA SOMENTE FECHADOS
 
     const card = document.createElement("div");
     card.className="card fechado";
@@ -249,6 +250,14 @@ document.getElementById("confirmBoletoBtn").onclick=async ()=>{
 };
 
 document.getElementById("btnAddCliente").onclick=()=>abrirModal({});
+
+document.getElementById("searchInput").oninput=()=>{
+  const q = document.getElementById("searchInput").value.toLowerCase();
+  document.querySelectorAll('.card').forEach(card=>{
+    const nome = card.querySelector('h3').innerText.toLowerCase();
+    card.style.display=nome.includes(q)?'flex':'none';
+  });
+};
 
 carregarClientes();
 </script>

@@ -53,9 +53,50 @@ header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
 
 .toast { position:fixed; right:20px; bottom:20px; background:#222; color:#fff; padding:8px 12px; border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.3); display:none; z-index:60; }
 </style>
+</head>
+<body>
+<div class="sidebar">
+<h2 onclick="window.location.href='dashboard.html'">AMR ADV</h2>
+<button onclick="window.location.href='dashboard.html'">
+<img src="https://img.icons8.com/ios-filled/50/ffffff/dashboard.png"/><span>Dashboard</span>
+</button>
+</div>
+
+<div class="main">
+<header>
+<h1>Clientes Fechados</h1>
+</header>
+
+<div class="kanban-container">
+<div class="column" id="em-dia"><h2>Em Dia</h2></div>
+<div class="column" id="em-atraso"><h2>Em Atraso</h2></div>
+</div>
+</div>
+
+<!-- Modal Boleto -->
+<div class="modal-backdrop" id="modalBoletoBackdrop">
+<div class="modal">
+<h3>Gerar Boleto</h3>
+<form id="formBoleto">
+<div class="row"><label>Nome</label><input id="boletoNome" disabled /></div>
+<div class="row"><label>CPF/CNPJ</label><input id="boletoCpf" /></div>
+<div class="row"><label>E-mail</label><input id="boletoEmail" type="email" /></div>
+<div class="row"><label>Valor</label><input id="boletoValor" type="number" /></div>
+<div class="row"><label>Vencimento</label><input id="boletoVencimento" type="date" /></div>
+<div class="row"><label>Descrição</label><textarea id="boletoDesc"></textarea></div>
+<div class="actions">
+<button type="button" class="btn ghost" onclick="closeBoletoModal()">Cancelar</button>
+<button type="submit" class="btn primary">Gerar</button>
+</div>
+</form>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, updateDoc, doc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
@@ -67,7 +108,6 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-window.firebaseDB = db;
 
 const toastEl = document.getElementById('toast');
 function showToast(msg){
@@ -78,6 +118,7 @@ function showToast(msg){
 }
 
 let clientes = [];
+
 async function getClientes(){
     const snapshot = await getDocs(collection(db,"clientes"));
     clientes = snapshot.docs.map(doc => ({ id: doc.id, boletos: [], ...doc.data() }))
@@ -132,7 +173,6 @@ function criarCard(cliente){
 
     card.appendChild(actionsDiv);
 
-    // Drag & Drop visual
     card.addEventListener('dragstart',()=>{ draggedCard=card; card.style.opacity='.5'; });
     card.addEventListener('dragend',()=>{ draggedCard=null; card.style.opacity='1'; });
 
@@ -158,12 +198,23 @@ function render(){
 function abrirBoletoModal(clienteId){
     const cliente = clientes.find(c=>c.id===clienteId);
     document.getElementById('boletoNome').value = cliente.nome;
+    document.getElementById('boletoCpf').value = cliente.cpf || '';
+    document.getElementById('boletoEmail').value = cliente.email || '';
     document.getElementById('boletoValor').value = cliente.valor || 0;
+    document.getElementById('boletoVencimento').valueAsDate = new Date();
+    document.getElementById('boletoDesc').value = '';
     document.getElementById('modalBoletoBackdrop').style.display='flex';
-    document.getElementById('formBoleto').onsubmit = (e)=>{
+
+    document.getElementById('formBoleto').onsubmit = async (e)=>{
         e.preventDefault();
         const valor = document.getElementById('boletoValor').value;
-        cliente.boletos.push(`R$ ${valor} - ${new Date().toLocaleDateString()}`);
+        const venc = document.getElementById('boletoVencimento').value;
+        const desc = document.getElementById('boletoDesc').value;
+        const novoBoleto = `R$ ${valor} - ${venc} - ${desc}`;
+        // Salvar no Firestore
+        const docRef = doc(db,'clientes',cliente.id);
+        await updateDoc(docRef,{ boletos: arrayUnion(novoBoleto) });
+        cliente.boletos.push(novoBoleto);
         const ul = document.getElementById(`boletos-${cliente.id}`);
         ul.innerHTML = cliente.boletos.map(b => `<li>${b}</li>`).join('');
         showToast('Boleto gerado!');
@@ -177,21 +228,5 @@ function closeBoletoModal(){
 
 getClientes();
 </script>
-
 </body>
-<div class="modal-backdrop" id="modalBoletoBackdrop">
-<div class="modal">
-<h3>Gerar Boleto</h3>
-<form id="formBoleto">
-<div class="row"><label>Cliente</label><input id="boletoNome" disabled /></div>
-<div class="row"><label>Valor</label><input id="boletoValor" type="number" /></div>
-<div class="row"><label>Vencimento</label><input id="boletoVencimento" type="date" /></div>
-<div class="actions">
-<button type="button" class="btn ghost" onclick="closeBoletoModal()">Cancelar</button>
-<button type="submit" class="btn primary">Gerar</button>
-</div>
-</form>
-</div>
-</div>
-<div class="toast" id="toast"></div>
 </html>

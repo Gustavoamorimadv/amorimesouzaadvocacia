@@ -83,6 +83,7 @@ window.firebaseDB = db;
 
 const STATUS=['lista-fria','negociacao','contrato-assinado','fechado'];
 const cardsMap={};
+
 const modalBackdrop=document.getElementById('modalBackdrop');
 const clientForm=document.getElementById('clientForm');
 const inputNome=document.getElementById('inputNome');
@@ -117,6 +118,23 @@ async function saveCliente(cliente){
     }
 }
 
+function addProcessoField(value=""){
+    const row = document.createElement('div');
+    row.className='processo-row';
+    const input = document.createElement('input');
+    input.className='inputProcesso';
+    input.placeholder='0000000-00.0000.0.00.0000';
+    input.value = value;
+    const btnAdd = document.createElement('button');
+    btnAdd.type='button'; btnAdd.className='btn ghost btnAddProcesso'; btnAdd.textContent='+';
+    btnAdd.onclick=()=>addProcessoField();
+    const btnRemove = document.createElement('button');
+    btnRemove.type='button'; btnRemove.className='btn ghost btnRemoveProcesso'; btnRemove.textContent='-';
+    btnRemove.onclick=()=>row.remove();
+    row.appendChild(input); row.appendChild(btnAdd); row.appendChild(btnRemove);
+    processosContainer.appendChild(row);
+}
+
 function openModal(edit=false,data=null){
     modalBackdrop.style.display='flex';
     document.getElementById('modalTitle').innerText=edit?"Editar Cliente":"Novo Cliente";
@@ -143,29 +161,6 @@ function openModal(edit=false,data=null){
 
 function closeModal(){ modalBackdrop.style.display='none'; }
 
-function addProcessoField(value=""){
-    const row = document.createElement('div');
-    row.className='processo-row';
-    const input = document.createElement('input');
-    input.className='inputProcesso';
-    input.placeholder='0000000-00.0000.0.00.0000';
-    input.value = value;
-    const btnAdd = document.createElement('button');
-    btnAdd.type='button';
-    btnAdd.className='btn ghost btnAddProcesso';
-    btnAdd.textContent='+';
-    btnAdd.onclick=()=>addProcessoField();
-    const btnRemove = document.createElement('button');
-    btnRemove.type='button';
-    btnRemove.className='btn ghost btnRemoveProcesso';
-    btnRemove.textContent='-';
-    btnRemove.onclick=()=>row.remove();
-    row.appendChild(input);
-    row.appendChild(btnAdd);
-    row.appendChild(btnRemove);
-    processosContainer.appendChild(row);
-}
-
 btnAdd.onclick=()=>openModal();
 btnCancel.onclick=()=>closeModal();
 
@@ -184,21 +179,19 @@ function criarCard(cliente){
     const actionsDiv=document.createElement('div'); actionsDiv.className='card-actions';
     const btnCall=document.createElement('button');
     btnCall.onclick=(e)=>{ e.stopPropagation(); ligar(cliente.numeros||''); };
-    const imgCall=document.createElement('img'); imgCall.src="https://img.icons8.com/ios-glyphs/30/000000/phone.png";
-    btnCall.appendChild(imgCall);
+    const imgCall=document.createElement('img'); imgCall.src="https://img.icons8.com/ios-glyphs/30/000000/phone.png"; btnCall.appendChild(imgCall);
     const btnWa=document.createElement('button');
     btnWa.onclick=(e)=>{ e.stopPropagation(); whatsapp(cliente.numeros||''); };
-    const imgWa=document.createElement('img'); imgWa.src="https://img.icons8.com/ios-glyphs/30/000000/whatsapp.png";
-    btnWa.appendChild(imgWa);
+    const imgWa=document.createElement('img'); imgWa.src="https://img.icons8.com/ios-glyphs/30/000000/whatsapp.png"; btnWa.appendChild(imgWa);
     actionsDiv.appendChild(btnCall); actionsDiv.appendChild(btnWa); card.appendChild(actionsDiv);
 
     const contentDiv=document.createElement('div'); contentDiv.className='card-content';
     const processosArray = cliente.processo ? cliente.processo.split(',').map(p=>p.trim()) : [];
-    const primeiroProcesso = processosArray.length > 0 ? processosArray[0] : '-';
+    const processosHTML = processosArray.map(p=>`<p>Processo: ${p}</p>`).join('');
     contentDiv.innerHTML=`<h3>${cliente.nome}</h3>
         <p>CPF: ${cliente.cpf||'-'}</p>
         <p>Classe: ${cliente.classe||'-'}</p>
-        <p>Processo: ${primeiroProcesso}</p>
+        ${processosHTML}
         <p>Valor: R$ ${cliente.valor||0}</p>
         ${cliente.ultimaOferta ? `<p>Última proposta: R$ ${cliente.ultimaOferta}</p>` : ''}`;
     card.appendChild(contentDiv);
@@ -213,10 +206,8 @@ function ligar(numero){ if(!numero){ showToast("Número não informado"); return
 function whatsapp(numero){ if(!numero){ showToast("Número não informado"); return; } const num=numero.replace(/\D/g,''); window.open(`https://wa.me/55${num}`,'_blank'); }
 
 async function render(){
-    // Limpa cards existentes, sem remover h2
-    Object.values(cardsMap).forEach(card => card.remove());
+    Object.values(cardsMap).forEach(card=>card.remove());
     for(const k in cardsMap) delete cardsMap[k];
-
     const clientes = await getClientes();
     for(const c of clientes) criarCard(c);
     filtragemAplicada();
@@ -226,11 +217,7 @@ clientForm.onsubmit = async function(e){
     e.preventDefault();
     const nome = inputNome.value.trim();
     if(!nome){ showToast("Nome obrigatório"); return; }
-
-    const processos = Array.from(document.querySelectorAll('.inputProcesso'))
-                    .map(i=>i.value.trim())
-                    .filter(v=>v);
-
+    const processos = Array.from(document.querySelectorAll('.inputProcesso')).map(i=>i.value.trim()).filter(v=>v);
     const novo = {
         nome, cpf: inputCPF.value.trim(),
         obs: inputObs.value.trim().substring(0,300),
@@ -240,18 +227,9 @@ clientForm.onsubmit = async function(e){
         classe: inputClasse.value,
         valor: inputValor.value
     };
-
-    if(clientForm.dataset.editId){
-        novo.id = clientForm.dataset.editId;
-        await saveCliente(novo);
-        showToast("Cliente atualizado!");
-    } else {
-        await saveCliente(novo);
-        showToast("Cliente adicionado!");
-    }
-
-    closeModal();
-    render();
+    if(clientForm.dataset.editId){ novo.id = clientForm.dataset.editId; await saveCliente(novo); showToast("Cliente atualizado!"); }
+    else { await saveCliente(novo); showToast("Cliente adicionado!"); }
+    closeModal(); render();
 };
 
 let draggedCard=null;
@@ -267,14 +245,8 @@ document.querySelectorAll('.column').forEach(col=>{
         const status = col.id;
         const docRef = doc(firebaseDB,"clientes",id);
         await updateDoc(docRef,{status});
-
-        if(status === "fechado"){ 
-            coinSound.currentTime = 0;
-            coinSound.play();
-        }
-
-        render(); 
-        showToast("Status atualizado");
+        if(status === "fechado"){ coinSound.currentTime = 0; coinSound.play(); }
+        render(); showToast("Status atualizado");
     });
 });
 
@@ -292,6 +264,41 @@ filterStatus.onchange=filtragemAplicada;
 
 render();
 </script>
+</head>
+<body>
+<div class="sidebar">
+<h2 onclick="window.location.href='dashboard.html'">AMR ADV</h2>
+<button onclick="window.location.href='dashboard.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/dashboard.png"/><span>Dashboard</span></button>
+<button onclick="window.location.href='relatorios.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/combo-chart.png"/><span>Relatórios</span></button>
+<button onclick="window.location.href='agenda.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/calendar.png"/><span>Agenda</span></button>
+<button onclick="window.location.href='contatos.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/contacts.png"/><span>Contatos</span></button>
+<button><img src="https://img.icons8.com/ios-filled/50/ffffff/settings.png"/><span>Configurações</span></button>
+</div>
+
+<div class="main">
+<header>
+<h1>CRM</h1>
+<button id="btnAdd" class="btn primary">Adicionar Cliente</button>
+</header>
+<div class="search-bar">
+<input id="searchInput" placeholder="Buscar cliente..." />
+<select id="filterStatus">
+<option value="">Todos os status</option>
+<option value="lista-fria">Lista Fria</option>
+<option value="negociacao">Negociação</option>
+<option value="contrato-assinado">Contrato Assinado</option>
+<option value="fechado">Fechado</option>
+</select>
+</div>
+<div class="kanban-container">
+<main class="kanban" id="kanban">
+<div class="column" id="lista-fria"><h2>Lista Fria</h2></div>
+<div class="column" id="negociacao"><h2>Negociação</h2></div>
+<div class="column" id="contrato-assinado"><h2>Contrato Assinado</h2></div>
+<div class="column" id="fechado"><h2>Fechado</h2></div>
+</main>
+</div>
+</div>
 
 <div class="modal-backdrop" id="modalBackdrop">
 <div class="modal">
@@ -300,10 +307,7 @@ render();
 <div class="row"><label>Nome</label><input id="inputNome" required /></div>
 <div class="row"><label>CPF</label><input id="inputCPF" placeholder="000.000.000-00" /></div>
 <div class="row"><label>Números</label><input id="inputNumeros" placeholder="Ex: (21) 99999-9999" /></div>
-<div class="row">
-<label>Números do Processo</label>
-<div id="processosContainer"></div>
-</div>
+<div class="row"><label>Números do Processo</label><div id="processosContainer"></div></div>
 <div class="row"><label>Classe Processual</label>
 <select id="inputClasse">
 <option value="Busca e Apreensão">Busca e Apreensão</option>
@@ -314,8 +318,7 @@ render();
 </div>
 <div class="row"><label>Valor da Causa</label><input id="inputValor" type="number" placeholder="Ex: 10000" /></div>
 <div class="row"><label>Observação</label><textarea id="inputObs" maxlength="300"></textarea></div>
-<div class="row">
-<label>Status</label>
+<div class="row"><label>Status</label>
 <select id="inputStatus">
 <option value="lista-fria">Lista Fria</option>
 <option value="negociacao">Negociação</option>
@@ -333,6 +336,5 @@ render();
 
 <div class="toast" id="toast"></div>
 <audio id="coinSound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_8a3d7f1e1b.mp3?filename=coin-collect-retro-8-bit-sound-effect-145251.mp3" preload="auto"></audio>
-
 </body>
 </html>

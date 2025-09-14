@@ -3,129 +3,57 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Clientes Fechados - Boletos</title>
+<title>Clientes Fechados - AMR ADV</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
+body { display:flex; background:#f0f2f5; min-height:100vh; overflow-x:hidden; }
 
-/* Sidebar */
 .sidebar { width:80px; background:#1e1e2f; display:flex; flex-direction:column; align-items:center; padding:20px 0; flex-shrink:0; transition:width 0.3s; }
 .sidebar:hover { width:220px; }
-.sidebar h2 { font-size:22px; font-family:'Poppins', sans-serif; font-weight:600; color:#fff; margin-bottom:30px; text-align:center; cursor:pointer; width:100%; white-space:nowrap; overflow:hidden; transition:opacity 0.3s; }
+.sidebar h2 { font-size:22px; font-family:'Poppins', sans-serif; font-weight:600; color:#fff; letter-spacing:1px; margin-bottom:30px; text-align:center; cursor:pointer; width:100%; white-space:nowrap; overflow:hidden; transition:opacity 0.3s; }
 .sidebar button { width:100%; background:transparent; border:none; color:#fff; display:flex; align-items:center; gap:15px; padding:12px 20px; margin:5px 0; cursor:pointer; border-radius:10px; transition:background 0.2s, color 0.2s; font-size:14px; white-space:nowrap; overflow:hidden; }
 .sidebar button:hover { background:#2a2a40; color:#fff; }
 .sidebar button img { width:24px; height:24px; filter: invert(1); flex-shrink:0; }
 .sidebar button span { display:inline-block; opacity:1; transition:opacity 0.3s; }
 .sidebar:not(:hover) h2, .sidebar:not(:hover) button span { opacity:0; }
 
-/* Main content */
 .main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
 header { height:60px; background:#fff; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; padding:0 20px; flex-shrink:0; }
 header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
 header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
 
 .search-bar { padding:10px 20px; background:#fff; border-bottom:1px solid #ddd; display:flex; gap:10px; align-items:center; flex-shrink:0; }
-.search-bar input { flex:1; padding:8px; border:1px solid #ccc; border-radius:6px; }
+.search-bar input { padding:8px; border:1px solid #ccc; border-radius:6px; flex:1; }
 
-/* Cards grid */
-.cards-container { flex:1; padding:20px; display:grid; grid-template-columns: repeat(auto-fill,minmax(300px,1fr)); gap:20px; overflow-y:auto; }
+.cards-container { flex:1; overflow-y:auto; padding:20px; display:flex; flex-wrap:wrap; gap:20px; }
 
-.card { display:flex; flex-direction:column; background:#fff; border-radius:15px; box-shadow:0 12px 30px rgba(0,0,0,0.12); cursor:pointer; transition:0.3s; position:relative; padding:20px; }
+.card { background:#fff; border-radius:15px; box-shadow:0 12px 30px rgba(0,0,0,0.12); cursor:pointer; transition:0.3s; width:300px; min-height:180px; display:flex; flex-direction:column; position:relative; }
 .card:hover { transform:scale(1.03); }
-.card .color-bar { width:8px; height:100%; border-radius:15px 0 0 15px; position:absolute; left:0; top:0; background:#2ecc71; }
-.card-content { padding-left:12px; display:flex; flex-direction:column; }
-.card h3 { font-size:18px; color:#1e1e2f; margin-bottom:6px; }
-.card p { font-size:14px; color:#555; margin:2px 0; }
-.boleto { margin-top:6px; padding:6px 10px; background:#e0e0e0; border-radius:6px; font-size:13px; }
+.card .color-bar { width:8px; height:100%; border-radius:15px 0 0 15px; background:#2ecc71; position:absolute; left:0; top:0; }
+.card-content { padding:20px; flex:1; display:flex; flex-direction:column; justify-content:center; }
+.card-content h3 { font-size:20px; margin-bottom:6px; color:#333; }
+.card-content p { font-size:14px; color:#555; margin:3px 0; }
+.boleto { background:#f1f3f5; border-radius:6px; padding:4px 8px; margin-top:4px; font-size:13px; }
 
-/* Modal */
-#modalBoleto { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); justify-content:center; align-items:center; z-index:50; }
-.modal { background:#fff; padding:18px; border-radius:15px; width:380px; max-height:90vh; overflow-y:auto; }
+.modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); justify-content:center; align-items:center; z-index:50; }
+.modal { background:#fff; padding:18px; border-radius:15px; min-width:320px; max-width:500px; box-shadow:0 8px 30px rgba(0,0,0,.25); }
 .modal h3 { margin-bottom:12px; }
-.modal label { display:block; margin-top:10px; font-weight:bold; }
-.modal input, .modal select { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; }
-.modal .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:12px; }
+.modal .row { margin-bottom:10px; }
+.modal input, .modal textarea, .modal select { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; }
+.modal textarea { min-height:80px; resize:vertical; }
+.modal .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
 .btn { padding:8px 12px; border-radius:6px; border:0; cursor:pointer; }
 .btn.primary { background:#1e1e2f; color:#fff; }
 .btn.ghost { background:#f1f3f5; }
-
 .toast { position:fixed; right:20px; bottom:20px; background:#222; color:#fff; padding:8px 12px; border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.3); display:none; z-index:60; }
 </style>
-</head>
-<body>
-
-<div class="sidebar">
-<h2 onclick="window.location.href='dashboard.html'">AMR ADV</h2>
-<button onclick="window.location.href='dashboard.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/dashboard.png"/><span>Dashboard</span></button>
-<button onclick="window.location.href='relatorios.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/combo-chart.png"/><span>Relatórios</span></button>
-<button onclick="window.location.href='agenda.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/calendar.png"/><span>Agenda</span></button>
-<button onclick="window.location.href='clientes.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/contacts.png"/><span>Clientes</span></button>
-</div>
-
-<div class="main">
-<header>
-<h1>Clientes Fechados</h1>
-<button class="btn primary" id="btnAddCliente">Novo Boleto</button>
-</header>
-
-<div class="search-bar">
-<input id="searchInput" placeholder="Buscar cliente..." />
-</div>
-
-<div class="cards-container" id="clientesContainer"></div>
-</div>
-
-<!-- Modal de gerar boleto -->
-<div id="modalBoleto">
-<div class="modal">
-<h3>Gerar Boleto</h3>
-
-<label>Nome</label>
-<input type="text" id="modalNome">
-
-<label>CPF/CNPJ</label>
-<input type="text" id="modalCpf">
-
-<label>Email</label>
-<input type="email" id="modalEmail">
-
-<label>Telefone</label>
-<input type="text" id="modalTelefone">
-
-<label>CEP</label>
-<input type="text" id="modalCep">
-
-<label>Endereço</label>
-<input type="text" id="modalEndereco">
-
-<label>Cidade</label>
-<input type="text" id="modalCidade">
-
-<label>Estado (UF)</label>
-<input type="text" id="modalEstado">
-
-<label>Valor do Boleto</label>
-<input type="text" id="modalValor">
-
-<label>Data de Vencimento</label>
-<input type="date" id="modalVencimento" value="">
-
-<div class="actions">
-<button class="btn primary" id="confirmBoletoBtn">Gerar</button>
-<button class="btn ghost" onclick="fecharModal()">Cancelar</button>
-</div>
-</div>
-</div>
-
-<div class="toast" id="toast"></div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, setDoc, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
+  apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
     authDomain: "dapapp-38637.firebaseapp.com",
     projectId: "dapapp-38637",
     storageBucket: "dapapp-38637.appspot.com",
@@ -135,112 +63,112 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const container = document.getElementById("clientesContainer");
 
-let clienteAtual = null;
+const cardsContainer = document.querySelector('.cards-container');
+const modalBackdrop = document.getElementById('modalBackdrop');
+const clientForm = document.getElementById('clientForm');
+const toastEl = document.getElementById('toast');
 
-function showToast(msg){
-  const t = document.getElementById("toast");
-  t.innerText=msg;
-  t.style.display="block";
-  setTimeout(()=>t.style.display="none",3000);
+function showToast(msg){ toastEl.innerText=msg; toastEl.style.display='block'; clearTimeout(toastEl._t); toastEl._t=setTimeout(()=>toastEl.style.display='none',3000); }
+
+let clienteAtual=null;
+
+// Modal
+function abrirModal(cliente=null){
+  modalBackdrop.style.display='flex';
+  clienteAtual = cliente;
+  clientForm.reset();
+  if(cliente){
+    clientForm.nome.value = cliente.nome;
+    clientForm.cpf.value = cliente.cpf;
+    clientForm.email.value = cliente.email;
+    clientForm.telefone.value = cliente.telefone||'';
+    clientForm.cep.value = cliente.cep||'';
+    clientForm.endereco.value = cliente.endereco||'';
+    clientForm.cidade.value = cliente.cidade||'';
+    clientForm.estado.value = cliente.estado||'';
+    clientForm.valor.value = cliente.boletos && cliente.boletos[cliente.boletos.length-1]?.valor || '';
+    clientForm.vencimento.value = cliente.boletos && cliente.boletos[cliente.boletos.length-1]?.vencimento || '';
+  }
 }
 
+function fecharModal(){ modalBackdrop.style.display='none'; }
+
+// Carregar clientes fechados
 async function carregarClientes(){
-  container.innerHTML="Carregando...";
-  const q = collection(db,"clientes");
-  const snapshot = await getDocs(q);
-  container.innerHTML="";
-  snapshot.forEach(docSnap=>{
+  cardsContainer.innerHTML='';
+  const snapshot = await getDocs(collection(db,"clientes"));
+  snapshot.docs.forEach(docSnap=>{
     const cliente = docSnap.data();
     cliente.id = docSnap.id;
-    if(cliente.status!=="fechado") return; // MOSTRA SOMENTE FECHADOS
+    if(cliente.status!=='fechado') return;
 
-    const card = document.createElement("div");
-    card.className="card fechado";
-    card.innerHTML=`
-      <div class="color-bar"></div>
-      <div class="card-content">
-        <h3>${cliente.nome||"-"}</h3>
-        <p>CPF: ${cliente.cpf||"-"}</p>
-        <div id="boletos-${cliente.id}">
-          ${(cliente.boletos||[]).map(b=>`<div class="boleto">Boleto R$${b.valor} - ${b.vencimento}</div>`).join('')}
-        </div>
-      </div>
-    `;
-    container.appendChild(card);
-    card.onclick=()=>abrirModal(cliente);
+    const card = document.createElement('div');
+    card.className='card';
+    const colorBar = document.createElement('div'); colorBar.className='color-bar'; card.appendChild(colorBar);
+
+    const content = document.createElement('div'); content.className='card-content';
+    content.innerHTML = `<h3>${cliente.nome}</h3>
+                         <p>CPF: ${cliente.cpf||'-'}</p>
+                         <p>Email: ${cliente.email||'-'}</p>
+                         <p>Telefone: ${cliente.telefone||'-'}</p>
+                         <div id="boletos-${cliente.id}">
+                           ${(cliente.boletos||[]).map(b=>`<div class="boleto">Boleto R$${b.valor} - ${b.vencimento}</div>`).join('')}
+                         </div>`;
+    card.appendChild(content);
+    card.onclick = ()=>abrirModal(cliente);
+    cardsContainer.appendChild(card);
   });
 }
 
-const modal = document.getElementById('modalBoleto');
-const modalNome = document.getElementById('modalNome');
-const modalCpf = document.getElementById('modalCpf');
-const modalEmail = document.getElementById('modalEmail');
-const modalTelefone = document.getElementById('modalTelefone');
-const modalCep = document.getElementById('modalCep');
-const modalEndereco = document.getElementById('modalEndereco');
-const modalCidade = document.getElementById('modalCidade');
-const modalEstado = document.getElementById('modalEstado');
-const modalValor = document.getElementById('modalValor');
-const modalVencimento = document.getElementById('modalVencimento');
-
-function abrirModal(cliente){
-  clienteAtual = cliente;
-  modalNome.value=cliente.nome||"";
-  modalCpf.value=cliente.cpf||"";
-  modalEmail.value=cliente.email||"";
-  modalTelefone.value=cliente.telefone||"";
-  modalCep.value=cliente.cep||"";
-  modalEndereco.value=cliente.endereco||"";
-  modalCidade.value=cliente.cidade||"";
-  modalEstado.value=cliente.estado||"";
-  modalValor.value="";
-  modalVencimento.value=new Date().toISOString().split("T")[0];
-  modal.style.display="flex";
-}
-
-function fecharModal(){ modal.style.display="none"; clienteAtual=null; }
-
-document.getElementById("confirmBoletoBtn").onclick=async ()=>{
-  if(!clienteAtual) return;
-  const nome = modalNome.value.trim();
-  const cpf = modalCpf.value.trim();
-  const email = modalEmail.value.trim();
-  const telefone = modalTelefone.value.trim();
-  const cep = modalCep.value.trim();
-  const endereco = modalEndereco.value.trim();
-  const cidade = modalCidade.value.trim();
-  const estado = modalEstado.value.trim();
-  const valor = modalValor.value.trim();
-  const vencimento = modalVencimento.value;
-
-  if(!nome || !cpf || !email || !valor || !vencimento){
-    showToast("Preencha os campos obrigatórios!");
-    return;
-  }
+// Enviar boleto para servidor
+clientForm.onsubmit = async (e)=>{
+  e.preventDefault();
+  const nome = clientForm.nome.value.trim();
+  if(!nome){ showToast("Nome obrigatório"); return; }
+  const clienteData = {
+    nome,
+    cpf: clientForm.cpf.value.trim(),
+    email: clientForm.email.value.trim(),
+    telefone: clientForm.telefone.value.trim(),
+    cep: clientForm.cep.value.trim(),
+    endereco: clientForm.endereco.value.trim(),
+    cidade: clientForm.cidade.value.trim(),
+    estado: clientForm.estado.value.trim(),
+    status: 'fechado',
+    boletos: clienteAtual?.boletos || []
+  };
+  const valor = clientForm.valor.value.trim();
+  const vencimento = clientForm.vencimento.value;
 
   try{
     const res = await fetch("http://localhost:3000/api/gerarBoletos",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({
-        nome, cpf, email, telefone, cep, endereco, cidade, estado,
+        nome, cpf: clienteData.cpf, email: clienteData.email,
+        telefone: clienteData.telefone,
+        cep: clienteData.cep,
+        endereco: clienteData.endereco,
+        cidade: clienteData.cidade,
+        estado: clienteData.estado,
         boletos:[{ valor, vencimento }]
       })
     });
     const data = await res.json();
     if(data.sucesso){
       showToast("Boleto gerado!");
-      const docRef = doc(db,"clientes",clienteAtual.id);
-      const novosBoletos = (clienteAtual.boletos||[]);
+      const novosBoletos = clienteData.boletos;
       novosBoletos.push({ valor, vencimento });
-      await updateDoc(docRef,{boletos:novosBoletos});
-      clienteAtual.boletos = novosBoletos;
-
-      document.getElementById(`boletos-${clienteAtual.id}`).innerHTML=
-        novosBoletos.map(b=>`<div class="boleto">Boleto R$${b.valor} - ${b.vencimento}</div>`).join('');
+      clienteData.boletos = novosBoletos;
+      if(clienteAtual && clienteAtual.id){
+        await updateDoc(doc(db,"clientes",clienteAtual.id), { boletos: novosBoletos });
+      } else {
+        const docRef = await addDoc(collection(db,"clientes"), clienteData);
+        clienteAtual = {...clienteData, id:docRef.id};
+      }
       fecharModal();
+      carregarClientes();
     } else {
       showToast("Erro ao gerar boleto");
     }
@@ -249,17 +177,49 @@ document.getElementById("confirmBoletoBtn").onclick=async ()=>{
   }
 };
 
-document.getElementById("btnAddCliente").onclick=()=>abrirModal({});
+document.getElementById('btnAddCliente').onclick = ()=>abrirModal();
 
-document.getElementById("searchInput").oninput=()=>{
-  const q = document.getElementById("searchInput").value.toLowerCase();
-  document.querySelectorAll('.card').forEach(card=>{
-    const nome = card.querySelector('h3').innerText.toLowerCase();
-    card.style.display=nome.includes(q)?'flex':'none';
-  });
-};
-
-carregarClientes();
+window.onload = carregarClientes;
 </script>
+</head>
+<body>
+<div class="sidebar">
+<h2 onclick="window.location.href='dashboard.html'">AMR ADV</h2>
+<button onclick="window.location.href='dashboard.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/dashboard.png"/><span>Dashboard</span></button>
+</div>
+<div class="main">
+<header>
+<h1>Clientes Fechados</h1>
+<button id="btnAddCliente" class="btn primary">Gerar Boleto</button>
+</header>
+<div class="search-bar">
+<input id="searchInput" placeholder="Buscar cliente...">
+</div>
+<div class="cards-container">
+<!-- Cards serão adicionados aqui via JS -->
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+<div class="modal">
+<h3>Gerar Boleto</h3>
+<form id="clientForm">
+<div class="row"><label>Nome</label><input name="nome" required></div>
+<div class="row"><label>CPF/CNPJ</label><input name="cpf" required></div>
+<div class="row"><label>Email</label><input name="email" type="email" required></div>
+<div class="row"><label>Telefone</label><input name="telefone"></div>
+<div class="row"><label>CEP</label><input name="cep"></div>
+<div class="row"><label>Endereço</label><input name="endereco"></div>
+<div class="row"><label>Cidade</label><input name="cidade"></div>
+<div class="row"><label>Estado</label><input name="estado"></div>
+<div class="row"><label>Valor do Boleto</label><input name="valor" type="number" required></div>
+<div class="row"><label>Data de Vencimento</label><input name="vencimento" type="date" required></div>
+<div class="actions">
+<button type="button" class="btn ghost" onclick="document.getElementById('modalBackdrop').style.display='none'">Cancelar</button>
+<button type="submit" class="btn primary">Gerar</button>
+</div>
+</form>
+</div>
+</div>
+<div class="toast" id="toast"></div>
 </body>
 </html>

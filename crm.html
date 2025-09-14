@@ -3,254 +3,347 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Clientes - Boletos</title>
+<title>CRM AMR ADV</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
 body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
 
-/* Sidebar */
 .sidebar { width:80px; background:#1e1e2f; display:flex; flex-direction:column; align-items:center; padding:20px 0; flex-shrink:0; transition:width 0.3s; }
 .sidebar:hover { width:220px; }
-.sidebar h2 { font-size:22px; font-family:'Poppins', sans-serif; font-weight:600; color:#fff; margin-bottom:30px; text-align:center; cursor:pointer; width:100%; white-space:nowrap; overflow:hidden; transition:opacity 0.3s; }
+.sidebar h2 { font-size:22px; font-family:'Poppins', sans-serif; font-weight:600; color:#fff; letter-spacing:1px; margin-bottom:30px; text-align:center; cursor:pointer; width:100%; white-space:nowrap; overflow:hidden; transition:opacity 0.3s; }
 .sidebar button { width:100%; background:transparent; border:none; color:#fff; display:flex; align-items:center; gap:15px; padding:12px 20px; margin:5px 0; cursor:pointer; border-radius:10px; transition:background 0.2s, color 0.2s; font-size:14px; white-space:nowrap; overflow:hidden; }
 .sidebar button:hover { background:#2a2a40; color:#fff; }
 .sidebar button img { width:24px; height:24px; filter: invert(1); flex-shrink:0; }
 .sidebar button span { display:inline-block; opacity:1; transition:opacity 0.3s; }
 .sidebar:not(:hover) h2, .sidebar:not(:hover) button span { opacity:0; }
 
-/* Main content */
 .main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
 header { height:60px; background:#fff; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; padding:0 20px; flex-shrink:0; }
 header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
 header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
 
 .search-bar { padding:10px 20px; background:#fff; border-bottom:1px solid #ddd; display:flex; gap:10px; align-items:center; flex-shrink:0; }
-.search-bar input { flex:1; padding:8px; border:1px solid #ccc; border-radius:6px; }
+.search-bar input, .search-bar select { padding:8px; border:1px solid #ccc; border-radius:6px; }
+.search-bar input { flex:1; }
 
-/* Cards grid */
-.cards-container { flex:1; padding:20px; display:grid; grid-template-columns: repeat(auto-fill,minmax(300px,1fr)); gap:20px; overflow-y:auto; }
-
-.card { display:flex; flex-direction:column; background:#fff; border-radius:15px; box-shadow:0 12px 30px rgba(0,0,0,0.12); cursor:pointer; transition:0.3s; position:relative; padding:20px; }
+.kanban-container { flex:1; overflow-x:auto; padding:20px; }
+.kanban { display:flex; gap:20px; min-width:max-content; height:100%; }
+.column { background:#fff; border-radius:15px; padding:15px; min-width:320px; max-height:calc(100%); display:flex; flex-direction:column; gap:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); overflow-y:auto; }
+.column h2 { margin-bottom:10px; font-size:18px; color:#1e1e2f; text-transform:uppercase; }
+.card { display:flex; background:#fff; border-radius:15px; box-shadow:0 12px 30px rgba(0,0,0,0.12); cursor:pointer; overflow:hidden; transition:0.3s; min-height:160px; flex-direction:row; position:relative; }
 .card:hover { transform:scale(1.03); }
-.card .color-bar { width:8px; height:100%; border-radius:15px 0 0 15px; position:absolute; left:0; top:0; }
-.card-content { padding-left:12px; display:flex; flex-direction:column; }
-.card h3 { font-size:18px; color:#1e1e2f; margin-bottom:6px; }
-.card p { font-size:14px; color:#555; margin:2px 0; }
-.boleto { margin-top:6px; padding:6px 10px; background:#e0e0e0; border-radius:6px; font-size:13px; }
+.card .color-bar { width:8px; height:100%; border-radius:15px 0 0 15px; }
+.card-content { padding:20px; flex:1; display:flex; flex-direction:column; justify-content:center; }
+.card h3 { font-size:20px; margin-bottom:6px; color:#333; }
+.card p { font-size:14px; color:#555; margin:3px 0; }
+.lista-fria .color-bar { background:#3498db; }
+.negociacao .color-bar { background:#f1c40f; }
+.contrato-assinado .color-bar { background:#9b59b6; }
+.fechado .color-bar { background:#2ecc71; }
 
-/* Modal */
-#modalBoleto { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); justify-content:center; align-items:center; z-index:50; }
-.modal { background:#fff; padding:18px; border-radius:15px; width:380px; max-height:90vh; overflow-y:auto; }
+.card-actions { position:absolute; top:10px; right:10px; display:flex; gap:10px; }
+.card-actions button { background:none; border:none; cursor:pointer; padding:4px; }
+.card-actions img { width:20px; height:20px; opacity:0.7; transition:opacity 0.2s; }
+.card-actions img:hover { opacity:1; }
+
+.modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); justify-content:center; align-items:center; z-index:50; }
+.modal { background:#fff; padding:18px; border-radius:15px; min-width:320px; max-width:420px; box-shadow:0 8px 30px rgba(0,0,0,.25); }
 .modal h3 { margin-bottom:12px; }
-.modal label { display:block; margin-top:10px; font-weight:bold; }
-.modal input, .modal select { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; }
-.modal .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:12px; }
+.modal .row { margin-bottom:10px; }
+.modal input, .modal textarea, .modal select { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; }
+.modal textarea { min-height:80px; resize:vertical; }
+.modal .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
 .btn { padding:8px 12px; border-radius:6px; border:0; cursor:pointer; }
 .btn.primary { background:#1e1e2f; color:#fff; }
 .btn.ghost { background:#f1f3f5; }
 
 .toast { position:fixed; right:20px; bottom:20px; background:#222; color:#fff; padding:8px 12px; border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.3); display:none; z-index:60; }
 </style>
-</head>
-<body>
 
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
+    authDomain: "dapapp-38637.firebaseapp.com",
+    projectId: "dapapp-38637",
+    storageBucket: "dapapp-38637.appspot.com",
+    messagingSenderId: "628852295313",
+    appId: "1:628852295313:web:INSERIR_SEU_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+window.firebaseDB = db;
+</script>
+</head>
+
+<body>
 <div class="sidebar">
 <h2 onclick="window.location.href='dashboard.html'">AMR ADV</h2>
-<button onclick="window.location.href='dashboard.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/dashboard.png"/><span>Dashboard</span></button>
-<button onclick="window.location.href='relatorios.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/combo-chart.png"/><span>Relatórios</span></button>
-<button onclick="window.location.href='agenda.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/calendar.png"/><span>Agenda</span></button>
-<button onclick="window.location.href='clientes.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/contacts.png"/><span>Clientes</span></button>
+<button onclick="window.location.href='dashboard.html'">
+<img src="https://img.icons8.com/ios-filled/50/ffffff/dashboard.png"/><span>Dashboard</span>
+</button>
+<button onclick="window.location.href='relatorios.html'">
+<img src="https://img.icons8.com/ios-filled/50/ffffff/combo-chart.png"/><span>Relatórios</span>
+</button>
+<button onclick="window.location.href='agenda.html'">
+<img src="https://img.icons8.com/ios-filled/50/ffffff/calendar.png"/><span>Agenda</span>
+</button>
+<button onclick="window.location.href='contatos.html'">
+<img src="https://img.icons8.com/ios-filled/50/ffffff/contacts.png"/><span>Contatos</span>
+</button>
+<button><img src="https://img.icons8.com/ios-filled/50/ffffff/settings.png"/><span>Configurações</span></button>
 </div>
 
 <div class="main">
 <header>
-<h1>Clientes</h1>
-<button class="btn primary" id="btnAddCliente">Novo Boleto</button>
+<h1>CRM</h1>
+<button id="btnAdd" class="btn primary">Adicionar Cliente</button>
 </header>
 
 <div class="search-bar">
 <input id="searchInput" placeholder="Buscar cliente..." />
+<select id="filterStatus">
+<option value="">Todos os status</option>
+<option value="lista-fria">Lista Fria</option>
+<option value="negociacao">Negociação</option>
+<option value="contrato-assinado">Contrato Assinado</option>
+<option value="fechado">Fechado</option>
+</select>
 </div>
 
-<div class="cards-container" id="clientesContainer"></div>
+<div class="kanban-container">
+<main class="kanban" id="kanban">
+<div class="column" id="lista-fria"><h2>Lista Fria</h2></div>
+<div class="column" id="negociacao"><h2>Negociação</h2></div>
+<div class="column" id="contrato-assinado"><h2>Contrato Assinado</h2></div>
+<div class="column" id="fechado"><h2>Fechado</h2></div>
+</main>
+</div>
 </div>
 
-<!-- Modal de gerar boleto -->
-<div id="modalBoleto">
+<div class="modal-backdrop" id="modalBackdrop">
 <div class="modal">
-<h3>Gerar Boleto</h3>
-
-<label>Nome</label>
-<input type="text" id="modalNome">
-
-<label>CPF/CNPJ</label>
-<input type="text" id="modalCpf">
-
-<label>Email</label>
-<input type="email" id="modalEmail">
-
-<label>Telefone</label>
-<input type="text" id="modalTelefone">
-
-<label>CEP</label>
-<input type="text" id="modalCep">
-
-<label>Endereço</label>
-<input type="text" id="modalEndereco">
-
-<label>Cidade</label>
-<input type="text" id="modalCidade">
-
-<label>Estado (UF)</label>
-<input type="text" id="modalEstado">
-
-<label>Valor do Boleto</label>
-<input type="text" id="modalValor">
-
-<label>Data de Vencimento</label>
-<input type="date" id="modalVencimento" value="">
-
-<div class="actions">
-<button class="btn primary" id="confirmBoletoBtn">Gerar</button>
-<button class="btn ghost" onclick="fecharModal()">Cancelar</button>
+<h3 id="modalTitle">Novo Cliente</h3>
+<form id="clientForm">
+<div class="row"><label>Nome</label><input id="inputNome" required /></div>
+<div class="row"><label>CPF</label><input id="inputCPF" placeholder="000.000.000-00" /></div>
+<div class="row"><label>Números</label><input id="inputNumeros" placeholder="Ex: (21) 99999-9999" /></div>
+<div class="row"><label>Número do Processo</label><input id="inputProcesso" placeholder="0000000-00.0000.0.00.0000" /></div>
+<div class="row"><label>Classe Processual</label>
+<select id="inputClasse">
+<option value="Busca e Apreensão">Busca e Apreensão</option>
+<option value="Execução de Título">Execução de Título</option>
+<option value="Processo Comum Cível">Processo Comum Cível</option>
+<option value="Outros">Outros</option>
+</select>
 </div>
+<div class="row"><label>Valor da Causa</label><input id="inputValor" type="number" placeholder="Ex: 10000" /></div>
+<div class="row"><label>Observação</label><textarea id="inputObs" maxlength="300"></textarea></div>
+<div class="row">
+<label>Status</label>
+<select id="inputStatus">
+<option value="lista-fria">Lista Fria</option>
+<option value="negociacao">Negociação</option>
+<option value="contrato-assinado">Contrato Assinado</option>
+<option value="fechado">Fechado</option>
+</select>
+</div>
+<div class="actions">
+<button type="button" class="btn ghost" id="btnCancel">Cancelar</button>
+<button type="submit" class="btn primary">Salvar</button>
+</div>
+</form>
 </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
+<audio id="coinSound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_8a3d7f1e1b.mp3?filename=coin-collect-retro-8-bit-sound-effect-145251.mp3" preload="auto"></audio>
+
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+import { collection, addDoc, getDocs, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
-const firebaseConfig = {
-    apiKey: "SUA_API_KEY",
-    authDomain: "SEU_FIREBASE_APP.firebaseapp.com",
-    projectId: "SEU_FIREBASE_APP_ID",
-    storageBucket: "SEU_FIREBASE_APP.appspot.com",
-    messagingSenderId: "SEU_MESSAGING_SENDER_ID",
-    appId: "SEU_APP_ID"
-};
+const STATUS=['lista-fria','negociacao','contrato-assinado','fechado'];
+const cardsMap={};
+const modalBackdrop=document.getElementById('modalBackdrop');
+const clientForm=document.getElementById('clientForm');
+const inputNome=document.getElementById('inputNome');
+const inputCPF=document.getElementById('inputCPF');
+const inputObs=document.getElementById('inputObs');
+const inputStatus=document.getElementById('inputStatus');
+const inputNumeros=document.getElementById('inputNumeros');
+const inputProcesso=document.getElementById('inputProcesso');
+const inputClasse=document.getElementById('inputClasse');
+const inputValor=document.getElementById('inputValor');
+const btnAdd=document.getElementById('btnAdd');
+const btnCancel=document.getElementById('btnCancel');
+const searchInput=document.getElementById('searchInput');
+const filterStatus=document.getElementById('filterStatus');
+const toastEl=document.getElementById('toast');
+const coinSound=document.getElementById('coinSound');
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const container = document.getElementById("clientesContainer");
+function showToast(msg){ toastEl.innerText=msg; toastEl.style.display='block'; clearTimeout(toastEl._t); toastEl._t=setTimeout(()=>toastEl.style.display='none',3000); }
 
-let clienteAtual = null;
-
-function showToast(msg){
-  const t = document.getElementById("toast");
-  t.innerText=msg;
-  t.style.display="block";
-  setTimeout(()=>t.style.display="none",3000);
+async function getClientes(){
+    const snapshot = await getDocs(collection(firebaseDB,"clientes"));
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
 
-async function carregarClientes(){
-  container.innerHTML="Carregando...";
-  const q = collection(db,"clientes");
-  const snapshot = await getDocs(q);
-  container.innerHTML="";
-  snapshot.forEach(docSnap=>{
-    const cliente = docSnap.data();
-    cliente.id = docSnap.id;
-
-    const card = document.createElement("div");
-    card.className="card fechado";
-    card.innerHTML=`
-      <div class="color-bar"></div>
-      <div class="card-content">
-        <h3>${cliente.nome||"-"}</h3>
-        <p>CPF: ${cliente.cpf||"-"}</p>
-        <div id="boletos-${cliente.id}">
-          ${(cliente.boletos||[]).map(b=>`<div class="boleto">Boleto R$${b.valor} - ${b.vencimento}</div>`).join('')}
-        </div>
-      </div>
-    `;
-    container.appendChild(card);
-    card.onclick=()=>abrirModal(cliente);
-  });
-}
-
-const modal = document.getElementById('modalBoleto');
-const modalNome = document.getElementById('modalNome');
-const modalCpf = document.getElementById('modalCpf');
-const modalEmail = document.getElementById('modalEmail');
-const modalTelefone = document.getElementById('modalTelefone');
-const modalCep = document.getElementById('modalCep');
-const modalEndereco = document.getElementById('modalEndereco');
-const modalCidade = document.getElementById('modalCidade');
-const modalEstado = document.getElementById('modalEstado');
-const modalValor = document.getElementById('modalValor');
-const modalVencimento = document.getElementById('modalVencimento');
-
-function abrirModal(cliente){
-  clienteAtual = cliente;
-  modalNome.value=cliente.nome||"";
-  modalCpf.value=cliente.cpf||"";
-  modalEmail.value=cliente.email||"";
-  modalTelefone.value=cliente.telefone||"";
-  modalCep.value=cliente.cep||"";
-  modalEndereco.value=cliente.endereco||"";
-  modalCidade.value=cliente.cidade||"";
-  modalEstado.value=cliente.estado||"";
-  modalValor.value="";
-  modalVencimento.value=new Date().toISOString().split("T")[0];
-  modal.style.display="flex";
-}
-
-function fecharModal(){ modal.style.display="none"; clienteAtual=null; }
-
-document.getElementById("confirmBoletoBtn").onclick=async ()=>{
-  if(!clienteAtual) return;
-  const nome = modalNome.value.trim();
-  const cpf = modalCpf.value.trim();
-  const email = modalEmail.value.trim();
-  const telefone = modalTelefone.value.trim();
-  const cep = modalCep.value.trim();
-  const endereco = modalEndereco.value.trim();
-  const cidade = modalCidade.value.trim();
-  const estado = modalEstado.value.trim();
-  const valor = modalValor.value.trim();
-  const vencimento = modalVencimento.value;
-
-  if(!nome || !cpf || !email || !valor || !vencimento){
-    showToast("Preencha os campos obrigatórios!");
-    return;
-  }
-
-  try{
-    const res = await fetch("http://localhost:3000/api/gerarBoletos",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        nome, cpf, email, telefone, cep, endereco, cidade, estado,
-        boletos:[{ valor, vencimento }]
-      })
-    });
-    const data = await res.json();
-    if(data.sucesso){
-      showToast("Boleto gerado!");
-      const docRef = doc(db,"clientes",clienteAtual.id);
-      const novosBoletos = (clienteAtual.boletos||[]);
-      novosBoletos.push({ valor, vencimento });
-      await updateDoc(docRef,{boletos:novosBoletos});
-      clienteAtual.boletos = novosBoletos;
-
-      document.getElementById(`boletos-${clienteAtual.id}`).innerHTML=
-        novosBoletos.map(b=>`<div class="boleto">Boleto R$${b.valor} - ${b.vencimento}</div>`).join('');
-      fecharModal();
+async function saveCliente(cliente){
+    if(cliente.id && isNaN(cliente.id)){
+        const docRef = doc(firebaseDB, "clientes", cliente.id);
+        await setDoc(docRef, cliente);
     } else {
-      showToast("Erro ao gerar boleto");
+        const docRef = await addDoc(collection(firebaseDB,"clientes"), cliente);
+        cliente.id = docRef.id;
     }
-  }catch(err){
-    showToast("Erro: "+err.message);
-  }
+}
+
+function openModal(edit=false,data=null){
+    modalBackdrop.style.display='flex';
+    document.getElementById('modalTitle').innerText=edit?"Editar Cliente":"Novo Cliente";
+    if(edit&&data){
+        inputNome.value=data.nome;
+        inputCPF.value=data.cpf||"";
+        inputObs.value=data.obs||"";
+        inputStatus.value=data.status;
+        inputNumeros.value=data.numeros||"";
+        inputProcesso.value=data.processo||"";
+        inputClasse.value=data.classe||"Outros";
+        inputValor.value=data.valor||"";
+        clientForm.dataset.editId=data.id;
+    }else{
+        inputNome.value=""; inputCPF.value=""; inputObs.value=""; inputStatus.value="lista-fria";
+        inputNumeros.value=""; inputProcesso.value=""; inputClasse.value="Outros"; inputValor.value="";
+        delete clientForm.dataset.editId;
+    }
+}
+function closeModal(){ modalBackdrop.style.display='none'; }
+
+function criarCard(cliente){
+    const col=document.getElementById(cliente.status);
+    if(!col) return;
+    const card=document.createElement('div');
+    card.className=`card ${cliente.status}`;
+    card.dataset.id=cliente.id;
+    card.dataset.status=cliente.status;
+    card.dataset.nome=cliente.nome.toLowerCase();
+    card.draggable=true;
+
+    const colorBar=document.createElement('div'); colorBar.className='color-bar'; card.appendChild(colorBar);
+
+    const actionsDiv=document.createElement('div'); actionsDiv.className='card-actions';
+    const btnCall=document.createElement('button');
+    btnCall.onclick=(e)=>{ e.stopPropagation(); ligar(cliente.numeros||''); };
+    const imgCall=document.createElement('img'); imgCall.src="https://img.icons8.com/ios-glyphs/30/000000/phone.png";
+    btnCall.appendChild(imgCall);
+    const btnWa=document.createElement('button');
+    btnWa.onclick=(e)=>{ e.stopPropagation(); whatsapp(cliente.numeros||''); };
+    const imgWa=document.createElement('img'); imgWa.src="https://img.icons8.com/ios-glyphs/30/000000/whatsapp.png";
+    btnWa.appendChild(imgWa);
+    actionsDiv.appendChild(btnCall); actionsDiv.appendChild(btnWa); card.appendChild(actionsDiv);
+
+    const contentDiv=document.createElement('div'); contentDiv.className='card-content';
+    contentDiv.innerHTML=`<h3>${cliente.nome}</h3>
+        <p>CPF: ${cliente.cpf||'-'}</p>
+        <p>Classe: ${cliente.classe||'-'}</p>
+        <p>Processo: ${cliente.processo||'-'}</p>
+        <p>Valor: R$ ${cliente.valor||0}</p>`;
+    card.appendChild(contentDiv);
+
+    card.onclick=()=>openModal(true,cliente);
+    addDragEvents(card);
+    col.appendChild(card);
+    cardsMap[cliente.id]=card;
+}
+
+function ligar(numero){ if(!numero){ showToast("Número não informado"); return; } window.open(`tel:${numero.replace(/\D/g,'')}`); }
+function whatsapp(numero){ if(!numero){ showToast("Número não informado"); return; } const num=numero.replace(/\D/g,''); window.open(`https://wa.me/55${num}`,'_blank'); }
+
+async function render(){
+    STATUS.forEach(s=>{
+        const col=document.getElementById(s);
+        col.innerHTML=`<h2>${s.replace('-',' ').toUpperCase()}</h2>`;
+    });
+    for(const k in cardsMap) delete cardsMap[k];
+    const clientes = await getClientes();
+    for(const c of clientes) criarCard(c);
+    filtragemAplicada();
+}
+
+clientForm.onsubmit = async function(e){
+    e.preventDefault();
+    const nome = inputNome.value.trim();
+    if(!nome){ showToast("Nome obrigatório"); return; }
+
+    const novo = {
+        nome, cpf: inputCPF.value.trim(),
+        obs: inputObs.value.trim().substring(0,300),
+        status: inputStatus.value,
+        numeros: inputNumeros.value,
+        processo: inputProcesso.value,
+        classe: inputClasse.value,
+        valor: inputValor.value
+    };
+
+    if(clientForm.dataset.editId){
+        novo.id = clientForm.dataset.editId;
+        await saveCliente(novo);
+        showToast("Cliente atualizado!");
+    } else {
+        await saveCliente(novo);
+        showToast("Cliente adicionado!");
+    }
+
+    closeModal();
+    render();
 };
 
-document.getElementById("btnAddCliente").onclick=()=>abrirModal({});
+btnAdd.onclick=()=>openModal();
+btnCancel.onclick=()=>closeModal();
 
-carregarClientes();
+let draggedCard=null;
+function addDragEvents(card){
+    card.addEventListener('dragstart',()=>{ draggedCard=card; card.style.opacity='.5'; });
+    card.addEventListener('dragend',()=>{ draggedCard=null; card.style.opacity='1'; });
+}
+document.querySelectorAll('.column').forEach(col=>{
+    col.addEventListener('dragover', e=>e.preventDefault());
+    col.addEventListener('drop', async ()=>{
+        if(!draggedCard) return;
+        const id = draggedCard.dataset.id;
+        const status = col.id;
+        const docRef = doc(firebaseDB,"clientes",id);
+        await updateDoc(docRef,{status});
+
+        if(status === "fechado"){ 
+            coinSound.currentTime = 0;
+            coinSound.play();
+        }
+
+        render(); 
+        showToast("Status atualizado");
+    });
+});
+
+function filtragemAplicada(){
+    const q = searchInput.value.toLowerCase();
+    const filterS = filterStatus.value;
+    Object.values(cardsMap).forEach(card=>{
+        const matchSearch = card.dataset.nome.includes(q);
+        const matchStatus = !filterS || card.dataset.status===filterS;
+        card.style.display=(matchSearch && matchStatus)?'flex':'none';
+    });
+}
+searchInput.oninput=filtragemAplicada;
+filterStatus.onchange=filtragemAplicada;
+
+render();
 </script>
 </body>
 </html>

@@ -1,1 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clientes Fechados - CRM AMR ADV</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+    body { background:#f0f2f5; padding:20px; }
 
+    h1 { font-family:'Poppins', sans-serif; color:#1e1e2f; margin-bottom:20px; }
+
+    .container { display:flex; flex-wrap:wrap; gap:20px; }
+
+    .card {
+      background:#fff; padding:20px; border-radius:12px;
+      box-shadow:0 6px 18px rgba(0,0,0,0.1);
+      width:320px; flex:1;
+    }
+    .card h2 { font-size:18px; margin-bottom:10px; }
+    .card p { font-size:14px; margin:4px 0; color:#333; }
+
+    input {
+      width:100%; padding:8px; margin-top:5px; margin-bottom:10px;
+      border:1px solid #ccc; border-radius:6px;
+    }
+    button {
+      padding:8px 12px; background:#1e1e2f; color:#fff; border:none; border-radius:6px;
+      cursor:pointer; margin-top:8px;
+    }
+    button:hover { background:#2a2a40; }
+
+    .processo {
+      margin-top:10px; padding:10px; background:#f9f9f9; border-radius:8px;
+    }
+    .processo strong { color:#1e1e2f; }
+  </style>
+</head>
+<body>
+  <h1>Clientes Fechados</h1>
+  <div class="container" id="clientesContainer"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+    import { getFirestore, collection, query, where, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "SUA_API_KEY",
+      authDomain: "SUA_AUTH_DOMAIN",
+      projectId: "SEU_PROJECT_ID",
+      storageBucket: "SEU_BUCKET",
+      messagingSenderId: "SEU_SENDER",
+      appId: "SEU_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const container = document.getElementById("clientesContainer");
+
+    async function carregarClientesFechados() {
+      container.innerHTML = "<p>Carregando clientes...</p>";
+
+      const q = query(collection(db, "clientes"), where("status", "==", "fechado"));
+      const snapshot = await getDocs(q);
+
+      container.innerHTML = "";
+
+      if (snapshot.empty) {
+        container.innerHTML = "<p>Nenhum cliente fechado encontrado.</p>";
+        return;
+      }
+
+      snapshot.forEach(docSnap => {
+        const cliente = docSnap.data();
+        const id = docSnap.id;
+
+        const card = document.createElement("div");
+        card.className = "card";
+
+        card.innerHTML = `
+          <h2>${cliente.nome || "Cliente sem nome"}</h2>
+          <p><strong>CPF:</strong> ${cliente.cpf || "-"}</p>
+
+          <label>Valor total dos honorários</label>
+          <input type="text" id="honorarios-${id}" value="${cliente.honorarios || ""}" placeholder="Ex: 10.000,00">
+
+          <label>Parcelamento</label>
+          <input type="text" id="parcelamento-${id}" value="${cliente.parcelamento || ""}" placeholder="Ex: 10x de 1.000,00">
+
+          <button onclick="salvarHonorarios('${id}')">Salvar Honorários</button>
+
+          <h3>Processos</h3>
+          <div id="processos-${id}"></div>
+        `;
+
+        container.appendChild(card);
+
+        // Renderizar processos do cliente
+        const processosContainer = card.querySelector(`#processos-${id}`);
+        if (cliente.processos && Array.isArray(cliente.processos)) {
+          cliente.processos.forEach((proc, index) => {
+            const procDiv = document.createElement("div");
+            procDiv.className = "processo";
+            procDiv.innerHTML = `
+              <p><strong>Processo:</strong> ${proc.numero || "Sem número"}</p>
+              <label>Valor da causa</label>
+              <input type="text" id="processo-${id}-${index}" value="${proc.valorCausa || ""}" placeholder="Ex: 5.000,00">
+              <button onclick="salvarProcesso('${id}', ${index})">Salvar Valor da Causa</button>
+            `;
+            processosContainer.appendChild(procDiv);
+          });
+        } else {
+          processosContainer.innerHTML = "<p>Nenhum processo cadastrado.</p>";
+        }
+      });
+    }
+
+    // Salvar honorários e parcelamento
+    window.salvarHonorarios = async function (id) {
+      const honorarios = document.getElementById(`honorarios-${id}`).value;
+      const parcelamento = document.getElementById(`parcelamento-${id}`).value;
+
+      await updateDoc(doc(db, "clientes", id), {
+        honorarios,
+        parcelamento
+      });
+      alert("Honorários atualizados!");
+    };
+
+    // Salvar valor da causa de um processo específico
+    window.salvarProcesso = async function (id, index) {
+      const docRef = doc(db, "clientes", id);
+      const input = document.getElementById(`processo-${id}-${index}`).value;
+
+      // Recuperar doc atual para atualizar o processo correto
+      const q = query(collection(db, "clientes"), where("__name__", "==", id));
+      const snapshot = await getDocs(q);
+      if (!snapshot.empty) {
+        const cliente = snapshot.docs[0].data();
+        if (cliente.processos && Array.isArray(cliente.processos)) {
+          cliente.processos[index].valorCausa = input;
+          await updateDoc(docRef, { processos: cliente.processos });
+          alert("Valor da causa atualizado!");
+        }
+      }
+    };
+
+    carregarClientesFechados();
+  </script>
+</body>
+</html>

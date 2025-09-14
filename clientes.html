@@ -13,18 +13,15 @@ h1 { font-family:'Poppins', sans-serif; color:#1e1e2f; margin-bottom:20px; }
 .card {
   background:#fff; padding:20px; border-radius:12px;
   box-shadow:0 6px 18px rgba(0,0,0,0.1);
-  width:320px; flex:1;
+  width:320px; flex:1; cursor:pointer;
+  transition: transform 0.2s;
 }
+.card:hover { transform: scale(1.02); }
 .card h2 { font-size:18px; margin-bottom:10px; }
-.card p { font-size:14px; margin:4px 0; color:#333; }
-input { width:100%; padding:8px; margin-top:5px; margin-bottom:10px; border:1px solid #ccc; border-radius:6px; }
-button { padding:8px 12px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; margin-top:8px; }
-button:hover { background:#2a2a40; }
-.processo { margin-top:10px; padding:10px; background:#f9f9f9; border-radius:8px; }
-.processo strong { color:#1e1e2f; }
+.card p { font-size:14px; color:#333; }
 
 /* Modal */
-#modalBoleto {
+#modalCliente {
   display:none;
   position:fixed;
   top:0; left:0; width:100%; height:100%;
@@ -36,8 +33,11 @@ button:hover { background:#2a2a40; }
   width:400px; max-height:90vh; overflow-y:auto;
 }
 .modal-content h3 { margin-bottom:15px; }
-.modal-content input { margin-bottom:10px; }
-.modal-content button { margin-right:10px; }
+.modal-content label { display:block; margin-top:10px; font-weight:600; }
+.modal-content input { width:100%; padding:8px; margin-top:5px; margin-bottom:10px; border:1px solid #ccc; border-radius:6px; }
+.modal-content button { padding:8px 12px; margin-top:8px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+.modal-content button:hover { background:#2a2a40; }
+.processo { margin-top:10px; padding:10px; background:#f9f9f9; border-radius:8px; }
 </style>
 </head>
 <body>
@@ -46,11 +46,18 @@ button:hover { background:#2a2a40; }
 <div class="container" id="clientesContainer"></div>
 
 <!-- Modal -->
-<div id="modalBoleto">
+<div id="modalCliente">
   <div class="modal-content" id="modalContent">
-    <h3>Gerar Boletos</h3>
+    <h3 id="modalClienteNome"></h3>
+    <label>Valor total dos honorários</label>
+    <input type="text" id="modalHonorarios">
+    <label>Parcelamento</label>
+    <input type="text" id="modalParcelamento" placeholder="Ex: 3">
+    <div id="modalProcessos"></div>
+    <h3>Boletos</h3>
     <div id="boletosInputs"></div>
-    <button id="confirmBoletoBtn">Gerar Boletos</button>
+    <button id="salvarClienteBtn">Salvar Cliente</button>
+    <button id="gerarBoletosBtn">Gerar Boletos</button>
     <button onclick="fecharModal()">Cancelar</button>
   </div>
 </div>
@@ -73,8 +80,8 @@ const db = getFirestore(app);
 const container = document.getElementById("clientesContainer");
 
 let clienteAtual = null;
-let numParcelas = 1;
 
+// Carregar clientes fechados
 async function carregarClientesFechados() {
   container.innerHTML = "<p>Carregando clientes...</p>";
   const q = query(collection(db, "clientes"), where("status", "==", "fechado"));
@@ -91,99 +98,98 @@ async function carregarClientesFechados() {
     const id = docSnap.id;
     const card = document.createElement("div");
     card.className = "card";
-
-    card.innerHTML = `
-      <h2>${cliente.nome || "Cliente sem nome"}</h2>
-      <p><strong>CPF:</strong> ${cliente.cpf || "-"}</p>
-      <label>Valor total dos honorários</label>
-      <input type="text" id="honorarios-${id}" value="${cliente.honorarios || ""}" placeholder="Ex: 10.000,00">
-      <label>Parcelamento</label>
-      <input type="text" id="parcelamento-${id}" value="${cliente.parcelamento || "1"}" placeholder="Ex: 3">
-      <button onclick="salvarHonorarios('${id}')">Salvar Honorários</button>
-      <button onclick="abrirModal('${id}')">Gerar Boleto</button>
-      <h3>Processos</h3>
-      <div id="processos-${id}"></div>
-    `;
+    card.innerHTML = `<h2>${cliente.nome}</h2><p>CPF: ${cliente.cpf || "-"}</p>`;
+    card.onclick = () => abrirModal(cliente, id);
     container.appendChild(card);
-
-    // Renderizar processos
-    const processosContainer = card.querySelector(`#processos-${id}`);
-    if (cliente.processos && Array.isArray(cliente.processos)) {
-      cliente.processos.forEach((proc, index) => {
-        const procDiv = document.createElement("div");
-        procDiv.className = "processo";
-        procDiv.innerHTML = `
-          <p><strong>Processo:</strong> ${proc.numero || "Sem número"}</p>
-          <label>Valor da causa</label>
-          <input type="text" id="processo-${id}-${index}" value="${proc.valorCausa || ""}" placeholder="Ex: 5.000,00">
-          <button onclick="salvarProcesso('${id}', ${index})">Salvar Valor da Causa</button>
-        `;
-        processosContainer.appendChild(procDiv);
-      });
-    } else {
-      processosContainer.innerHTML = "<p>Nenhum processo cadastrado.</p>";
-    }
   });
 }
 
-window.salvarHonorarios = async function (id) {
-  const honorarios = document.getElementById(`honorarios-${id}`).value;
-  const parcelamento = document.getElementById(`parcelamento-${id}`).value || "1";
-  await updateDoc(doc(db, "clientes", id), { honorarios, parcelamento });
-  alert("Honorários atualizados!");
-};
-
-window.salvarProcesso = async function (id, index) {
-  const docRef = doc(db, "clientes", id);
-  const input = document.getElementById(`processo-${id}-${index}`).value;
-  const snapshot = await getDocs(query(collection(db, "clientes"), where("__name__", "==", id)));
-  if (!snapshot.empty) {
-    const cliente = snapshot.docs[0].data();
-    if (cliente.processos && Array.isArray(cliente.processos)) {
-      cliente.processos[index].valorCausa = input;
-      await updateDoc(docRef, { processos: cliente.processos });
-      alert("Valor da causa atualizado!");
-    }
-  }
-};
-
 // Modal
-const modal = document.getElementById('modalBoleto');
+const modal = document.getElementById('modalCliente');
+const modalNome = document.getElementById('modalClienteNome');
+const modalHonorarios = document.getElementById('modalHonorarios');
+const modalParcelamento = document.getElementById('modalParcelamento');
+const modalProcessos = document.getElementById('modalProcessos');
 const boletosInputs = document.getElementById('boletosInputs');
-const confirmBtn = document.getElementById('confirmBoletoBtn');
+const salvarClienteBtn = document.getElementById('salvarClienteBtn');
+const gerarBoletosBtn = document.getElementById('gerarBoletosBtn');
 
-window.abrirModal = async function(id) {
-  const snapshot = await getDocs(query(collection(db, "clientes"), where("__name__", "==", id)));
-  if (!snapshot.empty) {
-    clienteAtual = snapshot.docs[0].data();
-    clienteAtual.id = id;
-    numParcelas = parseInt(clienteAtual.parcelamento) || 1;
+function abrirModal(cliente, id) {
+  clienteAtual = { ...cliente, id };
+  modalNome.textContent = cliente.nome;
+  modalHonorarios.value = cliente.honorarios || "";
+  modalParcelamento.value = cliente.parcelamento || "1";
 
-    boletosInputs.innerHTML = "";
-    for (let i=0; i<numParcelas; i++) {
-      boletosInputs.innerHTML += `
-        <label>Boleto ${i+1} - Valor:</label>
-        <input type="text" id="valor-${i}" placeholder="Ex: 1000">
-        <label>Vencimento:</label>
-        <input type="date" id="vencimento-${i}" value="${new Date().toISOString().split('T')[0]}">
-        <hr>
+  // Processos
+  modalProcessos.innerHTML = "<h4>Processos</h4>";
+  if (cliente.processos && Array.isArray(cliente.processos)) {
+    cliente.processos.forEach((proc, index) => {
+      const div = document.createElement("div");
+      div.className = "processo";
+      div.innerHTML = `
+        <p>Processo: ${proc.numero}</p>
+        <label>Valor da causa:</label>
+        <input type="text" id="proc-${index}" value="${proc.valorCausa || ""}">
       `;
-    }
-    modal.style.display = "flex";
+      modalProcessos.appendChild(div);
+    });
+  } else {
+    modalProcessos.innerHTML += "<p>Nenhum processo cadastrado.</p>";
   }
-};
 
-window.fecharModal = function() {
+  // Boletos
+  boletosInputs.innerHTML = "<h4>Boletos</h4>";
+  const numParcelas = parseInt(cliente.parcelamento) || 1;
+  for (let i = 0; i < numParcelas; i++) {
+    boletosInputs.innerHTML += `
+      <label>Boleto ${i+1} - Valor:</label>
+      <input type="text" id="boletoValor-${i}" placeholder="Ex: 1000">
+      <label>Vencimento:</label>
+      <input type="date" id="boletoVenc-${i}" value="${new Date().toISOString().split('T')[0]}">
+      <hr>
+    `;
+  }
+
+  modal.style.display = "flex";
+}
+
+function fecharModal() {
   modal.style.display = "none";
   clienteAtual = null;
+}
+
+// Salvar cliente
+salvarClienteBtn.onclick = async function() {
+  if (!clienteAtual) return;
+  const honorarios = modalHonorarios.value;
+  const parcelamento = modalParcelamento.value;
+
+  // Atualizar processos
+  if (clienteAtual.processos && Array.isArray(clienteAtual.processos)) {
+    clienteAtual.processos.forEach((proc, index) => {
+      const valor = document.getElementById(`proc-${index}`).value;
+      proc.valorCausa = valor;
+    });
+  }
+
+  await updateDoc(doc(db, "clientes", clienteAtual.id), {
+    honorarios,
+    parcelamento,
+    processos: clienteAtual.processos
+  });
+  alert("Cliente atualizado!");
+  fecharModal();
+  carregarClientesFechados();
 };
 
-confirmBtn.onclick = async function() {
+// Gerar boletos
+gerarBoletosBtn.onclick = async function() {
   if (!clienteAtual) return;
   const boletos = [];
-  for (let i=0; i<numParcelas; i++) {
-    const valor = document.getElementById(`valor-${i}`).value;
-    const vencimento = document.getElementById(`vencimento-${i}`).value;
+  const numParcelas = parseInt(clienteAtual.parcelamento) || 1;
+  for (let i = 0; i < numParcelas; i++) {
+    const valor = document.getElementById(`boletoValor-${i}`).value;
+    const vencimento = document.getElementById(`boletoVenc-${i}`).value;
     boletos.push({ valor, vencimento });
   }
 

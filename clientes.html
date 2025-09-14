@@ -3,239 +3,226 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Clientes Fechados - AMR ADV</title>
+<title>Clientes Fechados - Gerar Boletos</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
+body { background:#f0f2f5; padding:20px; }
+h1 { font-family:'Poppins', sans-serif; color:#1e1e2f; margin-bottom:20px; }
+.container { display:flex; flex-wrap:wrap; gap:20px; }
+.card {
+  background:#fff; padding:20px; border-radius:12px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.1);
+  width:300px; cursor:pointer; position:relative;
+}
+.card h2 { font-size:18px; margin-bottom:10px; }
+.card p { font-size:14px; margin:4px 0; color:#333; }
+.boleto { margin-top:5px; padding:5px 8px; background:#e0e0e0; border-radius:6px; font-size:13px; }
 
-.sidebar { width:80px; background:#1e1e2f; display:flex; flex-direction:column; align-items:center; padding:20px 0; flex-shrink:0; transition:width 0.3s; }
-.sidebar:hover { width:220px; }
-.sidebar h2 { font-size:22px; font-family:'Poppins', sans-serif; font-weight:600; color:#fff; letter-spacing:1px; margin-bottom:30px; text-align:center; cursor:pointer; width:100%; white-space:nowrap; overflow:hidden; transition:opacity 0.3s; }
-.sidebar button { width:100%; background:transparent; border:none; color:#fff; display:flex; align-items:center; gap:15px; padding:12px 20px; margin:5px 0; cursor:pointer; border-radius:10px; transition:background 0.2s, color 0.2s; font-size:14px; white-space:nowrap; overflow:hidden; }
-.sidebar button:hover { background:#2a2a40; color:#fff; }
-.sidebar button img { width:24px; height:24px; filter: invert(1); flex-shrink:0; }
-.sidebar button span { display:inline-block; opacity:1; transition:opacity 0.3s; }
-.sidebar:not(:hover) h2, .sidebar:not(:hover) button span { opacity:0; }
-
-.main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
-header { height:60px; background:#fff; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; padding:0 20px; flex-shrink:0; }
-header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
-
-.kanban-container { flex:1; overflow-x:auto; padding:20px; display:grid; grid-template-columns:repeat(2, 1fr); gap:20px; }
-.column { background:#fff; border-radius:15px; padding:15px; display:flex; flex-direction:column; gap:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); min-height:500px; }
-.column h2 { margin-bottom:10px; font-size:18px; color:#1e1e2f; text-transform:uppercase; text-align:center; }
-
-.card { display:flex; background:#fff; border-radius:15px; box-shadow:0 8px 20px rgba(0,0,0,0.12); cursor:pointer; overflow:hidden; transition:0.3s; flex-direction:column; min-height:180px; position:relative; }
-.card:hover { transform:scale(1.03); }
-.card .color-bar { width:8px; height:100%; border-radius:15px 0 0 15px; background:#2ecc71; position:absolute; left:0; top:0; }
-.card-content { padding:15px; display:flex; flex-direction:column; justify-content:flex-start; gap:4px; }
-.card-content h3 { font-size:18px; color:#333; }
-.card-content p { font-size:14px; color:#555; margin:0; }
-.card-content ul { font-size:14px; color:#555; margin:0; padding-left:15px; }
-
-.card-actions { display:flex; justify-content:flex-end; gap:8px; position:absolute; top:8px; right:8px; }
-.card-actions button { background:none; border:none; cursor:pointer; padding:4px; }
-.card-actions img { width:20px; height:20px; opacity:0.7; transition:opacity 0.2s; }
-.card-actions img:hover { opacity:1; }
-
-.modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); justify-content:center; align-items:center; z-index:50; }
-.modal { background:#fff; padding:18px; border-radius:15px; min-width:320px; max-width:420px; box-shadow:0 8px 30px rgba(0,0,0,.25); }
-.modal h3 { margin-bottom:12px; }
-.modal .row { margin-bottom:10px; }
-.modal input, .modal textarea, .modal select { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; }
-.modal textarea { min-height:80px; resize:vertical; }
-.modal .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
-
-.btn { padding:8px 12px; border-radius:6px; border:0; cursor:pointer; }
-.btn.primary { background:#1e1e2f; color:#fff; }
-.btn.ghost { background:#f1f3f5; }
-
-.toast { position:fixed; right:20px; bottom:20px; background:#222; color:#fff; padding:8px 12px; border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.3); display:none; z-index:60; }
+/* Modal */
+#modalBoleto {
+  display:none;
+  position:fixed;
+  top:0; left:0; width:100%; height:100%;
+  background:rgba(0,0,0,0.5);
+  justify-content:center; align-items:center;
+}
+.modal-content {
+  background:#fff; padding:20px; border-radius:12px;
+  width:400px; max-height:90vh; overflow-y:auto;
+}
+.modal-content h3 { margin-bottom:15px; }
+.modal-content label { display:block; margin-top:10px; font-weight:bold; }
+.modal-content input { width:100%; padding:8px; margin-top:5px; border:1px solid #ccc; border-radius:6px; }
+.modal-content button { margin-top:15px; padding:10px 15px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+.modal-content button:hover { background:#2a2a40; margin-right:10px; }
 </style>
 </head>
 <body>
-<div class="sidebar">
-<h2 onclick="window.location.href='dashboard.html'">AMR ADV</h2>
-<button onclick="window.location.href='dashboard.html'">
-<img src="https://img.icons8.com/ios-filled/50/ffffff/dashboard.png"/><span>Dashboard</span>
-</button>
-</div>
 
-<div class="main">
-<header>
 <h1>Clientes Fechados</h1>
-</header>
+<div class="container" id="clientesContainer"></div>
 
-<div class="kanban-container">
-<div class="column" id="em-dia"><h2>Em Dia</h2></div>
-<div class="column" id="em-atraso"><h2>Em Atraso</h2></div>
-</div>
-</div>
+<!-- Modal -->
+<div id="modalBoleto">
+  <div class="modal-content" id="modalContent">
+    <h3>Gerar Boleto</h3>
 
-<!-- Modal Boleto -->
-<div class="modal-backdrop" id="modalBoletoBackdrop">
-<div class="modal">
-<h3>Gerar Boleto</h3>
-<form id="formBoleto">
-<div class="row"><label>Nome</label><input id="boletoNome" disabled /></div>
-<div class="row"><label>CPF/CNPJ</label><input id="boletoCpf" /></div>
-<div class="row"><label>E-mail</label><input id="boletoEmail" type="email" /></div>
-<div class="row"><label>Valor</label><input id="boletoValor" type="number" /></div>
-<div class="row"><label>Vencimento</label><input id="boletoVencimento" type="date" /></div>
-<div class="row"><label>Descrição</label><textarea id="boletoDesc"></textarea></div>
-<div class="actions">
-<button type="button" class="btn ghost" onclick="closeBoletoModal()">Cancelar</button>
-<button type="submit" class="btn primary">Gerar</button>
-</div>
-</form>
-</div>
-</div>
+    <label>Nome</label>
+    <input type="text" id="modalNome" placeholder="Nome completo">
 
-<div class="toast" id="toast"></div>
+    <label>CPF/CNPJ</label>
+    <input type="text" id="modalCpf" placeholder="Somente números">
+
+    <label>Email</label>
+    <input type="email" id="modalEmail" placeholder="email@exemplo.com">
+
+    <label>Telefone</label>
+    <input type="text" id="modalTelefone" placeholder="Ex: 11999999999">
+
+    <label>CEP</label>
+    <input type="text" id="modalCep" placeholder="Ex: 01001000">
+
+    <label>Endereço</label>
+    <input type="text" id="modalEndereco" placeholder="Rua, número">
+
+    <label>Cidade</label>
+    <input type="text" id="modalCidade" placeholder="Cidade">
+
+    <label>Estado (UF)</label>
+    <input type="text" id="modalEstado" placeholder="SP">
+
+    <label>Valor do Boleto</label>
+    <input type="text" id="modalValor" placeholder="Ex: 1000.00">
+
+    <label>Data de Vencimento</label>
+    <input type="date" id="modalVencimento" value="">
+
+    <button id="confirmBoletoBtn">Gerar Boleto</button>
+    <button onclick="fecharModal()">Cancelar</button>
+  </div>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-import { getFirestore, collection, getDocs, updateDoc, doc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+import { getFirestore, collection, query, where, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
-// Config Firestore
 const firebaseConfig = {
-    apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
+  apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
     authDomain: "dapapp-38637.firebaseapp.com",
     projectId: "dapapp-38637",
     storageBucket: "dapapp-38637.appspot.com",
     messagingSenderId: "628852295313",
     appId: "1:628852295313:web:INSERIR_SEU_APP_ID"
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const container = document.getElementById("clientesContainer");
 
-// Toast
-const toastEl = document.getElementById('toast');
-function showToast(msg){
-    toastEl.innerText = msg;
-    toastEl.style.display = 'block';
-    clearTimeout(toastEl._t);
-    toastEl._t = setTimeout(()=>toastEl.style.display='none',3000);
-}
+let clienteAtualId = null;
 
-// Clientes fechados
-let clientes = [];
+async function carregarClientes() {
+  container.innerHTML = "<p>Carregando clientes...</p>";
+  const q = query(collection(db, "clientes"), where("status", "==", "fechado"));
+  const snapshot = await getDocs(q);
+  container.innerHTML = "";
 
-async function getClientes(){
-    const snapshot = await getDocs(collection(db,"clientes"));
-    clientes = snapshot.docs
-        .map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter(c => c.status === 'fechado')
-        .map(c => ({ boletos: c.boletos || [], ...c }));
-    render();
-}
+  if(snapshot.empty) {
+    container.innerHTML = "<p>Nenhum cliente fechado encontrado.</p>";
+    return;
+  }
 
-// Criar card
-function criarCard(cliente){
-    const colId = cliente.valor < 5000 ? 'em-atraso' : 'em-dia';
-    const col = document.getElementById(colId);
-    if(!col) return;
-
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.dataset.id = cliente.id;
-    card.draggable = true;
-
-    const colorBar = document.createElement('div'); colorBar.className='color-bar';
-    card.appendChild(colorBar);
-
-    const contentDiv = document.createElement('div'); contentDiv.className='card-content';
-    contentDiv.innerHTML = `
-        <h3>${cliente.nome}</h3>
-        <p>CPF: ${cliente.cpf || '-'}</p>
-        <p>Boletos:</p>
-        <ul id="boletos-${cliente.id}">
-        ${cliente.boletos.map(b => `<li>${b}</li>`).join('')}
-        </ul>
+  snapshot.forEach(docSnap => {
+    const cliente = docSnap.data();
+    const id = docSnap.id;
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <h2>${cliente.nome || "Sem nome"}</h2>
+      <p><strong>CPF:</strong> ${cliente.cpf || "-"}</p>
+      <div id="boletos-${id}">
+        ${(cliente.boletos || []).map(b => `<div class="boleto">Boleto R$${b.valor} - ${b.vencimento}</div>`).join('')}
+      </div>
     `;
-    card.appendChild(contentDiv);
+    container.appendChild(card);
 
-    const actionsDiv = document.createElement('div'); actionsDiv.className='card-actions';
-
-    // Telefone
-    const btnCall = document.createElement('button');
-    btnCall.onclick = (e)=>{ e.stopPropagation(); window.open(`tel:${cliente.numeros||''}`); };
-    const imgCall = document.createElement('img'); imgCall.src="https://img.icons8.com/ios-glyphs/30/000000/phone.png";
-    btnCall.appendChild(imgCall);
-
-    // WhatsApp
-    const btnWa = document.createElement('button');
-    btnWa.onclick = (e)=>{ e.stopPropagation(); window.open(`https://wa.me/55${(cliente.numeros||'').replace(/\D/g,'')}`,'_blank'); };
-    const imgWa = document.createElement('img'); imgWa.src="https://img.icons8.com/ios-glyphs/30/000000/whatsapp.png";
-    btnWa.appendChild(imgWa);
-
-    // Boleto
-    const btnBoleto = document.createElement('button');
-    btnBoleto.onclick = (e)=>{ e.stopPropagation(); abrirBoletoModal(cliente.id); };
-    const imgBoleto = document.createElement('img'); imgBoleto.src="https://img.icons8.com/ios-filled/50/000000/money.png";
-    btnBoleto.appendChild(imgBoleto);
-
-    actionsDiv.appendChild(btnCall);
-    actionsDiv.appendChild(btnWa);
-    actionsDiv.appendChild(btnBoleto);
-
-    card.appendChild(actionsDiv);
-
-    // Drag and drop
-    card.addEventListener('dragstart',()=>{ draggedCard=card; card.style.opacity='.5'; });
-    card.addEventListener('dragend',()=>{ draggedCard=null; card.style.opacity='1'; });
-
-    col.appendChild(card);
+    card.onclick = () => abrirModal(cliente, id);
+  });
 }
 
-let draggedCard = null;
-document.querySelectorAll('.column').forEach(col=>{
-    col.addEventListener('dragover', e=>e.preventDefault());
-    col.addEventListener('drop', ()=>{
-        if(!draggedCard) return;
-        col.appendChild(draggedCard);
+// Modal
+const modal = document.getElementById('modalBoleto');
+const modalNome = document.getElementById('modalNome');
+const modalCpf = document.getElementById('modalCpf');
+const modalEmail = document.getElementById('modalEmail');
+const modalTelefone = document.getElementById('modalTelefone');
+const modalCep = document.getElementById('modalCep');
+const modalEndereco = document.getElementById('modalEndereco');
+const modalCidade = document.getElementById('modalCidade');
+const modalEstado = document.getElementById('modalEstado');
+const modalValor = document.getElementById('modalValor');
+const modalVencimento = document.getElementById('modalVencimento');
+const confirmBtn = document.getElementById('confirmBoletoBtn');
+
+function abrirModal(cliente, id) {
+  clienteAtualId = id;
+
+  modalNome.value = cliente.nome || "";
+  modalCpf.value = cliente.cpf || "";
+  modalEmail.value = cliente.email || "";
+  modalTelefone.value = cliente.telefone || "";
+  modalCep.value = cliente.cep || "";
+  modalEndereco.value = cliente.endereco || "";
+  modalCidade.value = cliente.cidade || "";
+  modalEstado.value = cliente.estado || "";
+  modalValor.value = "";
+  modalVencimento.value = new Date().toISOString().split('T')[0];
+
+  modal.style.display = "flex";
+}
+
+function fecharModal() {
+  modal.style.display = "none";
+  clienteAtualId = null;
+}
+
+// Gerar boleto
+confirmBtn.onclick = async () => {
+  if(!clienteAtualId) return;
+
+  const nome = modalNome.value.trim();
+  const cpf = modalCpf.value.trim();
+  const email = modalEmail.value.trim();
+  const telefone = modalTelefone.value.trim();
+  const cep = modalCep.value.trim();
+  const endereco = modalEndereco.value.trim();
+  const cidade = modalCidade.value.trim();
+  const estado = modalEstado.value.trim();
+  const valor = modalValor.value.trim();
+  const vencimento = modalVencimento.value;
+
+  if(!nome || !cpf || !email || !valor || !vencimento) {
+    alert("Preencha os campos obrigatórios!");
+    return;
+  }
+
+  try {
+    const res = await fetch("http://localhost:3000/api/gerarBoletos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        nome, cpf, email, telefone, cep, endereco, cidade, estado,
+        boletos: [{ valor, vencimento }]
+      })
     });
-});
 
-function render(){
-    document.getElementById('em-dia').innerHTML='<h2>Em Dia</h2>';
-    document.getElementById('em-atraso').innerHTML='<h2>Em Atraso</h2>';
-    clientes.forEach(c=>criarCard(c));
-}
+    const data = await res.json();
+    if(data.sucesso) {
+      alert("Boleto gerado com sucesso!");
 
-// Modal Boleto
-function abrirBoletoModal(clienteId){
-    const cliente = clientes.find(c=>c.id===clienteId);
-    document.getElementById('boletoNome').value = cliente.nome;
-    document.getElementById('boletoCpf').value = cliente.cpf || '';
-    document.getElementById('boletoEmail').value = cliente.email || '';
-    document.getElementById('boletoValor').value = cliente.valor || 0;
-    document.getElementById('boletoVencimento').valueAsDate = new Date();
-    document.getElementById('boletoDesc').value = '';
-    document.getElementById('modalBoletoBackdrop').style.display='flex';
+      // Salvar no Firestore
+      const docRef = doc(db, "clientes", clienteAtualId);
+      const clienteSnap = await getDocs(query(collection(db, "clientes"), where("__name__", "==", clienteAtualId)));
+      const clienteData = clienteSnap.docs[0].data();
+      const novosBoletos = clienteData.boletos || [];
+      novosBoletos.push({ valor, vencimento });
+      await updateDoc(docRef, { boletos: novosBoletos });
 
-    document.getElementById('formBoleto').onsubmit = async (e)=>{
-        e.preventDefault();
-        const valor = document.getElementById('boletoValor').value;
-        const venc = document.getElementById('boletoVencimento').value;
-        const desc = document.getElementById('boletoDesc').value;
-        const novoBoleto = `R$ ${valor} - ${venc} - ${desc}`;
-        const docRef = doc(db,'clientes',cliente.id);
-        await updateDoc(docRef,{ boletos: arrayUnion(novoBoleto) });
-        cliente.boletos.push(novoBoleto);
-        const ul = document.getElementById(`boletos-${cliente.id}`);
-        ul.innerHTML = cliente.boletos.map(b => `<li>${b}</li>`).join('');
-        showToast('Boleto gerado!');
-        closeBoletoModal();
-    };
-}
+      // Atualizar card
+      const boletosContainer = document.getElementById(`boletos-${clienteAtualId}`);
+      boletosContainer.innerHTML = novosBoletos.map(b => `<div class="boleto">Boleto R$${b.valor} - ${b.vencimento}</div>`).join('');
 
-function closeBoletoModal(){
-    document.getElementById('modalBoletoBackdrop').style.display='none';
-}
+      fecharModal();
+    } else {
+      alert("Erro ao gerar boleto: " + JSON.stringify(data.erro));
+    }
+  } catch(err) {
+    alert("Erro ao conectar ao servidor: " + err.message);
+  }
+};
 
-getClientes();
+carregarClientes();
 </script>
 </body>
 </html>

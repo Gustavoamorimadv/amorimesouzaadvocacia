@@ -3,24 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Clientes - Gerar Boletos</title>
+<title>Clientes Fechados - Gerar Boletos</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
 body { background:#f0f2f5; padding:20px; }
-h1 { font-family:'Poppins', sans-serif; color:#1e1e2f; margin-bottom:20px; text-align:center; }
-.container { display:flex; flex-wrap:wrap; gap:20px; justify-content:center; }
+h1 { font-family:'Poppins', sans-serif; color:#1e1e2f; margin-bottom:20px; }
+.container { display:flex; flex-wrap:wrap; gap:20px; }
 .card {
   background:#fff; padding:20px; border-radius:12px;
   box-shadow:0 6px 18px rgba(0,0,0,0.1);
-  width:300px; position:relative;
+  width:300px; cursor:pointer; position:relative;
 }
 .card h2 { font-size:18px; margin-bottom:10px; }
 .card p { font-size:14px; margin:4px 0; color:#333; }
-.card .boletos { margin-top:10px; }
-.card .boleto { font-size:14px; padding:5px; background:#f1f1f1; border-radius:6px; margin-bottom:5px; }
-button { margin-top:10px; padding:8px 12px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
-button:hover { background:#2a2a40; }
+.boleto { margin-top:5px; padding:5px 8px; background:#e0e0e0; border-radius:6px; font-size:13px; }
 
 /* Modal */
 #modalBoleto {
@@ -35,9 +32,10 @@ button:hover { background:#2a2a40; }
   width:400px; max-height:90vh; overflow-y:auto;
 }
 .modal-content h3 { margin-bottom:15px; }
-.modal-content label { font-weight:bold; display:block; margin-top:10px; }
+.modal-content label { display:block; margin-top:10px; font-weight:bold; }
 .modal-content input { width:100%; padding:8px; margin-top:5px; border:1px solid #ccc; border-radius:6px; }
-.modal-content button { margin-top:10px; margin-right:10px; }
+.modal-content button { margin-top:15px; padding:10px 15px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+.modal-content button:hover { background:#2a2a40; margin-right:10px; }
 </style>
 </head>
 <body>
@@ -45,14 +43,41 @@ button:hover { background:#2a2a40; }
 <h1>Clientes Fechados</h1>
 <div class="container" id="clientesContainer"></div>
 
-<!-- Modal para gerar boletos -->
+<!-- Modal -->
 <div id="modalBoleto">
-  <div class="modal-content">
+  <div class="modal-content" id="modalContent">
     <h3>Gerar Boleto</h3>
-    <label>Valor do boleto</label>
-    <input type="text" id="modalValor" placeholder="Ex: 500.00">
-    <label>Data de vencimento</label>
+
+    <label>Nome</label>
+    <input type="text" id="modalNome" placeholder="Nome completo">
+
+    <label>CPF/CNPJ</label>
+    <input type="text" id="modalCpf" placeholder="Somente números">
+
+    <label>Email</label>
+    <input type="email" id="modalEmail" placeholder="email@exemplo.com">
+
+    <label>Telefone</label>
+    <input type="text" id="modalTelefone" placeholder="Ex: 11999999999">
+
+    <label>CEP</label>
+    <input type="text" id="modalCep" placeholder="Ex: 01001000">
+
+    <label>Endereço</label>
+    <input type="text" id="modalEndereco" placeholder="Rua, número">
+
+    <label>Cidade</label>
+    <input type="text" id="modalCidade" placeholder="Cidade">
+
+    <label>Estado (UF)</label>
+    <input type="text" id="modalEstado" placeholder="SP">
+
+    <label>Valor do Boleto</label>
+    <input type="text" id="modalValor" placeholder="Ex: 1000.00">
+
+    <label>Data de Vencimento</label>
     <input type="date" id="modalVencimento" value="">
+
     <button id="confirmBoletoBtn">Gerar Boleto</button>
     <button onclick="fecharModal()">Cancelar</button>
   </div>
@@ -62,27 +87,21 @@ button:hover { background:#2a2a40; }
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
 import { getFirestore, collection, query, where, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
-// Config Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
-    authDomain: "dapapp-38637.firebaseapp.com",
-    projectId: "dapapp-38637",
-    storageBucket: "dapapp-38637.appspot.com",
-    messagingSenderId: "628852295313",
-    appId: "1:628852295313:web:INSERIR_SEU_APP_ID"
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_FIREBASE_APP.firebaseapp.com",
+  projectId: "SEU_FIREBASE_APP_ID",
+  storageBucket: "SEU_FIREBASE_APP.appspot.com",
+  messagingSenderId: "SEU_MESSAGING_SENDER_ID",
+  appId: "SEU_APP_ID"
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const container = document.getElementById("clientesContainer");
 
-const container = document.getElementById('clientesContainer');
-const modal = document.getElementById('modalBoleto');
-const modalValor = document.getElementById('modalValor');
-const modalVencimento = document.getElementById('modalVencimento');
-const confirmBtn = document.getElementById('confirmBoletoBtn');
+let clienteAtualId = null;
 
-let clienteAtual = null;
-
-// Carregar clientes fechados
 async function carregarClientes() {
   container.innerHTML = "<p>Carregando clientes...</p>";
   const q = query(collection(db, "clientes"), where("status", "==", "fechado"));
@@ -96,64 +115,84 @@ async function carregarClientes() {
 
   snapshot.forEach(docSnap => {
     const cliente = docSnap.data();
-    cliente.id = docSnap.id;
-
-    const card = document.createElement('div');
-    card.className = 'card';
+    const id = docSnap.id;
+    const card = document.createElement("div");
+    card.className = "card";
     card.innerHTML = `
-      <h2>${cliente.nome || "Cliente sem nome"}</h2>
-      <p><strong>CPF/CNPJ:</strong> ${cliente.cpf || "-"}</p>
-      <div class="boletos" id="boletos-${cliente.id}">
+      <h2>${cliente.nome || "Sem nome"}</h2>
+      <p><strong>CPF:</strong> ${cliente.cpf || "-"}</p>
+      <div id="boletos-${id}">
         ${(cliente.boletos || []).map(b => `<div class="boleto">Boleto R$${b.valor} - ${b.vencimento}</div>`).join('')}
       </div>
-      <button onclick="abrirModal('${cliente.id}')">Gerar Boleto</button>
     `;
     container.appendChild(card);
+
+    card.onclick = () => abrirModal(cliente, id);
   });
 }
 
-// Abrir modal
-window.abrirModal = function(clienteId) {
-  clienteAtual = clienteId;
+// Modal
+const modal = document.getElementById('modalBoleto');
+const modalNome = document.getElementById('modalNome');
+const modalCpf = document.getElementById('modalCpf');
+const modalEmail = document.getElementById('modalEmail');
+const modalTelefone = document.getElementById('modalTelefone');
+const modalCep = document.getElementById('modalCep');
+const modalEndereco = document.getElementById('modalEndereco');
+const modalCidade = document.getElementById('modalCidade');
+const modalEstado = document.getElementById('modalEstado');
+const modalValor = document.getElementById('modalValor');
+const modalVencimento = document.getElementById('modalVencimento');
+const confirmBtn = document.getElementById('confirmBoletoBtn');
+
+function abrirModal(cliente, id) {
+  clienteAtualId = id;
+
+  modalNome.value = cliente.nome || "";
+  modalCpf.value = cliente.cpf || "";
+  modalEmail.value = cliente.email || "";
+  modalTelefone.value = cliente.telefone || "";
+  modalCep.value = cliente.cep || "";
+  modalEndereco.value = cliente.endereco || "";
+  modalCidade.value = cliente.cidade || "";
+  modalEstado.value = cliente.estado || "";
   modalValor.value = "";
   modalVencimento.value = new Date().toISOString().split('T')[0];
-  modal.style.display = 'flex';
-};
 
-// Fechar modal
-window.fecharModal = function() {
-  modal.style.display = 'none';
-  clienteAtual = null;
-};
+  modal.style.display = "flex";
+}
+
+function fecharModal() {
+  modal.style.display = "none";
+  clienteAtualId = null;
+}
 
 // Gerar boleto
-confirmBtn.onclick = async function() {
-  if(!clienteAtual) return;
+confirmBtn.onclick = async () => {
+  if(!clienteAtualId) return;
 
+  const nome = modalNome.value.trim();
+  const cpf = modalCpf.value.trim();
+  const email = modalEmail.value.trim();
+  const telefone = modalTelefone.value.trim();
+  const cep = modalCep.value.trim();
+  const endereco = modalEndereco.value.trim();
+  const cidade = modalCidade.value.trim();
+  const estado = modalEstado.value.trim();
   const valor = modalValor.value.trim();
   const vencimento = modalVencimento.value;
 
-  if(!valor || !vencimento) {
-    alert("Preencha todos os campos!");
+  if(!nome || !cpf || !email || !valor || !vencimento) {
+    alert("Preencha os campos obrigatórios!");
     return;
   }
 
-  // Pegar dados do cliente do Firestore
-  const docRef = doc(db, "clientes", clienteAtual);
-  const snapshot = await getDocs(query(collection(db, "clientes"), where("__name__", "==", clienteAtual)));
-  if(snapshot.empty) return;
-
-  const clienteData = snapshot.docs[0].data();
-
-  // Enviar para API
   try {
     const res = await fetch("http://localhost:3000/api/gerarBoletos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        nome: clienteData.nome,
-        cpf: clienteData.cpf,
-        email: clienteData.email,
+        nome, cpf, email, telefone, cep, endereco, cidade, estado,
         boletos: [{ valor, vencimento }]
       })
     });
@@ -162,20 +201,22 @@ confirmBtn.onclick = async function() {
     if(data.sucesso) {
       alert("Boleto gerado com sucesso!");
 
-      // Atualizar Firestore com boleto gerado
+      // Salvar no Firestore
+      const docRef = doc(db, "clientes", clienteAtualId);
+      const clienteSnap = await getDocs(query(collection(db, "clientes"), where("__name__", "==", clienteAtualId)));
+      const clienteData = clienteSnap.docs[0].data();
       const novosBoletos = clienteData.boletos || [];
       novosBoletos.push({ valor, vencimento });
       await updateDoc(docRef, { boletos: novosBoletos });
 
       // Atualizar card
-      const boletosContainer = document.getElementById(`boletos-${clienteAtual}`);
+      const boletosContainer = document.getElementById(`boletos-${clienteAtualId}`);
       boletosContainer.innerHTML = novosBoletos.map(b => `<div class="boleto">Boleto R$${b.valor} - ${b.vencimento}</div>`).join('');
 
       fecharModal();
     } else {
       alert("Erro ao gerar boleto: " + JSON.stringify(data.erro));
     }
-
   } catch(err) {
     alert("Erro ao conectar ao servidor: " + err.message);
   }
@@ -183,6 +224,5 @@ confirmBtn.onclick = async function() {
 
 carregarClientes();
 </script>
-
 </body>
 </html>

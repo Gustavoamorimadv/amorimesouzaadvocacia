@@ -82,22 +82,13 @@ const db = getFirestore(app);
 window.firebaseDB = db;
 </script>
 </head>
-
 <body>
 <div class="sidebar">
 <h2 onclick="window.location.href='dashboard.html'">AMR ADV</h2>
-<button onclick="window.location.href='dashboard.html'">
-<img src="https://img.icons8.com/ios-filled/50/ffffff/dashboard.png"/><span>Dashboard</span>
-</button>
-<button onclick="window.location.href='relatorios.html'">
-<img src="https://img.icons8.com/ios-filled/50/ffffff/combo-chart.png"/><span>Relatórios</span>
-</button>
-<button onclick="window.location.href='agenda.html'">
-<img src="https://img.icons8.com/ios-filled/50/ffffff/calendar.png"/><span>Agenda</span>
-</button>
-<button onclick="window.location.href='contatos.html'">
-<img src="https://img.icons8.com/ios-filled/50/ffffff/contacts.png"/><span>Contatos</span>
-</button>
+<button onclick="window.location.href='dashboard.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/dashboard.png"/><span>Dashboard</span></button>
+<button onclick="window.location.href='relatorios.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/combo-chart.png"/><span>Relatórios</span></button>
+<button onclick="window.location.href='agenda.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/calendar.png"/><span>Agenda</span></button>
+<button onclick="window.location.href='contatos.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/contacts.png"/><span>Contatos</span></button>
 <button><img src="https://img.icons8.com/ios-filled/50/ffffff/settings.png"/><span>Configurações</span></button>
 </div>
 
@@ -218,7 +209,7 @@ async function saveCliente(cliente){
 function openModal(edit=false,data=null){
     modalBackdrop.style.display='flex';
     document.getElementById('modalTitle').innerText=edit?"Editar Cliente":"Novo Cliente";
-    processosContainer.innerHTML=''; // limpa campos processos
+    processosContainer.innerHTML='';
     if(edit&&data){
         inputNome.value=data.nome;
         inputCPF.value=data.cpf||"";
@@ -284,7 +275,6 @@ function addProcessoField(value=""){
     processosContainer.appendChild(row);
 }
 
-// inicializa primeiro campo
 addProcessoField();
 
 function criarCard(cliente){
@@ -311,10 +301,12 @@ function criarCard(cliente){
     actionsDiv.appendChild(btnCall); actionsDiv.appendChild(btnWa); card.appendChild(actionsDiv);
 
     const contentDiv=document.createElement('div'); contentDiv.className='card-content';
+    const processosArray = cliente.processo ? cliente.processo.split(',').map(p=>p.trim()) : [];
+    const primeiroProcesso = processosArray.length > 0 ? processosArray[0] : '-';
     contentDiv.innerHTML=`<h3>${cliente.nome}</h3>
         <p>CPF: ${cliente.cpf||'-'}</p>
         <p>Classe: ${cliente.classe||'-'}</p>
-        <p>Processos: ${cliente.processo||'-'}</p>
+        <p>Processo: ${primeiroProcesso}</p>
         <p>Valor: R$ ${cliente.valor||0}</p>
         ${cliente.ultimaOferta ? `<p>Última proposta: R$ ${cliente.ultimaOferta}</p>` : ''}`;
     card.appendChild(contentDiv);

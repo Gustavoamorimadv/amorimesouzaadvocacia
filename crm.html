@@ -133,7 +133,16 @@ window.firebaseDB = db;
 <div class="row"><label>Nome</label><input id="inputNome" required /></div>
 <div class="row"><label>CPF</label><input id="inputCPF" placeholder="000.000.000-00" /></div>
 <div class="row"><label>Números</label><input id="inputNumeros" placeholder="Ex: (21) 99999-9999" /></div>
-<div class="row"><label>Número do Processo</label><input id="inputProcesso" placeholder="0000000-00.0000.0.00.0000" /></div>
+
+<!-- Processos Dinâmicos -->
+<div class="row" id="processosContainer">
+  <label>Processos</label>
+  <div class="processo-field">
+    <input name="processo" placeholder="0000000-00.0000.0.00.0000" />
+  </div>
+</div>
+<button type="button" class="btn ghost" id="btnAddProcesso" style="margin-bottom:10px;">+ Adicionar Processo</button>
+
 <div class="row"><label>Classe Processual</label>
 <select id="inputClasse">
 <option value="Busca e Apreensão">Busca e Apreensão</option>
@@ -177,7 +186,6 @@ const inputCPF=document.getElementById('inputCPF');
 const inputObs=document.getElementById('inputObs');
 const inputStatus=document.getElementById('inputStatus');
 const inputNumeros=document.getElementById('inputNumeros');
-const inputProcesso=document.getElementById('inputProcesso');
 const inputClasse=document.getElementById('inputClasse');
 const inputValor=document.getElementById('inputValor');
 const btnAdd=document.getElementById('btnAdd');
@@ -186,6 +194,8 @@ const searchInput=document.getElementById('searchInput');
 const filterStatus=document.getElementById('filterStatus');
 const toastEl=document.getElementById('toast');
 const coinSound=document.getElementById('coinSound');
+const processosContainer=document.getElementById('processosContainer');
+const btnAddProcesso=document.getElementById('btnAddProcesso');
 
 function showToast(msg){ toastEl.innerText=msg; toastEl.style.display='block'; clearTimeout(toastEl._t); toastEl._t=setTimeout(()=>toastEl.style.display='none',3000); }
 
@@ -207,23 +217,46 @@ async function saveCliente(cliente){
 function openModal(edit=false,data=null){
     modalBackdrop.style.display='flex';
     document.getElementById('modalTitle').innerText=edit?"Editar Cliente":"Novo Cliente";
+
+    // Limpa campos de processo
+    processosContainer.querySelectorAll('.processo-field').forEach((el,i)=>{ if(i>0) el.remove(); });
+
     if(edit&&data){
         inputNome.value=data.nome;
         inputCPF.value=data.cpf||"";
         inputObs.value=data.obs||"";
         inputStatus.value=data.status;
         inputNumeros.value=data.numeros||"";
-        inputProcesso.value=data.processo||"";
         inputClasse.value=data.classe||"Outros";
         inputValor.value=data.valor||"";
+
+        // Preenche processos
+        const processos = Array.isArray(data.processo)?data.processo:[data.processo||""];
+        const firstInput = processosContainer.querySelector('input[name="processo"]');
+        firstInput.value = processos[0]||"";
+        for(let i=1;i<processos.length;i++){
+            const div = document.createElement('div');
+            div.className='processo-field';
+            div.innerHTML=`<input name="processo" placeholder="0000000-00.0000.0.00.0000" value="${processos[i]}"/>`;
+            processosContainer.appendChild(div);
+        }
+
         clientForm.dataset.editId=data.id;
     }else{
         inputNome.value=""; inputCPF.value=""; inputObs.value=""; inputStatus.value="lista-fria";
-        inputNumeros.value=""; inputProcesso.value=""; inputClasse.value="Outros"; inputValor.value="";
+        inputNumeros.value=""; inputClasse.value="Outros"; inputValor.value="";
         delete clientForm.dataset.editId;
+        processosContainer.querySelector('input[name="processo"]').value="";
     }
 }
 function closeModal(){ modalBackdrop.style.display='none'; }
+
+btnAddProcesso.onclick = () => {
+    const div = document.createElement('div');
+    div.className='processo-field';
+    div.innerHTML='<input name="processo" placeholder="0000000-00.0000.0.00.0000"/>';
+    processosContainer.appendChild(div);
+};
 
 function criarCard(cliente){
     const col=document.getElementById(cliente.status);
@@ -249,10 +282,19 @@ function criarCard(cliente){
     actionsDiv.appendChild(btnCall); actionsDiv.appendChild(btnWa); card.appendChild(actionsDiv);
 
     const contentDiv=document.createElement('div'); contentDiv.className='card-content';
+
+    // Exibe apenas o primeiro processo
+    let processoDisplay = "-";
+    if(Array.isArray(cliente.processo) && cliente.processo.length>0){
+        processoDisplay = cliente.processo[0];
+    } else if(cliente.processo){
+        processoDisplay = cliente.processo;
+    }
+
     contentDiv.innerHTML=`<h3>${cliente.nome}</h3>
         <p>CPF: ${cliente.cpf||'-'}</p>
         <p>Classe: ${cliente.classe||'-'}</p>
-        <p>Processo: ${cliente.processo||'-'}</p>
+        <p>Processo: ${processoDisplay}</p>
         <p>Valor: R$ ${cliente.valor||0}</p>`;
     card.appendChild(contentDiv);
 
@@ -281,12 +323,16 @@ clientForm.onsubmit = async function(e){
     const nome = inputNome.value.trim();
     if(!nome){ showToast("Nome obrigatório"); return; }
 
+    const processosArray = Array.from(processosContainer.querySelectorAll('input[name="processo"]'))
+        .map(inp => inp.value.trim())
+        .filter(v=>v);
+
     const novo = {
         nome, cpf: inputCPF.value.trim(),
         obs: inputObs.value.trim().substring(0,300),
         status: inputStatus.value,
         numeros: inputNumeros.value,
-        processo: inputProcesso.value,
+        processo: processosArray,
         classe: inputClasse.value,
         valor: inputValor.value
     };

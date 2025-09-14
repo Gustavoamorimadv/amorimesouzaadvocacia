@@ -80,95 +80,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 window.firebaseDB = db;
-</script>
-</head>
-<body>
-<div class="sidebar">
-<h2 onclick="window.location.href='dashboard.html'">AMR ADV</h2>
-<button onclick="window.location.href='dashboard.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/dashboard.png"/><span>Dashboard</span></button>
-<button onclick="window.location.href='relatorios.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/combo-chart.png"/><span>Relatórios</span></button>
-<button onclick="window.location.href='agenda.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/calendar.png"/><span>Agenda</span></button>
-<button onclick="window.location.href='contatos.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/contacts.png"/><span>Contatos</span></button>
-<button><img src="https://img.icons8.com/ios-filled/50/ffffff/settings.png"/><span>Configurações</span></button>
-</div>
-
-<div class="main">
-<header>
-<h1>CRM</h1>
-<button id="btnAdd" class="btn primary">Adicionar Cliente</button>
-</header>
-
-<div class="search-bar">
-<input id="searchInput" placeholder="Buscar cliente..." />
-<select id="filterStatus">
-<option value="">Todos os status</option>
-<option value="lista-fria">Lista Fria</option>
-<option value="negociacao">Negociação</option>
-<option value="contrato-assinado">Contrato Assinado</option>
-<option value="fechado">Fechado</option>
-</select>
-</div>
-
-<div class="kanban-container">
-<main class="kanban" id="kanban">
-<div class="column" id="lista-fria"><h2>Lista Fria</h2></div>
-<div class="column" id="negociacao"><h2>Negociação</h2></div>
-<div class="column" id="contrato-assinado"><h2>Contrato Assinado</h2></div>
-<div class="column" id="fechado"><h2>Fechado</h2></div>
-</main>
-</div>
-</div>
-
-<div class="modal-backdrop" id="modalBackdrop">
-<div class="modal">
-<h3 id="modalTitle">Novo Cliente</h3>
-<form id="clientForm">
-<div class="row"><label>Nome</label><input id="inputNome" required /></div>
-<div class="row"><label>CPF</label><input id="inputCPF" placeholder="000.000.000-00" /></div>
-<div class="row"><label>Números</label><input id="inputNumeros" placeholder="Ex: (21) 99999-9999" /></div>
-
-<div class="row">
-<label>Números do Processo</label>
-<div id="processosContainer">
-  <div class="processo-row">
-    <input class="inputProcesso" placeholder="0000000-00.0000.0.00.0000" />
-    <button type="button" class="btn ghost btnAddProcesso">+</button>
-  </div>
-</div>
-</div>
-
-<div class="row"><label>Classe Processual</label>
-<select id="inputClasse">
-<option value="Busca e Apreensão">Busca e Apreensão</option>
-<option value="Execução de Título">Execução de Título</option>
-<option value="Processo Comum Cível">Processo Comum Cível</option>
-<option value="Outros">Outros</option>
-</select>
-</div>
-<div class="row"><label>Valor da Causa</label><input id="inputValor" type="number" placeholder="Ex: 10000" /></div>
-<div class="row"><label>Observação</label><textarea id="inputObs" maxlength="300"></textarea></div>
-<div class="row">
-<label>Status</label>
-<select id="inputStatus">
-<option value="lista-fria">Lista Fria</option>
-<option value="negociacao">Negociação</option>
-<option value="contrato-assinado">Contrato Assinado</option>
-<option value="fechado">Fechado</option>
-</select>
-</div>
-<div class="actions">
-<button type="button" class="btn ghost" id="btnCancel">Cancelar</button>
-<button type="submit" class="btn primary">Salvar</button>
-</div>
-</form>
-</div>
-</div>
-
-<div class="toast" id="toast"></div>
-<audio id="coinSound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_8a3d7f1e1b.mp3?filename=coin-collect-retro-8-bit-sound-effect-145251.mp3" preload="auto"></audio>
-
-<script type="module">
-import { collection, addDoc, getDocs, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
 const STATUS=['lista-fria','negociacao','contrato-assinado','fechado'];
 const cardsMap={};
@@ -210,7 +121,7 @@ function openModal(edit=false,data=null){
     modalBackdrop.style.display='flex';
     document.getElementById('modalTitle').innerText=edit?"Editar Cliente":"Novo Cliente";
     processosContainer.innerHTML='';
-    if(edit&&data){
+    if(edit && data){
         inputNome.value=data.nome;
         inputCPF.value=data.cpf||"";
         inputObs.value=data.obs||"";
@@ -219,33 +130,13 @@ function openModal(edit=false,data=null){
         inputClasse.value=data.classe||"Outros";
         inputValor.value=data.valor||"";
         const processos = data.processo ? data.processo.split(',').map(p=>p.trim()) : [''];
-        processos.forEach((p,i)=>{
-            const row = document.createElement('div');
-            row.className='processo-row';
-            const input = document.createElement('input');
-            input.className='inputProcesso';
-            input.value = p;
-            input.placeholder='0000000-00.0000.0.00.0000';
-            const btnAdd = document.createElement('button');
-            btnAdd.type='button';
-            btnAdd.className='btn ghost btnAddProcesso';
-            btnAdd.textContent='+';
-            btnAdd.onclick=()=>addProcessoField();
-            const btnRemove = document.createElement('button');
-            btnRemove.type='button';
-            btnRemove.className='btn ghost btnRemoveProcesso';
-            btnRemove.textContent='-';
-            btnRemove.onclick=()=>row.remove();
-            row.appendChild(input);
-            row.appendChild(btnAdd);
-            row.appendChild(btnRemove);
-            processosContainer.appendChild(row);
-        });
-        clientForm.dataset.editId=data.id;
-    }else{
+        processos.forEach(p => addProcessoField(p));
+        clientForm.dataset.editId = data.id;
+    } else {
         addProcessoField();
-        inputNome.value=""; inputCPF.value=""; inputObs.value=""; inputStatus.value="lista-fria";
-        inputNumeros.value=""; inputClasse.value="Outros"; inputValor.value="";
+        inputNome.value=""; inputCPF.value=""; inputObs.value="";
+        inputStatus.value="lista-fria"; inputNumeros.value="";
+        inputClasse.value="Outros"; inputValor.value="";
         delete clientForm.dataset.editId;
     }
 }
@@ -275,7 +166,8 @@ function addProcessoField(value=""){
     processosContainer.appendChild(row);
 }
 
-addProcessoField();
+btnAdd.onclick=()=>openModal();
+btnCancel.onclick=()=>closeModal();
 
 function criarCard(cliente){
     const col=document.getElementById(cliente.status);
@@ -321,11 +213,10 @@ function ligar(numero){ if(!numero){ showToast("Número não informado"); return
 function whatsapp(numero){ if(!numero){ showToast("Número não informado"); return; } const num=numero.replace(/\D/g,''); window.open(`https://wa.me/55${num}`,'_blank'); }
 
 async function render(){
-    STATUS.forEach(s=>{
-        const col=document.getElementById(s);
-        col.innerHTML=`<h2>${s.replace('-',' ').toUpperCase()}</h2>`;
-    });
+    // Limpa cards existentes, sem remover h2
+    Object.values(cardsMap).forEach(card => card.remove());
     for(const k in cardsMap) delete cardsMap[k];
+
     const clientes = await getClientes();
     for(const c of clientes) criarCard(c);
     filtragemAplicada();
@@ -362,9 +253,6 @@ clientForm.onsubmit = async function(e){
     closeModal();
     render();
 };
-
-btnAdd.onclick=()=>openModal();
-btnCancel.onclick=()=>closeModal();
 
 let draggedCard=null;
 function addDragEvents(card){
@@ -404,5 +292,47 @@ filterStatus.onchange=filtragemAplicada;
 
 render();
 </script>
+
+<div class="modal-backdrop" id="modalBackdrop">
+<div class="modal">
+<h3 id="modalTitle">Novo Cliente</h3>
+<form id="clientForm">
+<div class="row"><label>Nome</label><input id="inputNome" required /></div>
+<div class="row"><label>CPF</label><input id="inputCPF" placeholder="000.000.000-00" /></div>
+<div class="row"><label>Números</label><input id="inputNumeros" placeholder="Ex: (21) 99999-9999" /></div>
+<div class="row">
+<label>Números do Processo</label>
+<div id="processosContainer"></div>
+</div>
+<div class="row"><label>Classe Processual</label>
+<select id="inputClasse">
+<option value="Busca e Apreensão">Busca e Apreensão</option>
+<option value="Execução de Título">Execução de Título</option>
+<option value="Processo Comum Cível">Processo Comum Cível</option>
+<option value="Outros">Outros</option>
+</select>
+</div>
+<div class="row"><label>Valor da Causa</label><input id="inputValor" type="number" placeholder="Ex: 10000" /></div>
+<div class="row"><label>Observação</label><textarea id="inputObs" maxlength="300"></textarea></div>
+<div class="row">
+<label>Status</label>
+<select id="inputStatus">
+<option value="lista-fria">Lista Fria</option>
+<option value="negociacao">Negociação</option>
+<option value="contrato-assinado">Contrato Assinado</option>
+<option value="fechado">Fechado</option>
+</select>
+</div>
+<div class="actions">
+<button type="button" class="btn ghost" id="btnCancel">Cancelar</button>
+<button type="submit" class="btn primary">Salvar</button>
+</div>
+</form>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+<audio id="coinSound" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_8a3d7f1e1b.mp3?filename=coin-collect-retro-8-bit-sound-effect-145251.mp3" preload="auto"></audio>
+
 </body>
 </html>

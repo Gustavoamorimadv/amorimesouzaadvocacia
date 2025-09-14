@@ -41,10 +41,11 @@ button:hover { background:#2a2a40; }
 </style>
 </head>
 <body>
+
 <h1>Clientes Fechados</h1>
 <div class="container" id="clientesContainer"></div>
 
-<!-- Modal para gerar boletos -->
+<!-- Modal -->
 <div id="modalBoleto">
   <div class="modal-content" id="modalContent">
     <h3>Gerar Boletos</h3>
@@ -105,7 +106,7 @@ async function carregarClientesFechados() {
     `;
     container.appendChild(card);
 
-    // Processos
+    // Renderizar processos
     const processosContainer = card.querySelector(`#processos-${id}`);
     if (cliente.processos && Array.isArray(cliente.processos)) {
       cliente.processos.forEach((proc, index) => {
@@ -156,10 +157,9 @@ window.abrirModal = async function(id) {
   if (!snapshot.empty) {
     clienteAtual = snapshot.docs[0].data();
     clienteAtual.id = id;
-
     numParcelas = parseInt(clienteAtual.parcelamento) || 1;
-    boletosInputs.innerHTML = "";
 
+    boletosInputs.innerHTML = "";
     for (let i=0; i<numParcelas; i++) {
       boletosInputs.innerHTML += `
         <label>Boleto ${i+1} - Valor:</label>
@@ -169,7 +169,6 @@ window.abrirModal = async function(id) {
         <hr>
       `;
     }
-
     modal.style.display = "flex";
   }
 };

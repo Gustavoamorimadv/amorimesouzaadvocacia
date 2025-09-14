@@ -21,29 +21,23 @@ body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
 .main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
 header { height:60px; background:#fff; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; padding:0 20px; flex-shrink:0; }
 header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
-header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
 
-.cards-wrapper { flex:1; display:flex; gap:20px; padding:20px; overflow-y:auto; }
-.column { flex:1; display:flex; flex-direction:column; gap:15px; }
-.column h2 { font-size:18px; color:#1e1e2f; margin-bottom:10px; text-align:center; }
-.cards-container { display:flex; flex-wrap:wrap; gap:15px; justify-content:center; }
+.kanban-container { flex:1; overflow-x:auto; padding:20px; }
+.kanban { display:flex; gap:20px; min-width:max-content; height:100%; }
+.column { background:#fff; border-radius:15px; padding:15px; min-width:320px; max-height:calc(100%); display:flex; flex-direction:column; gap:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); overflow-y:auto; }
+.column h2 { margin-bottom:10px; font-size:18px; color:#1e1e2f; text-transform:uppercase; }
 
-.card { background:#fff; width:150px; height:150px; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.1); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; cursor:pointer; transition:0.3s; }
-.card:hover { transform:scale(1.05); }
-.card h3 { font-size:14px; color:#333; margin-bottom:4px; }
-.card p { font-size:12px; color:#555; margin:2px 0; }
-.boleto { font-size:11px; background:#f1f3f5; padding:2px 6px; border-radius:6px; margin-top:2px; }
+.card { display:flex; background:#fff; border-radius:15px; box-shadow:0 12px 30px rgba(0,0,0,0.12); cursor:pointer; overflow:hidden; transition:0.3s; min-height:160px; flex-direction:row; position:relative; }
+.card:hover { transform:scale(1.03); }
+.card .color-bar { width:8px; height:100%; border-radius:15px 0 0 15px; background:#2ecc71; }
+.card-content { padding:20px; flex:1; display:flex; flex-direction:column; justify-content:center; }
+.card h3 { font-size:20px; margin-bottom:6px; color:#333; }
+.card p { font-size:14px; color:#555; margin:3px 0; }
 
-.modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); justify-content:center; align-items:center; z-index:50; }
-.modal { background:#fff; padding:18px; border-radius:15px; min-width:320px; max-width:420px; box-shadow:0 8px 30px rgba(0,0,0,.25); }
-.modal h3 { margin-bottom:12px; }
-.modal .row { margin-bottom:10px; }
-.modal input, .modal textarea, .modal select { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; }
-.modal textarea { min-height:80px; resize:vertical; }
-.modal .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
-.btn { padding:8px 12px; border-radius:6px; border:0; cursor:pointer; }
-.btn.primary { background:#1e1e2f; color:#fff; }
-.btn.ghost { background:#f1f3f5; }
+.card-actions { position:absolute; top:10px; right:10px; display:flex; gap:10px; }
+.card-actions button { background:none; border:none; cursor:pointer; padding:4px; }
+.card-actions img { width:20px; height:20px; opacity:0.7; transition:opacity 0.2s; }
+.card-actions img:hover { opacity:1; }
 
 .toast { position:fixed; right:20px; bottom:20px; background:#222; color:#fff; padding:8px 12px; border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.3); display:none; z-index:60; }
 </style>
@@ -64,11 +58,44 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const colEmDia = document.getElementById('emDia').querySelector('.cards-container');
-const colEmAtraso = document.getElementById('emAtraso').querySelector('.cards-container');
+const colEmDia = document.getElementById('emDia');
+const colEmAtraso = document.getElementById('emAtraso');
 const toastEl = document.getElementById('toast');
 
 function showToast(msg){ toastEl.innerText=msg; toastEl.style.display='block'; clearTimeout(toastEl._t); toastEl._t=setTimeout(()=>toastEl.style.display='none',3000); }
+
+function criarCard(cliente){
+    const card=document.createElement('div');
+    card.className='card';
+    
+    // Barra verde
+    const bar=document.createElement('div'); bar.className='color-bar'; card.appendChild(bar);
+
+    // Conteúdo
+    const content=document.createElement('div'); content.className='card-content';
+    content.innerHTML = `<h3>${cliente.nome}</h3>
+                         <p>CPF: ${cliente.cpf||'-'}</p>
+                         <p>Classe: ${cliente.classe||'-'}</p>
+                         <p>Processo: ${cliente.processo||'-'}</p>
+                         <p>Valor: R$ ${cliente.valor||0}</p>`;
+    card.appendChild(content);
+
+    // Ações
+    const actions=document.createElement('div'); actions.className='card-actions';
+    const btnCall=document.createElement('button');
+    btnCall.onclick=(e)=>{ e.stopPropagation(); if(!cliente.numeros){showToast('Número não informado'); return;} window.open(`tel:${cliente.numeros.replace(/\D/g,'')}`); };
+    const imgCall=document.createElement('img'); imgCall.src="https://img.icons8.com/ios-glyphs/30/000000/phone.png";
+    btnCall.appendChild(imgCall);
+    const btnWa=document.createElement('button');
+    btnWa.onclick=(e)=>{ e.stopPropagation(); if(!cliente.numeros){showToast('Número não informado'); return;} window.open(`https://wa.me/55${cliente.numeros.replace(/\D/g,'')}`,'_blank'); };
+    const imgWa=document.createElement('img'); imgWa.src="https://img.icons8.com/ios-glyphs/30/000000/whatsapp.png";
+    btnWa.appendChild(imgWa);
+    actions.appendChild(btnCall); actions.appendChild(btnWa);
+    card.appendChild(actions);
+
+    card.onclick = ()=>showToast(`Cliente: ${cliente.nome}`);
+    return card;
+}
 
 async function carregarClientes(){
     colEmDia.innerHTML=''; colEmAtraso.innerHTML='';
@@ -77,20 +104,18 @@ async function carregarClientes(){
         const c = docSnap.data(); c.id=docSnap.id;
         if(c.status !== 'fechado') return;
 
-        const card = document.createElement('div'); card.className='card';
-        card.innerHTML = `<h3>${c.nome}</h3><p>CPF: ${c.cpf||'-'}</p><p>Classe: ${c.classe||'-'}</p>`;
-        
-        const temVencido = (c.boletos||[]).some(b=>new Date(b.vencimento) < new Date());
-        if(temVencido) colEmAtraso.appendChild(card);
+        const card = criarCard(c);
+        // Verifica boletos atrasados
+        const atrasado = (c.boletos||[]).some(b=>new Date(b.vencimento) < new Date());
+        if(atrasado) colEmAtraso.appendChild(card);
         else colEmDia.appendChild(card);
-
-        card.onclick=()=>showToast(`Cliente: ${c.nome}`);
     });
 }
 
 window.onload = carregarClientes;
 </script>
 </head>
+
 <body>
 <div class="sidebar">
 <h2 onclick="window.location.href='dashboard.html'">AMR ADV</h2>
@@ -107,15 +132,15 @@ window.onload = carregarClientes;
 <h1>Clientes Fechados</h1>
 </header>
 
-<div class="cards-wrapper">
+<div class="kanban-container">
+<main class="kanban">
 <div class="column" id="emDia">
 <h2>Em Dia</h2>
-<div class="cards-container"></div>
 </div>
 <div class="column" id="emAtraso">
 <h2>Em Atraso</h2>
-<div class="cards-container"></div>
 </div>
+</main>
 </div>
 
 <div class="toast" id="toast"></div>

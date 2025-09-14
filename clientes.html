@@ -21,18 +21,18 @@ body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
 .main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
 header { height:60px; background:#fff; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; padding:0 20px; flex-shrink:0; }
 header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
-header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
 
 .kanban-container { flex:1; overflow-x:auto; padding:20px; display:grid; grid-template-columns:repeat(2, 1fr); gap:20px; }
-.column { background:#fff; border-radius:15px; padding:15px; display:flex; flex-direction:column; gap:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); }
+.column { background:#fff; border-radius:15px; padding:15px; display:flex; flex-direction:column; gap:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); min-height:500px; }
 .column h2 { margin-bottom:10px; font-size:18px; color:#1e1e2f; text-transform:uppercase; text-align:center; }
 
 .card { display:flex; background:#fff; border-radius:15px; box-shadow:0 8px 20px rgba(0,0,0,0.12); cursor:pointer; overflow:hidden; transition:0.3s; flex-direction:column; min-height:180px; position:relative; }
 .card:hover { transform:scale(1.03); }
 .card .color-bar { width:8px; height:100%; border-radius:15px 0 0 15px; background:#2ecc71; position:absolute; left:0; top:0; }
-.card-content { padding:15px; display:flex; flex-direction:column; justify-content:center; gap:4px; }
+.card-content { padding:15px; display:flex; flex-direction:column; justify-content:flex-start; gap:4px; }
 .card-content h3 { font-size:18px; color:#333; }
 .card-content p { font-size:14px; color:#555; margin:0; }
+.card-content ul { font-size:14px; color:#555; margin:0; padding-left:15px; }
 
 .card-actions { display:flex; justify-content:flex-end; gap:8px; position:absolute; top:8px; right:8px; }
 .card-actions button { background:none; border:none; cursor:pointer; padding:4px; }
@@ -53,10 +53,9 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 
 .toast { position:fixed; right:20px; bottom:20px; background:#222; color:#fff; padding:8px 12px; border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.3); display:none; z-index:60; }
 </style>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
@@ -69,59 +68,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 window.firebaseDB = db;
-</script>
-</head>
-<body>
-<div class="sidebar">
-<h2 onclick="window.location.href='dashboard.html'">AMR ADV</h2>
-<button onclick="window.location.href='dashboard.html'">
-<img src="https://img.icons8.com/ios-filled/50/ffffff/dashboard.png"/><span>Dashboard</span>
-</button>
-<button onclick="window.location.href='relatorios.html'">
-<img src="https://img.icons8.com/ios-filled/50/ffffff/combo-chart.png"/><span>Relatórios</span>
-</button>
-<button onclick="window.location.href='agenda.html'">
-<img src="https://img.icons8.com/ios-filled/50/ffffff/calendar.png"/><span>Agenda</span>
-</button>
-<button onclick="window.location.href='contatos.html'">
-<img src="https://img.icons8.com/ios-filled/50/ffffff/contacts.png"/><span>Contatos</span>
-</button>
-<button><img src="https://img.icons8.com/ios-filled/50/ffffff/settings.png"/><span>Configurações</span></button>
-</div>
-
-<div class="main">
-<header>
-<h1>Clientes Fechados</h1>
-</header>
-
-<div class="kanban-container">
-<div class="column" id="em-dia"><h2>Em Dia</h2></div>
-<div class="column" id="em-atraso"><h2>Em Atraso</h2></div>
-</div>
-</div>
-
-<div class="modal-backdrop" id="modalBoletoBackdrop">
-<div class="modal">
-<h3>Gerar Boleto</h3>
-<form id="formBoleto">
-<div class="row"><label>Cliente</label><input id="boletoNome" disabled /></div>
-<div class="row"><label>Valor</label><input id="boletoValor" type="number" /></div>
-<div class="row"><label>Vencimento</label><input id="boletoVencimento" type="date" /></div>
-<div class="actions">
-<button type="button" class="btn ghost" onclick="closeBoletoModal()">Cancelar</button>
-<button type="submit" class="btn primary">Gerar</button>
-</div>
-</form>
-</div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<script type="module">
-import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
 const toastEl = document.getElementById('toast');
-
 function showToast(msg){
     toastEl.innerText = msg;
     toastEl.style.display = 'block';
@@ -129,21 +77,21 @@ function showToast(msg){
     toastEl._t = setTimeout(()=>toastEl.style.display='none',3000);
 }
 
+let clientes = [];
 async function getClientes(){
-    const snapshot = await getDocs(collection(firebaseDB,"clientes"));
-    // Apenas clientes fechados
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+    const snapshot = await getDocs(collection(db,"clientes"));
+    clientes = snapshot.docs.map(doc => ({ id: doc.id, boletos: [], ...doc.data() }))
                         .filter(c => c.status === 'fechado');
+    render();
 }
 
 function criarCard(cliente){
-    // Determinar coluna visual: por valor ou qualquer critério
     const colId = cliente.valor < 5000 ? 'em-atraso' : 'em-dia';
     const col = document.getElementById(colId);
     if(!col) return;
 
     const card = document.createElement('div');
-    card.className = `card ${colId}`;
+    card.className = 'card';
     card.dataset.id = cliente.id;
     card.draggable = true;
 
@@ -154,9 +102,10 @@ function criarCard(cliente){
     contentDiv.innerHTML = `
         <h3>${cliente.nome}</h3>
         <p>CPF: ${cliente.cpf || '-'}</p>
-        <p>Classe: ${cliente.classe || '-'}</p>
-        <p>Processo: ${cliente.processo || '-'}</p>
-        <p>Valor: R$ ${cliente.valor || 0}</p>
+        <p>Boletos:</p>
+        <ul id="boletos-${cliente.id}">
+        ${cliente.boletos.map(b => `<li>${b}</li>`).join('')}
+        </ul>
     `;
     card.appendChild(contentDiv);
 
@@ -173,7 +122,7 @@ function criarCard(cliente){
     btnWa.appendChild(imgWa);
 
     const btnBoleto = document.createElement('button');
-    btnBoleto.onclick = (e)=>{ e.stopPropagation(); abrirBoletoModal(cliente); };
+    btnBoleto.onclick = (e)=>{ e.stopPropagation(); abrirBoletoModal(cliente.id); };
     const imgBoleto = document.createElement('img'); imgBoleto.src="https://img.icons8.com/ios-filled/50/000000/money.png";
     btnBoleto.appendChild(imgBoleto);
 
@@ -183,37 +132,66 @@ function criarCard(cliente){
 
     card.appendChild(actionsDiv);
 
-    col.appendChild(card);
+    // Drag & Drop visual
+    card.addEventListener('dragstart',()=>{ draggedCard=card; card.style.opacity='.5'; });
+    card.addEventListener('dragend',()=>{ draggedCard=null; card.style.opacity='1'; });
 
-    // Drag & drop visual
-    card.addEventListener('dragstart',()=>{ card.style.opacity='.5'; });
-    card.addEventListener('dragend',()=>{ card.style.opacity='1'; });
+    col.appendChild(card);
 }
 
-async function render(){
+let draggedCard = null;
+document.querySelectorAll('.column').forEach(col=>{
+    col.addEventListener('dragover', e=>e.preventDefault());
+    col.addEventListener('drop', ()=>{
+        if(!draggedCard) return;
+        col.appendChild(draggedCard);
+    });
+});
+
+function render(){
     document.getElementById('em-dia').innerHTML='<h2>Em Dia</h2>';
     document.getElementById('em-atraso').innerHTML='<h2>Em Atraso</h2>';
-    const clientes = await getClientes();
-    clientes.forEach(criarCard);
+    clientes.forEach(c=>criarCard(c));
 }
 
-function abrirBoletoModal(cliente){
+// Modal Boleto
+function abrirBoletoModal(clienteId){
+    const cliente = clientes.find(c=>c.id===clienteId);
     document.getElementById('boletoNome').value = cliente.nome;
-    document.getElementById('boletoValor').value = cliente.valor;
+    document.getElementById('boletoValor').value = cliente.valor || 0;
     document.getElementById('modalBoletoBackdrop').style.display='flex';
+    document.getElementById('formBoleto').onsubmit = (e)=>{
+        e.preventDefault();
+        const valor = document.getElementById('boletoValor').value;
+        cliente.boletos.push(`R$ ${valor} - ${new Date().toLocaleDateString()}`);
+        const ul = document.getElementById(`boletos-${cliente.id}`);
+        ul.innerHTML = cliente.boletos.map(b => `<li>${b}</li>`).join('');
+        showToast('Boleto gerado!');
+        closeBoletoModal();
+    };
 }
 
 function closeBoletoModal(){
     document.getElementById('modalBoletoBackdrop').style.display='none';
 }
 
-document.getElementById('formBoleto').onsubmit = function(e){
-    e.preventDefault();
-    showToast("Boleto gerado!");
-    closeBoletoModal();
-}
-
-render();
+getClientes();
 </script>
+
 </body>
+<div class="modal-backdrop" id="modalBoletoBackdrop">
+<div class="modal">
+<h3>Gerar Boleto</h3>
+<form id="formBoleto">
+<div class="row"><label>Cliente</label><input id="boletoNome" disabled /></div>
+<div class="row"><label>Valor</label><input id="boletoValor" type="number" /></div>
+<div class="row"><label>Vencimento</label><input id="boletoVencimento" type="date" /></div>
+<div class="actions">
+<button type="button" class="btn ghost" onclick="closeBoletoModal()">Cancelar</button>
+<button type="submit" class="btn primary">Gerar</button>
+</div>
+</form>
+</div>
+</div>
+<div class="toast" id="toast"></div>
 </html>

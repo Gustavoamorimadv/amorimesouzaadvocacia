@@ -182,6 +182,7 @@ async function carregarClientes() {
 }
 
 // Modal
+// Modal
 const modal = document.getElementById('modalBoleto');
 const modalNome = document.getElementById('modalNome');
 const modalCpf = document.getElementById('modalCpf');
@@ -194,6 +195,8 @@ const modalEstado = document.getElementById('modalEstado');
 const modalValor = document.getElementById('modalValor');
 const modalVencimento = document.getElementById('modalVencimento');
 const confirmBtn = document.getElementById('confirmBoletoBtn');
+
+let clienteAtualId = null;
 
 function abrirModal(cliente, id) {
   clienteAtualId = id;
@@ -210,10 +213,14 @@ function abrirModal(cliente, id) {
   modal.style.display = "flex";
 }
 
-function fecharModal() { modal.style.display = "none"; clienteAtualId = null; }
+function fecharModal() { 
+  modal.style.display = "none"; 
+  clienteAtualId = null; 
+}
 
 confirmBtn.onclick = async () => {
   if(!clienteAtualId) return;
+
   const nome = modalNome.value.trim();
   const cpf = modalCpf.value.trim();
   const email = modalEmail.value.trim();
@@ -231,11 +238,20 @@ confirmBtn.onclick = async () => {
   }
 
   try {
+    // Envia os dados para o backend
     const res = await fetch("http://localhost:3000/api/gerarBoletos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        nome, cpf, email, telefone, cep, endereco, cidade, estado,
+        clienteId: clienteAtualId, // ESSENCIAL para não dar "Dados incompletos"
+        nome,
+        cpf,
+        email,
+        telefone,
+        cep,
+        endereco,
+        cidade,
+        estado,
         boletos: [{ valor, vencimento }]
       })
     });
@@ -244,31 +260,18 @@ confirmBtn.onclick = async () => {
 
     if(data.sucesso) {
       alert("Boleto gerado com sucesso!");
-      const boletoGerado = data.boletos[0];
-      const linkPagamento = boletoGerado?.bankSlipUrl || "";
-      const linhaDigitavel = boletoGerado?.bankSlipLine || "";
-      const pixQrCodeBase64 = boletoGerado?.pixQrCode || "";
 
+      // Atualiza o Firestore local
       const docRef = doc(db, "clientes", clienteAtualId);
       const clienteSnap = await getDocs(query(collection(db, "clientes"), where("__name__", "==", clienteAtualId)));
       const clienteData = clienteSnap.docs[0].data();
       const novosBoletos = clienteData.boletos || [];
-      novosBoletos.push({
-        valor,
-        vencimento,
-        linkPagamento,
-        linhaDigitavel,
-        pixQrCodeBase64
-      });
+      novosBoletos.push({ valor, vencimento });
       await updateDoc(docRef, { boletos: novosBoletos });
 
+      // Atualiza a tela
       const boletosContainer = document.getElementById(`boletos-${clienteAtualId}`);
-      boletosContainer.innerHTML = novosBoletos
-        .map(b => `<div class="boleto">
-                     Boleto R$${b.valor} - ${b.vencimento} 
-                     ${b.linkPagamento ? `<a href="${b.linkPagamento}" target="_blank">[Link]</a>` : ""}
-                   </div>`)
-        .join('');
+      boletosContainer.innerHTML = novosBoletos.map(b => `<div class="boleto">Boleto R$${b.valor} - ${b.vencimento}</div>`).join('');
 
       fecharModal();
     } else {
@@ -278,8 +281,3 @@ confirmBtn.onclick = async () => {
     alert("Erro ao conectar ao servidor: " + err.message);
   }
 };
-
-carregarClientes();
-</script>
-</body>
-</html>

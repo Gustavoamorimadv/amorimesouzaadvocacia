@@ -109,7 +109,6 @@
               const andamento = document.getElementById(e.target.dataset.andamento).value;
 
               const docRef = doc(db, "clientes", clienteId);
-
               await updateDoc(docRef, {
                 [`processos.${numero}`]: {
                   valorCausa: valor,

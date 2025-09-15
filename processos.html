@@ -3,29 +3,65 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Processos - CRM AMR ADV</title>
+  <title>CRM AMR ADV - Processos</title>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f8f8f8; }
-    h1 { text-align: center; color: #333; }
-    .cliente-card {
-      background: white;
-      padding: 15px;
-      border-radius: 12px;
-      margin: 12px 0;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      cursor: pointer;
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0; padding: 0;
+      background: #f4f6f9;
     }
-    .cliente-card:hover { background: #f0f0f0; }
-    .processo {
-      margin: 10px 0;
+    header {
+      background: #1a237e;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .container {
+      max-width: 900px;
+      margin: 20px auto;
       padding: 10px;
-      border-left: 4px solid #007bff;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-bottom: 15px;
+      overflow: hidden;
+    }
+    .card-header {
+      background: #eceff1;
+      padding: 12px 15px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-header h3 {
+      margin: 0;
+      font-size: 16px;
+      color: #333;
+    }
+    .card-body {
+      padding: 15px;
+      display: none;
+    }
+    .processo {
+      margin-bottom: 15px;
+      padding: 10px;
+      border-left: 4px solid #1a237e;
       background: #f9f9f9;
       border-radius: 6px;
     }
-    label { display: block; margin-top: 8px; font-size: 14px; color: #333; }
+    label {
+      display: block;
+      margin-top: 8px;
+      font-size: 14px;
+      color: #333;
+    }
     input {
       width: 100%;
       padding: 6px;
@@ -36,33 +72,31 @@
     button {
       margin-top: 10px;
       padding: 8px 12px;
-      background: #007bff;
+      background: #1a237e;
       color: white;
       border: none;
       border-radius: 8px;
       cursor: pointer;
     }
-    button:hover { background: #0056b3; }
-    .processos-container { margin-top: 12px; }
+    button:hover { background: #0d1757; }
   </style>
 </head>
 <body>
-  <h1>Clientes Fechados</h1>
-  <div id="clientes"></div>
+  <header>📂 Processos - Clientes Fechados</header>
+  <div class="container" id="clientes"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-    // 🔥 Configuração Firebase (substituir pela sua)
+    // 🔥 Configuração Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
-    authDomain: "dapapp-38637.firebaseapp.com",
-    projectId: "dapapp-38637",
-    storageBucket: "dapapp-38637.appspot.com",
-    messagingSenderId: "628852295313",
-    appId: "1:628852295313:web:INSERIR_SEU_APP_ID"
-
+      authDomain: "dapapp-38637.firebaseapp.com",
+      projectId: "dapapp-38637",
+      storageBucket: "dapapp-38637.appspot.com",
+      messagingSenderId: "628852295313",
+      appId: "1:628852295313:web:INSERIR_SEU_APP_ID"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -82,69 +116,75 @@
 
         if (cliente.status === "fechado") {
           const card = document.createElement("div");
-          card.className = "cliente-card";
-          card.innerHTML = `
-            <h3>${cliente.nome}</h3>
-            <p><b>CPF:</b> ${cliente.cpf}</p>
-            <div class="processos-container" id="processos-${clienteId}" style="display:none;"></div>
-          `;
-          card.addEventListener("click", () => toggleProcessos(clienteId, cliente));
+          card.className = "card";
+
+          const header = document.createElement("div");
+          header.className = "card-header";
+          header.innerHTML = `<h3>${cliente.nome} - ${cliente.cpf}</h3><span>▼</span>`;
+          header.addEventListener("click", () => {
+            const body = card.querySelector(".card-body");
+            body.style.display = body.style.display === "none" ? "block" : "none";
+          });
+
+          const body = document.createElement("div");
+          body.className = "card-body";
+
+          const processosStr = cliente.processo || "";
+          const numeros = processosStr.split(",").map(p => p.trim()).filter(p => p.length > 0);
+
+          numeros.forEach((numero, index) => {
+            const processoDiv = document.createElement("div");
+            processoDiv.className = "processo";
+
+            const valorInputId = `valor-${clienteId}-${index}`;
+            const movInputId = `mov-${clienteId}-${index}`;
+
+            processoDiv.innerHTML = `
+              <p><b>Número:</b> ${numero}</p>
+              <label>Valor da causa:</label>
+              <input type="text" id="${valorInputId}" placeholder="Digite o valor da causa">
+              <label>Última movimentação:</label>
+              <input type="text" id="${movInputId}" placeholder="Digite a última movimentação">
+              <button type="button" data-cliente="${clienteId}" data-numero="${numero}" data-valor="${valorInputId}" data-mov="${movInputId}">
+                Salvar
+              </button>
+            `;
+
+            // 🔥 Evita que clique dentro do card feche ele
+            processoDiv.querySelectorAll("input, button").forEach(el => {
+              el.addEventListener("click", e => e.stopPropagation());
+            });
+
+            body.appendChild(processoDiv);
+          });
+
+          // evento salvar
+          body.addEventListener("click", async e => {
+            if (e.target.tagName === "BUTTON") {
+              const clienteId = e.target.dataset.cliente;
+              const numero = e.target.dataset.numero;
+              const valor = document.getElementById(e.target.dataset.valor).value;
+              const movimentacao = document.getElementById(e.target.dataset.mov).value;
+
+              const docRef = doc(db, "clientes", clienteId);
+
+              // 🔥 Atualiza campo processos
+              await updateDoc(docRef, {
+                [`processos.${numero}`]: {
+                  valorCausa: valor,
+                  ultimaMovimentacao: movimentacao
+                }
+              });
+
+              alert("Processo atualizado com sucesso!");
+            }
+          });
+
+          card.appendChild(header);
+          card.appendChild(body);
           clientesContainer.appendChild(card);
         }
       });
-    }
-
-    function toggleProcessos(clienteId, cliente) {
-      const container = document.getElementById(`processos-${clienteId}`);
-      if (container.style.display === "none") {
-        container.style.display = "block";
-        renderProcessos(clienteId, cliente, container);
-      } else {
-        container.style.display = "none";
-      }
-    }
-
-    function renderProcessos(clienteId, cliente, container) {
-      container.innerHTML = "";
-      const processosStr = cliente.processo || "";
-      const numeros = processosStr.split(",").map(p => p.trim()).filter(p => p.length > 0);
-
-      numeros.forEach((numero, index) => {
-        const processoDiv = document.createElement("div");
-        processoDiv.className = "processo";
-
-        const valorInputId = `valor-${clienteId}-${index}`;
-        const movInputId = `mov-${clienteId}-${index}`;
-
-        processoDiv.innerHTML = `
-          <p><b>Número:</b> ${numero}</p>
-          <label>Valor da causa:</label>
-          <input type="text" id="${valorInputId}" placeholder="Digite o valor da causa">
-          <label>Última movimentação:</label>
-          <input type="text" id="${movInputId}" placeholder="Digite a última movimentação">
-          <button onclick="salvarProcesso('${clienteId}', '${numero}', '${valorInputId}', '${movInputId}')">Salvar</button>
-        `;
-        container.appendChild(processoDiv);
-      });
-    }
-
-    window.salvarProcesso = async function(clienteId, numero, valorInputId, movInputId) {
-      const valor = document.getElementById(valorInputId).value;
-      const movimentacao = document.getElementById(movInputId).value;
-
-      const docRef = doc(db, "clientes", clienteId);
-
-      // 🔥 salva cada processo em um array "processos"
-      await updateDoc(docRef, {
-        processos: {
-          [numero]: {
-            valorCausa: valor,
-            ultimaMovimentacao: movimentacao
-          }
-        }
-      });
-
-      alert("Processo atualizado com sucesso!");
     }
 
     carregarClientes();

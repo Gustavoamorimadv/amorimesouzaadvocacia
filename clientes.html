@@ -169,7 +169,11 @@ async function carregarClientes() {
       <h2>${cliente.nome || "Sem nome"}</h2>
       <p><strong>CPF:</strong> ${cliente.cpf || "-"}</p>
       <div id="boletos-${id}">
-        ${(cliente.boletos || []).map(b => `<div class="boleto">Boleto R$${b.valor} - ${b.vencimento}</div>`).join('')}
+        ${(cliente.boletos || []).map(b => `
+          <div class="boleto">
+            Boleto R$${b.valor} - ${b.vencimento}<br>
+            <small>Código: ${b.codigo || "-"}</small>
+          </div>`).join('')}
       </div>
     `;
     container.appendChild(card);
@@ -243,10 +247,21 @@ confirmBtn.onclick = async () => {
       const clienteSnap = await getDocs(query(collection(db, "clientes"), where("__name__", "==", clienteAtualId)));
       const clienteData = clienteSnap.docs[0].data();
       const novosBoletos = clienteData.boletos || [];
-      novosBoletos.push({ valor, vencimento });
+      const novo = data.boletos[0]; // pega boleto do backend
+      novosBoletos.push({
+        valor,
+        vencimento,
+        codigo: novo.codigo,
+        qrCodeUrl: novo.qrCodeUrl,
+        classe: "Boleto"
+      });
       await updateDoc(docRef, { boletos: novosBoletos });
       const boletosContainer = document.getElementById(`boletos-${clienteAtualId}`);
-      boletosContainer.innerHTML = novosBoletos.map(b => `<div class="boleto">Boleto R$${b.valor} - ${b.vencimento}</div>`).join('');
+      boletosContainer.innerHTML = novosBoletos.map(b => `
+        <div class="boleto">
+          Boleto R$${b.valor} - ${b.vencimento}<br>
+          <small>Código: ${b.codigo || "-"}</small>
+        </div>`).join('');
       fecharModal();
     } else {
       alert("Erro ao gerar boleto: " + JSON.stringify(data.erro));
@@ -260,4 +275,3 @@ carregarClientes();
 </script>
 </body>
 </html>
-

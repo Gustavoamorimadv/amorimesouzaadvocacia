@@ -132,7 +132,7 @@ header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-import { getFirestore, collection, query, where, getDocs, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+import { getFirestore, collection, query, where, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
@@ -150,34 +150,31 @@ let clienteAtualId = null;
 
 async function carregarClientes() {
   container.innerHTML = "<p>Carregando clientes...</p>";
-  try {
-    const q = query(collection(db, "clientes"), where("status", "==", "fechado"));
-    const snapshot = await getDocs(q);
-    container.innerHTML = "";
+  const q = query(collection(db, "clientes"), where("status", "==", "fechado"));
+  const snapshot = await getDocs(q);
+  container.innerHTML = "";
 
-    if(snapshot.empty) {
-      container.innerHTML = "<p>Nenhum cliente fechado encontrado.</p>";
-      return;
-    }
-
-    snapshot.forEach(docSnap => {
-      const cliente = docSnap.data();
-      const id = docSnap.id;
-      const card = document.createElement("div");
-      card.className = "card";
-      card.innerHTML = `
-        <h2>${cliente.nome || "Sem nome"}</h2>
-        <p><strong>CPF:</strong> ${cliente.cpf || "-"}</p>
-        <div id="boletos-${id}">
-          ${(cliente.boletos || []).map(b => `<div class="boleto">Boleto R$${b.valor} - ${b.vencimento}</div>`).join('')}
-        </div>
-      `;
-      container.appendChild(card);
-      card.onclick = () => abrirModal(cliente, id);
-    });
-  } catch(err) {
-    container.innerHTML = `<p>Erro ao carregar clientes: ${err.message}</p>`;
+  if(snapshot.empty) {
+    container.innerHTML = "<p>Nenhum cliente fechado encontrado.</p>";
+    return;
   }
+
+  snapshot.forEach(docSnap => {
+    const cliente = docSnap.data();
+    const id = docSnap.id;
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <h2>${cliente.nome || "Sem nome"}</h2>
+      <p><strong>CPF:</strong> ${cliente.cpf || "-"}</p>
+      <div id="boletos-${id}">
+        ${(cliente.boletos || []).map(b => `<div class="boleto">Boleto R$${b.valor} - ${b.vencimento}</div>`).join('')}
+      </div>
+    `;
+    container.appendChild(card);
+
+    card.onclick = () => abrirModal(cliente, id);
+  });
 }
 
 // Modal
@@ -209,13 +206,11 @@ function abrirModal(cliente, id) {
   modal.style.display = "flex";
 }
 
-function fecharModal() { 
-  modal.style.display = "none"; 
-  clienteAtualId = null; 
-}
+function fecharModal() { modal.style.display = "none"; clienteAtualId = null; }
 
 confirmBtn.onclick = async () => {
   if(!clienteAtualId) return;
+
   const nome = modalNome.value.trim();
   const cpf = modalCpf.value.trim();
   const email = modalEmail.value.trim();
@@ -224,11 +219,11 @@ confirmBtn.onclick = async () => {
   const endereco = modalEndereco.value.trim();
   const cidade = modalCidade.value.trim();
   const estado = modalEstado.value.trim();
-  const valor = modalValor.value.trim();
+  const valor = parseFloat(modalValor.value.replace(",", "."));
   const vencimento = modalVencimento.value;
 
-  if(!nome || !cpf || !email || !valor || !vencimento) {
-    alert("Preencha os campos obrigatórios!");
+  if(!nome || !cpf || !email || !valor || !vencimento || !endereco || !cidade || !estado || !cep) {
+    alert("Preencha todos os campos obrigatórios!");
     return;
   }
 
@@ -241,19 +236,23 @@ confirmBtn.onclick = async () => {
         boletos: [{ valor, vencimento }]
       })
     });
+
     const data = await res.json();
+
     if(data.sucesso) {
       alert("Boleto gerado com sucesso!");
 
+      // Atualiza Firestore
       const docRef = doc(db, "clientes", clienteAtualId);
-      const clienteSnap = await getDoc(docRef);
-      const clienteData = clienteSnap.data();
+      const clienteSnap = await getDocs(query(collection(db, "clientes"), where("__name__", "==", clienteAtualId)));
+      const clienteData = clienteSnap.docs[0].data();
       const novosBoletos = clienteData.boletos || [];
       novosBoletos.push({ valor, vencimento });
       await updateDoc(docRef, { boletos: novosBoletos });
 
+      // Atualiza HTML
       const boletosContainer = document.getElementById(`boletos-${clienteAtualId}`);
-      boletosContainer.innerHTML = novosBoletos.map(b => `<div class="boleto">Boleto R$${b.valor} - ${b.vencimento}</div>`).join('');
+      boletosContainer.innerHTML = novosBoletos.map(b => `<div class="boleto">Boleto R$${b.valor.toFixed(2)} - ${b.vencimento}</div>`).join('');
 
       fecharModal();
     } else {

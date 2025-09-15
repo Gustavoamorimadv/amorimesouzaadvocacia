@@ -89,7 +89,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-    // 🔥 Configuração Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
       authDomain: "dapapp-38637.firebaseapp.com",
@@ -107,7 +106,6 @@
     async function carregarClientes() {
       clientesContainer.innerHTML = "<p>Carregando clientes...</p>";
       const snapshot = await getDocs(collection(db, "clientes"));
-
       clientesContainer.innerHTML = "";
 
       snapshot.forEach(docSnap => {
@@ -129,6 +127,7 @@
           const body = document.createElement("div");
           body.className = "card-body";
 
+          const processosObj = cliente.processos || {};
           const processosStr = cliente.processo || "";
           const numeros = processosStr.split(",").map(p => p.trim()).filter(p => p.length > 0);
 
@@ -139,8 +138,7 @@
             const valorInputId = `valor-${clienteId}-${index}`;
             const movInputId = `mov-${clienteId}-${index}`;
 
-            // Recupera dados já salvos no Firestore
-            const dadosProcesso = cliente.processos?.[numero] || {};
+            const dadosProcesso = processosObj[numero] || {};
 
             processoDiv.innerHTML = `
               <p><b>Número:</b> ${numero}</p>
@@ -153,7 +151,7 @@
               </button>
             `;
 
-            // 🔥 Evita que clique dentro do card feche ele
+            // Evita fechar ao clicar dentro
             processoDiv.querySelectorAll("input, button").forEach(el => {
               el.addEventListener("click", e => e.stopPropagation());
             });
@@ -161,7 +159,6 @@
             body.appendChild(processoDiv);
           });
 
-          // evento salvar
           body.addEventListener("click", async e => {
             if (e.target.tagName === "BUTTON") {
               const clienteId = e.target.dataset.cliente;
@@ -171,58 +168,10 @@
 
               const docRef = doc(db, "clientes", clienteId);
 
-              // 🔥 Atualiza campo processos.{numero}
               await updateDoc(docRef, {
                 [`processos.${numero}`]: {
                   valorCausa: valor,
                   ultimaMovimentacao: movimentacao
-                }
-              });
-
-              alert("Processo atualizado com sucesso!");
-            }
-          });
-
-          card.appendChild(header);
-          card.appendChild(body);
-          clientesContainer.appendChild(card);
-        }
-      });
-    }
-
-    carregarClientes();
-  </script>
-</body>
-</html>
-              <input type="text" id="${movInputId}" placeholder="Digite a última movimentação" value="${dadosProcesso.ultimaMovimentacao || ""}">
-              <label>Andamento do cliente:</label>
-              <textarea id="${andamentoInputId}" placeholder="Digite o andamento para o cliente">${dadosProcesso.andamentoCliente || ""}</textarea>
-              <button type="button" data-cliente="${clienteId}" data-numero="${numero}" data-valor="${valorInputId}" data-mov="${movInputId}" data-andamento="${andamentoInputId}">
-                Salvar
-              </button>
-            `;
-
-            processoDiv.querySelectorAll("input, textarea, button").forEach(el => {
-              el.addEventListener("click", e => e.stopPropagation());
-            });
-
-            body.appendChild(processoDiv);
-          });
-
-          body.addEventListener("click", async e => {
-            if (e.target.tagName === "BUTTON") {
-              const clienteId = e.target.dataset.cliente;
-              const numero = e.target.dataset.numero;
-              const valor = document.getElementById(e.target.dataset.valor).value;
-              const movimentacao = document.getElementById(e.target.dataset.mov).value;
-              const andamento = document.getElementById(e.target.dataset.andamento).value;
-
-              const docRef = doc(db, "clientes", clienteId);
-              await updateDoc(docRef, {
-                [`processos.${numero}`]: {
-                  valorCausa: valor,
-                  ultimaMovimentacao: movimentacao,
-                  andamentoCliente: andamento
                 }
               });
 

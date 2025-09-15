@@ -7,78 +7,19 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js"></script>
   <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      margin: 0; padding: 0;
-      background: #f4f6f9;
-    }
-    header {
-      background: #1a237e;
-      color: white;
-      padding: 15px;
-      text-align: center;
-      font-size: 20px;
-      font-weight: bold;
-    }
-    .container {
-      max-width: 900px;
-      margin: 20px auto;
-      padding: 10px;
-    }
-    .card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      margin-bottom: 15px;
-      overflow: hidden;
-    }
-    .card-header {
-      background: #eceff1;
-      padding: 12px 15px;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .card-header h3 {
-      margin: 0;
-      font-size: 16px;
-      color: #333;
-    }
-    .card-body {
-      padding: 15px;
-      display: none;
-    }
-    .processo {
-      margin-bottom: 15px;
-      padding: 10px;
-      border-left: 4px solid #1a237e;
-      background: #f9f9f9;
-      border-radius: 6px;
-    }
-    label {
-      display: block;
-      margin-top: 8px;
-      font-size: 14px;
-      color: #333;
-    }
-    input {
-      width: 100%;
-      padding: 6px;
-      margin-top: 4px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    button {
-      margin-top: 10px;
-      padding: 8px 12px;
-      background: #1a237e;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    button:hover { background: #0d1757; }
+    body { font-family: 'Poppins', sans-serif; margin:0; padding:0; background:#f4f6f9; }
+    header { background:#1a237e; color:white; padding:15px; text-align:center; font-size:20px; font-weight:bold; }
+    .container { max-width:900px; margin:20px auto; padding:10px; }
+    .card { background:white; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1); margin-bottom:15px; overflow:hidden; }
+    .card-header { background:#eceff1; padding:12px 15px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; }
+    .card-header h3 { margin:0; font-size:16px; color:#333; }
+    .card-body { padding:15px; display:none; }
+    .processo { margin-bottom:15px; padding:10px; border-left:4px solid #1a237e; background:#f9f9f9; border-radius:6px; }
+    label { display:block; margin-top:8px; font-size:14px; color:#333; }
+    input, textarea { width:100%; padding:6px; margin-top:4px; border-radius:6px; border:1px solid #ccc; }
+    textarea { resize: vertical; }
+    button { margin-top:10px; padding:8px 12px; background:#1a237e; color:white; border:none; border-radius:8px; cursor:pointer; }
+    button:hover { background:#0d1757; }
   </style>
 </head>
 <body>
@@ -146,14 +87,14 @@
               <input type="text" id="${valorInputId}" placeholder="Digite o valor da causa" value="${dadosProcesso.valorCausa || ""}">
               <label>Última movimentação:</label>
               <input type="text" id="${movInputId}" placeholder="Digite a última movimentação" value="${dadosProcesso.ultimaMovimentacao || ""}">
-              <label>Andamento do processo:</label>
-              <input type="text" id="${andamentoInputId}" placeholder="Digite o andamento" value="${dadosProcesso.andamento || ""}">
+              <label>Andamento do cliente:</label>
+              <textarea id="${andamentoInputId}" placeholder="Digite o andamento para o cliente">${dadosProcesso.andamentoCliente || ""}</textarea>
               <button type="button" data-cliente="${clienteId}" data-numero="${numero}" data-valor="${valorInputId}" data-mov="${movInputId}" data-andamento="${andamentoInputId}">
                 Salvar
               </button>
             `;
 
-            processoDiv.querySelectorAll("input, button").forEach(el => {
+            processoDiv.querySelectorAll("input, textarea, button").forEach(el => {
               el.addEventListener("click", e => e.stopPropagation());
             });
 
@@ -174,7 +115,7 @@
                 [`processos.${numero}`]: {
                   valorCausa: valor,
                   ultimaMovimentacao: movimentacao,
-                  andamento: andamento
+                  andamentoCliente: andamento
                 }
               });
 

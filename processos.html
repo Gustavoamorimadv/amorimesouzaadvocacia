@@ -89,7 +89,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-    // 🔥 Configuração Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
       authDomain: "dapapp-38637.firebaseapp.com",
@@ -107,7 +106,6 @@
     async function carregarClientes() {
       clientesContainer.innerHTML = "<p>Carregando clientes...</p>";
       const snapshot = await getDocs(collection(db, "clientes"));
-
       clientesContainer.innerHTML = "";
 
       snapshot.forEach(docSnap => {
@@ -138,8 +136,8 @@
 
             const valorInputId = `valor-${clienteId}-${index}`;
             const movInputId = `mov-${clienteId}-${index}`;
+            const andamentoInputId = `andamento-${clienteId}-${index}`;
 
-            // Recupera dados já salvos no Firestore
             const dadosProcesso = cliente.processos?.[numero] || {};
 
             processoDiv.innerHTML = `
@@ -148,12 +146,13 @@
               <input type="text" id="${valorInputId}" placeholder="Digite o valor da causa" value="${dadosProcesso.valorCausa || ""}">
               <label>Última movimentação:</label>
               <input type="text" id="${movInputId}" placeholder="Digite a última movimentação" value="${dadosProcesso.ultimaMovimentacao || ""}">
-              <button type="button" data-cliente="${clienteId}" data-numero="${numero}" data-valor="${valorInputId}" data-mov="${movInputId}">
+              <label>Andamento do processo:</label>
+              <input type="text" id="${andamentoInputId}" placeholder="Digite o andamento" value="${dadosProcesso.andamento || ""}">
+              <button type="button" data-cliente="${clienteId}" data-numero="${numero}" data-valor="${valorInputId}" data-mov="${movInputId}" data-andamento="${andamentoInputId}">
                 Salvar
               </button>
             `;
 
-            // 🔥 Evita que clique dentro do card feche ele
             processoDiv.querySelectorAll("input, button").forEach(el => {
               el.addEventListener("click", e => e.stopPropagation());
             });
@@ -161,21 +160,21 @@
             body.appendChild(processoDiv);
           });
 
-          // evento salvar
           body.addEventListener("click", async e => {
             if (e.target.tagName === "BUTTON") {
               const clienteId = e.target.dataset.cliente;
               const numero = e.target.dataset.numero;
               const valor = document.getElementById(e.target.dataset.valor).value;
               const movimentacao = document.getElementById(e.target.dataset.mov).value;
+              const andamento = document.getElementById(e.target.dataset.andamento).value;
 
               const docRef = doc(db, "clientes", clienteId);
 
-              // 🔥 Atualiza campo processos.{numero}
               await updateDoc(docRef, {
                 [`processos.${numero}`]: {
                   valorCausa: valor,
-                  ultimaMovimentacao: movimentacao
+                  ultimaMovimentacao: movimentacao,
+                  andamento: andamento
                 }
               });
 

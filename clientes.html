@@ -82,6 +82,7 @@ header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
 <button><img src="https://img.icons8.com/ios-filled/50/ffffff/settings.png"/><span>Configurações</span></button>
 </div>
 
+
 <div class="main">
 <header>
 <h1>Clientes Fechados</h1>
@@ -210,7 +211,6 @@ function fecharModal() { modal.style.display = "none"; clienteAtualId = null; }
 
 confirmBtn.onclick = async () => {
   if(!clienteAtualId) return;
-
   const nome = modalNome.value.trim();
   const cpf = modalCpf.value.trim();
   const email = modalEmail.value.trim();
@@ -219,11 +219,11 @@ confirmBtn.onclick = async () => {
   const endereco = modalEndereco.value.trim();
   const cidade = modalCidade.value.trim();
   const estado = modalEstado.value.trim();
-  const valor = parseFloat(modalValor.value.replace(",", "."));
+  const valor = modalValor.value.trim();
   const vencimento = modalVencimento.value;
 
-  if(!nome || !cpf || !email || !valor || !vencimento || !endereco || !cidade || !estado || !cep) {
-    alert("Preencha todos os campos obrigatórios!");
+  if(!nome || !cpf || !email || !valor || !vencimento) {
+    alert("Preencha os campos obrigatórios!");
     return;
   }
 
@@ -236,24 +236,17 @@ confirmBtn.onclick = async () => {
         boletos: [{ valor, vencimento }]
       })
     });
-
     const data = await res.json();
-
     if(data.sucesso) {
       alert("Boleto gerado com sucesso!");
-
-      // Atualiza Firestore
       const docRef = doc(db, "clientes", clienteAtualId);
       const clienteSnap = await getDocs(query(collection(db, "clientes"), where("__name__", "==", clienteAtualId)));
       const clienteData = clienteSnap.docs[0].data();
       const novosBoletos = clienteData.boletos || [];
       novosBoletos.push({ valor, vencimento });
       await updateDoc(docRef, { boletos: novosBoletos });
-
-      // Atualiza HTML
       const boletosContainer = document.getElementById(`boletos-${clienteAtualId}`);
-      boletosContainer.innerHTML = novosBoletos.map(b => `<div class="boleto">Boleto R$${b.valor.toFixed(2)} - ${b.vencimento}</div>`).join('');
-
+      boletosContainer.innerHTML = novosBoletos.map(b => `<div class="boleto">Boleto R$${b.valor} - ${b.vencimento}</div>`).join('');
       fecharModal();
     } else {
       alert("Erro ao gerar boleto: " + JSON.stringify(data.erro));
@@ -267,3 +260,4 @@ carregarClientes();
 </script>
 </body>
 </html>
+

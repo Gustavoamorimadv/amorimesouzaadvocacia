@@ -45,7 +45,7 @@ header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
 // 🔥 Configuração Firebase
 const firebaseConfig = {
@@ -97,20 +97,26 @@ async function carregarClientes() {
     });
 }
 
-function abrirModal(cliente) {
+async function abrirModal(cliente) {
     clienteAtual = cliente;
     modalTitle.textContent = `Processos de ${cliente.nome}`;
     processosContainer.innerHTML = "";
 
-    const processos = cliente.processo ? cliente.processo.split(",").map(p => p.trim()) : [];
+    // Buscar versão mais recente do cliente no Firestore
+    const docRef = doc(db, "clientes", cliente.id);
+    const docSnap = await getDoc(docRef);
+    const clienteAtualizado = docSnap.exists() ? docSnap.data() : cliente;
+
+    const processos = clienteAtualizado.processo ? clienteAtualizado.processo.split(",").map(p => p.trim()) : [];
 
     processos.forEach(numero => {
+        const dadosProcesso = clienteAtualizado.processos?.[numero] || {};
         const row = document.createElement("div");
         row.className = "row";
         row.innerHTML = `
             <p><b>Nº ${numero}</b></p>
-            <input type="text" placeholder="Valor da causa" data-numero="${numero}" data-field="valorCausa"/>
-            <input type="text" placeholder="Última movimentação" data-numero="${numero}" data-field="ultimaMovimentacao"/>
+            <input type="text" placeholder="Valor da causa" data-numero="${numero}" data-field="valorCausa" value="${dadosProcesso.valorCausa || ""}">
+            <input type="text" placeholder="Última movimentação" data-numero="${numero}" data-field="ultimaMovimentacao" value="${dadosProcesso.ultimaMovimentacao || ""}">
         `;
         processosContainer.appendChild(row);
     });
@@ -122,22 +128,24 @@ processosForm.onsubmit = async function(e) {
     e.preventDefault();
     if (!clienteAtual) return;
 
-    const updates = {};
+    const docRef = doc(db,"clientes",clienteAtual.id);
+    const docSnap = await getDoc(docRef);
+    const dadosExistentes = docSnap.exists() ? docSnap.data().processos || {} : {};
+
+    const novosProcessos = { ...dadosExistentes };
+
     processosContainer.querySelectorAll("input").forEach(input => {
         const numero = input.dataset.numero;
         const field = input.dataset.field;
-        const value = input.value;
-        if (!updates[`processos.${numero}`]) {
-            updates[`processos.${numero}`] = {};
-        }
-        updates[`processos.${numero}`][field] = value;
+        if (!novosProcessos[numero]) novosProcessos[numero] = {};
+        novosProcessos[numero][field] = input.value;
     });
 
-    const docRef = doc(db,"clientes",clienteAtual.id);
-    await updateDoc(docRef, updates);
+    await updateDoc(docRef, { processos: novosProcessos });
 
     alert("Processos atualizados!");
     modalBackdrop.style.display = "none";
+    carregarClientes();
 };
 
 document.getElementById("btnCancel").onclick = () => {

@@ -83,9 +83,238 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 
 .toast { position:fixed; right:20px; bottom:20px; background:#222; color:#fff; padding:8px 12px; border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.3); display:none; z-index:60; }
 </style>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
+    authDomain: "dapapp-38637.firebaseapp.com",
+    projectId: "dapapp-38637",
+    storageBucket: "dapapp-38637.appspot.com",
+    messagingSenderId: "628852295313",
+    appId: "1:628852295313:web:1234567890abcdef123456" // <-- SUBSTITUA este valor real do seu console!
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+window.firebaseDB = db;
+
+document.addEventListener('DOMContentLoaded', () => {
+    const STATUS=['lista-fria','negociacao','contrato-assinado','fechado'];
+    const cardsMap={};
+    const modalBackdrop=document.getElementById('modalBackdrop');
+    const clientForm=document.getElementById('clientForm');
+    const inputNome=document.getElementById('inputNome');
+    const inputCPF=document.getElementById('inputCPF');
+    const inputObs=document.getElementById('inputObs');
+    const inputStatus=document.getElementById('inputStatus');
+    const inputNumeros=document.getElementById('inputNumeros');
+    const inputClasse=document.getElementById('inputClasse');
+    const inputValor=document.getElementById('inputValor');
+    const btnAdd=document.getElementById('btnAdd');
+    const btnCancel=document.getElementById('btnCancel');
+    const searchInput=document.getElementById('searchInput');
+    const filterStatus=document.getElementById('filterStatus');
+    const toastEl=document.getElementById('toast');
+    const coinSound=document.getElementById('coinSound');
+    const processosContainer=document.getElementById('processosContainer');
+
+    function showToast(msg){ toastEl.innerText=msg; toastEl.style.display='block'; clearTimeout(toastEl._t); toastEl._t=setTimeout(()=>toastEl.style.display='none',3000); }
+
+    async function getClientes(){
+        const snapshot = await getDocs(collection(db,"clientes"));
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    }
+
+    async function saveCliente(cliente){
+        if(cliente.id){
+            const docRef = doc(db, "clientes", cliente.id);
+            await setDoc(docRef, cliente);
+        } else {
+            const docRef = await addDoc(collection(db,"clientes"), cliente);
+            cliente.id = docRef.id;
+        }
+    }
+
+    function openModal(edit=false,data=null){
+        modalBackdrop.style.display='flex';
+        document.getElementById('modalTitle').innerText=edit?"Editar Cliente":"Novo Cliente";
+        processosContainer.innerHTML='';
+        if(edit && data){
+            inputNome.value=data.nome;
+            inputCPF.value=data.cpf||"";
+            inputObs.value=data.obs||"";
+            inputStatus.value=data.status||"lista-fria";
+            inputNumeros.value=data.numeros||"";
+            inputClasse.value=data.classe||"Outros";
+            inputValor.value=data.valor||"";
+            const processos = data.processo ? data.processo.split(',').map(p=>p.trim()) : [''];
+            processos.forEach(p=>addProcessoField(p));
+            clientForm.dataset.editId=data.id;
+        } else {
+            addProcessoField();
+            inputNome.value=""; inputCPF.value=""; inputObs.value=""; inputStatus.value="lista-fria";
+            inputNumeros.value=""; inputClasse.value="Outros"; inputValor.value="";
+            delete clientForm.dataset.editId;
+        }
+    }
+
+    function closeModal(){ modalBackdrop.style.display='none'; }
+
+    function addProcessoField(value=""){
+        const row = document.createElement('div');
+        row.className='processo-row';
+        const input = document.createElement('input');
+        input.className='inputProcesso';
+        input.placeholder='0000000-00.0000.0.00.0000';
+        input.value = value;
+        const btnAdd = document.createElement('button');
+        btnAdd.type='button';
+        btnAdd.className='btn ghost btnAddProcesso';
+        btnAdd.textContent='+';
+        btnAdd.onclick=()=>addProcessoField();
+        const btnRemove = document.createElement('button');
+        btnRemove.type='button';
+        btnRemove.className='btn ghost btnRemoveProcesso';
+        btnRemove.textContent='-';
+        btnRemove.onclick=()=>row.remove();
+        row.appendChild(input);
+        row.appendChild(btnAdd);
+        row.appendChild(btnRemove);
+        processosContainer.appendChild(row);
+    }
+
+    function criarCard(cliente){
+        const status = cliente.status || 'lista-fria';
+        const col=document.getElementById(status);
+        if(!col) return;
+        const card=document.createElement('div');
+        card.className=`card ${status}`;
+        card.dataset.id=cliente.id;
+        card.dataset.status=status;
+        card.dataset.nome=cliente.nome.toLowerCase();
+        card.draggable=true;
+
+        const colorBar=document.createElement('div'); colorBar.className='color-bar'; card.appendChild(colorBar);
+
+        const actionsDiv=document.createElement('div'); actionsDiv.className='card-actions';
+        const btnCall=document.createElement('button');
+        btnCall.onclick=(e)=>{ e.stopPropagation(); ligar(cliente.numeros||''); };
+        btnCall.innerHTML='<img src="https://img.icons8.com/ios-glyphs/30/000000/phone.png"/>';
+        const btnWa=document.createElement('button');
+        btnWa.onclick=(e)=>{ e.stopPropagation(); whatsapp(cliente.numeros||''); };
+        btnWa.innerHTML='<img src="https://img.icons8.com/ios-glyphs/30/000000/whatsapp.png"/>';
+        actionsDiv.appendChild(btnCall); actionsDiv.appendChild(btnWa); card.appendChild(actionsDiv);
+
+        const contentDiv=document.createElement('div'); contentDiv.className='card-content';
+        const processosArray = cliente.processo ? cliente.processo.split(',').map(p=>p.trim()) : [];
+        const primeiroProcesso = processosArray.length > 0 ? processosArray[0] : '-';
+        contentDiv.innerHTML=`<h3>${cliente.nome}</h3>
+            <p>CPF: ${cliente.cpf||'-'}</p>
+            <p>Classe: ${cliente.classe||'-'}</p>
+            <p>Processo: ${primeiroProcesso}</p>
+            <p>Valor: R$ ${cliente.valor||0}</p>`;
+        card.appendChild(contentDiv);
+
+        card.onclick=()=>openModal(true,cliente);
+        addDragEvents(card);
+        col.appendChild(card);
+        cardsMap[cliente.id]=card;
+    }
+
+    function ligar(numero){ if(!numero){ showToast("Número não informado"); return; } window.open(`tel:${numero.replace(/\D/g,'')}`); }
+    function whatsapp(numero){ if(!numero){ showToast("Número não informado"); return; } const num=numero.replace(/\D/g,''); window.open(`https://wa.me/55${num}`,'_blank'); }
+
+    async function render(){
+        STATUS.forEach(s=>{
+            const col=document.getElementById(s);
+            col.innerHTML=`<h2>${s.replace('-',' ').toUpperCase()}</h2>`;
+        });
+        for(const k in cardsMap) delete cardsMap[k];
+        const clientes = await getClientes();
+        for(const c of clientes) criarCard(c);
+        filtragemAplicada();
+    }
+
+    clientForm.onsubmit = async function(e){
+        e.preventDefault();
+        const nome = inputNome.value.trim();
+        if(!nome){ showToast("Nome obrigatório"); return; }
+
+        const processos = Array.from(document.querySelectorAll('.inputProcesso'))
+                        .map(i=>i.value.trim())
+                        .filter(v=>v);
+
+        const novo = {
+            nome, cpf: inputCPF.value.trim(),
+            obs: inputObs.value.trim().substring(0,300),
+            status: inputStatus.value,
+            numeros: inputNumeros.value,
+            processo: processos.join(', '),
+            classe: inputClasse.value,
+            valor: inputValor.value
+        };
+
+        if(clientForm.dataset.editId){
+            novo.id = clientForm.dataset.editId;
+            await saveCliente(novo);
+            showToast("Cliente atualizado!");
+        } else {
+            await saveCliente(novo);
+            showToast("Cliente adicionado!");
+        }
+
+        closeModal();
+        render();
+    };
+
+    btnAdd.onclick=()=>openModal();
+    btnCancel.onclick=()=>closeModal();
+
+    let draggedCard=null;
+    function addDragEvents(card){
+        card.addEventListener('dragstart',()=>{ draggedCard=card; card.style.opacity='.5'; });
+        card.addEventListener('dragend',()=>{ draggedCard=null; card.style.opacity='1'; });
+    }
+    document.querySelectorAll('.column').forEach(col=>{
+        col.addEventListener('dragover', e=>e.preventDefault());
+        col.addEventListener('drop', async ()=>{
+            if(!draggedCard) return;
+            const id = draggedCard.dataset.id;
+            const status = col.id;
+            const docRef = doc(db,"clientes",id);
+            await updateDoc(docRef,{status});
+
+            if(status === "fechado"){ 
+                coinSound.currentTime = 0;
+                coinSound.play();
+            }
+
+            render(); 
+            showToast("Status atualizado");
+        });
+    });
+
+    function filtragemAplicada(){
+        const q = searchInput.value.toLowerCase();
+        const filterS = filterStatus.value;
+        Object.values(cardsMap).forEach(card=>{
+            const matchSearch = card.dataset.nome.includes(q);
+            const matchStatus = !filterS || card.dataset.status===filterS;
+            card.style.display=(matchSearch && matchStatus)?'flex':'none';
+        });
+    }
+    searchInput.oninput=filtragemAplicada;
+    filterStatus.onchange=filtragemAplicada;
+
+    render();
+});
+</script>
 </head>
 <body>
-<div class="sidebar" id="sidebar">
+<div class="sidebar">
     <h2 onclick="window.location.href='dashboard.html'">AMR ADV</h2>
     <button onclick="window.location.href='dashboard.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/dashboard.png"/><span>Dashboard</span></button>
     <button onclick="window.location.href='relatorios.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/combo-chart.png"/><span>Relatórios</span></button>
@@ -96,7 +325,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
     <button><img src="https://img.icons8.com/ios-filled/50/ffffff/settings.png"/><span>Configurações</span></button>
 </div>
 
-<div class="main" id="mainContent">
+<div class="main">
 <header>
 <h1>CRM</h1>
 <button id="btnAdd" class="btn primary">Adicionar Cliente</button>
@@ -145,19 +374,5 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 
 <div class="toast" id="toast"></div>
 <audio id="coinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-notification-2018.mp3" preload="auto"></audio>
-
-<script>
-const sidebar = document.getElementById('sidebar');
-const mainContent = document.getElementById('mainContent');
-
-sidebar.addEventListener('mouseenter', () => {
-    sidebar.classList.add('expanded');
-    mainContent.classList.add('blur');
-});
-sidebar.addEventListener('mouseleave', () => {
-    sidebar.classList.remove('expanded');
-    mainContent.classList.remove('blur');
-});
-</script>
 </body>
 </html>

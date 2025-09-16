@@ -9,16 +9,37 @@
 * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
 body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
 
-.sidebar { width:80px; background:#1e1e2f; display:flex; flex-direction:column; align-items:center; padding:20px 0; flex-shrink:0; transition:width 0.3s; }
-.sidebar:hover { width:220px; }
-.sidebar h2 { font-size:22px; font-family:'Poppins', sans-serif; font-weight:600; color:#fff; letter-spacing:1px; margin-bottom:30px; text-align:center; cursor:pointer; width:100%; white-space:nowrap; overflow:hidden; transition:opacity 0.3s; }
-.sidebar button { width:100%; background:transparent; border:none; color:#fff; display:flex; align-items:center; gap:15px; padding:12px 20px; margin:5px 0; cursor:pointer; border-radius:10px; transition:background 0.2s, color 0.2s; font-size:14px; white-space:nowrap; overflow:hidden; }
-.sidebar button:hover { background:#2a2a40; color:#fff; }
-.sidebar button img { width:24px; height:24px; filter: invert(1); flex-shrink:0; }
-.sidebar button span { display:inline-block; opacity:1; transition:opacity 0.3s; }
-.sidebar:not(:hover) h2, .sidebar:not(:hover) button span { opacity:0; }
+/* SIDEBAR (modelo copiado de processos.html) */
+.sidebar {
+  width:80px; background:#1e1e2f; display:flex; flex-direction:column; align-items:center;
+  padding:20px 0; flex-shrink:0; transition:width 0.4s ease; position:relative; z-index:10;
+}
+.sidebar.expanded { width:220px; }
+.sidebar h2 {
+  font-size:22px; font-family:'Poppins', sans-serif; font-weight:600; color:#fff;
+  letter-spacing:1px; margin-bottom:30px; text-align:center; cursor:pointer;
+  width:100%; white-space:nowrap; overflow:hidden; transition:opacity 0.3s;
+  opacity:0;
+}
+.sidebar.expanded h2 { opacity:1; }
 
-.main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.sidebar button {
+  width:100%; background:transparent; border:none; color:#fff;
+  display:flex; align-items:center; gap:15px; padding:12px 20px; margin:5px 0;
+  cursor:pointer; border-radius:10px; transition:background 0.3s, color 0.3s; font-size:14px;
+  white-space:nowrap; overflow:hidden;
+}
+.sidebar button img { width:28px; height:28px; filter: invert(1); flex-shrink:0; transition:transform 0.3s; }
+.sidebar button span { display:inline-block; opacity:0; transition:opacity 0.3s; font-weight:500; }
+.sidebar.expanded button span { opacity:1; }
+.sidebar button:hover img { transform:scale(1.1); }
+.sidebar button:hover { background:#2a2a40; color:#fff; }
+
+/* MAIN e BLUR (adicionado o comportamento de blur como em processos.html) */
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; transition:filter 0.3s; }
+.main.blur { filter:blur(4px) brightness(0.85); }
+
+/* RESTANTE DO CSS ORIGINAL DO CRM (mantido) */
 header { height:60px; background:#fff; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; padding:0 20px; flex-shrink:0; }
 header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
 header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
@@ -82,6 +103,15 @@ const db = getFirestore(app);
 window.firebaseDB = db;
 
 document.addEventListener('DOMContentLoaded', () => {
+    /* ---------- Adição do comportamento de sidebar + blur (baseado em processos.html) ---------- */
+    const sidebar = document.querySelector(".sidebar");
+    const mainContent = document.querySelector(".main");
+    if (sidebar && mainContent) {
+        sidebar.addEventListener('mouseenter', () => { sidebar.classList.add('expanded'); mainContent.classList.add('blur'); });
+        sidebar.addEventListener('mouseleave', () => { sidebar.classList.remove('expanded'); mainContent.classList.remove('blur'); });
+    }
+    /* ------------------------------------------------------------------------------------------ */
+
     const STATUS=['lista-fria','negociacao','contrato-assinado','fechado'];
     const cardsMap={};
     const modalBackdrop=document.getElementById('modalBackdrop');
@@ -294,9 +324,10 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </head>
 <body>
+<!-- SIDEBAR (HTML copiado do processos.html) -->
 <div class="sidebar">
     <h2 onclick="window.location.href='dashboard.html'">AMR ADV</h2>
-    <button onclick="window.location.href='dashboard.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/dashboard.png"/><span>Dashboard</span></button>
+    <button onclick="window.location.href='crm.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/dashboard.png"/><span>CRM</span></button>
     <button onclick="window.location.href='relatorios.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/combo-chart.png"/><span>Relatórios</span></button>
     <button onclick="window.location.href='agenda.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/calendar.png"/><span>Agenda</span></button>
     <button onclick="window.location.href='contatos.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/contacts.png"/><span>Contatos</span></button>

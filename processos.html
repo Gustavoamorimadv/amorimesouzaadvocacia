@@ -87,18 +87,11 @@ async function carregarClientes() {
 
             const content = document.createElement("div");
             content.className = "card-content";
-
-            // Corrigido: pega a última movimentação de cliente.processos
-            const processosData = cliente.processos || {};
-            const ultimas = Object.values(processosData).map(p => p.ultimaMovimentacao).filter(Boolean);
-            const ultimaMov = ultimas.length ? ultimas[ultimas.length - 1] : "-";
-
             content.innerHTML = `
                 <h3>${cliente.nome}</h3>
                 <p>CPF: ${cliente.cpf||"-"}</p>
                 <p>Classe: ${cliente.classe||"-"}</p>
                 <p>Processo: ${cliente.processo||"-"}</p>
-                <p>Última Movimentação: ${ultimaMov}</p>
             `;
             card.appendChild(content);
 
@@ -169,13 +162,14 @@ processosForm.onsubmit = async function(e) {
 
     await updateDoc(docRef, updates);
 
+    // Atualiza histórico com arrayUnion
     for (const numero in historicoUpdates) {
         for (const mov of historicoUpdates[numero]) {
             await updateDoc(docRef, { [`processos.${numero}.historico`]: arrayUnion(mov) });
         }
     }
 
-    // Atualiza modal e cards
+    // Atualiza modal imediatamente
     for (const numero in historicoUpdates) {
         const container = document.getElementById(`hist-${numero}`);
         historicoUpdates[numero].forEach(mov => {
@@ -186,11 +180,8 @@ processosForm.onsubmit = async function(e) {
         });
     }
 
-    alert("Processos atualizados!");
-    modalBackdrop.style.display = "none";
-    carregarClientes();
+    alert("Processos atualizados com histórico e timestamps!");
 };
-
 document.getElementById("btnCancel").onclick = () => { modalBackdrop.style.display = "none"; };
 
 carregarClientes();

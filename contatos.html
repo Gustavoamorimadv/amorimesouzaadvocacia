@@ -7,101 +7,114 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
 <style>
 /* Reset e body */
-* { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+body{display:flex;background:#f0f2f5;height:100vh;overflow:hidden;}
 
-/* Sidebar moderna e minimalista */
-.sidebar {
-    width:80px;
-    background:#1e1e2f;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    padding:20px 0;
-    flex-shrink:0;
-    transition:width 0.3s;
+/* Sidebar com efeito expandir + blur */
+.sidebar{
+  width:80px;
+  background:#1e1e2f;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:20px 0;
+  flex-shrink:0;
+  transition:width 0.4s ease;
+  position:relative;
+  z-index:10;
 }
-.sidebar:hover { width:220px; }
-.sidebar h2 {
-    font-size:22px;
-    font-family:'Poppins', sans-serif;
-    font-weight:600;
-    color:#fff;
-    letter-spacing:1px;
-    margin-bottom:30px;
-    text-align:center;
-    cursor:pointer;
-    width:100%;
-    white-space:nowrap;
-    overflow:hidden;
-    transition:opacity 0.3s;
+.sidebar.expanded{width:220px;}
+.sidebar h2{
+  font-size:22px;
+  font-family:'Poppins',sans-serif;
+  font-weight:600;
+  color:#fff;
+  letter-spacing:1px;
+  margin-bottom:30px;
+  text-align:center;
+  cursor:pointer;
+  width:100%;
+  white-space:nowrap;
+  overflow:hidden;
+  transition:opacity 0.3s;
+  opacity:0;
 }
-.sidebar button {
-    width:100%;
-    background:transparent;
-    border:none;
-    color:#fff;
-    display:flex;
-    align-items:center;
-    gap:15px;
-    padding:12px 20px;
-    margin:5px 0;
-    cursor:pointer;
-    border-radius:10px;
-    transition:background 0.2s, color 0.2s;
-    font-size:14px;
-    white-space:nowrap;
-    overflow:hidden;
+.sidebar.expanded h2{opacity:1;}
+.sidebar button{
+  width:100%;
+  background:transparent;
+  border:none;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  gap:15px;
+  padding:12px 20px;
+  margin:5px 0;
+  cursor:pointer;
+  border-radius:10px;
+  font-size:14px;
+  white-space:nowrap;
+  overflow:hidden;
+  transition:background 0.3s,color 0.3s;
 }
-.sidebar button:hover { background:#2a2a40; color:#fff; }
-.sidebar button img { width:24px; height:24px; filter: invert(1); flex-shrink:0; }
-.sidebar button span { display:inline-block; opacity:1; transition:opacity 0.3s; }
-.sidebar:not(:hover) h2,
-.sidebar:not(:hover) button span { opacity:0; }
+.sidebar button img{width:28px;height:28px;filter:invert(1);flex-shrink:0;transition:transform 0.3s;}
+.sidebar button span{display:inline-block;opacity:0;transition:opacity 0.3s;font-weight:500;}
+.sidebar.expanded button span{opacity:1;}
+.sidebar button:hover img{transform:scale(1.1);}
+.sidebar button:hover{background:#2a2a40;color:#fff;}
 
-/* Main */
-.main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
-header { height:60px; background:#fff; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; padding:0 20px; flex-shrink:0; }
-header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
-header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+/* Main com transição para blur */
+.main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  transition:filter 0.3s;
+}
+.main.blur{filter:blur(4px) brightness(0.85);}
+
+/* Header */
+header{height:60px;background:#fff;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center;padding:0 20px;flex-shrink:0;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
+header h1{font-size:22px;color:#1e1e2f;font-family:'Poppins',sans-serif;}
+header button{padding:8px 16px;background:#1e1e2f;color:#fff;border:none;border-radius:6px;cursor:pointer;}
 
 /* Search */
-.search-bar { padding:10px 20px; background:#fff; border-bottom:1px solid #ddd; display:flex; gap:10px; align-items:center; flex-shrink:0; }
-.search-bar input { flex:1; padding:8px; border:1px solid #ccc; border-radius:6px; }
+.search-bar{padding:10px 20px;background:#fff;border-bottom:1px solid #ddd;display:flex;gap:10px;align-items:center;flex-shrink:0;}
+.search-bar input{flex:1;padding:8px;border:1px solid #ccc;border-radius:6px;}
 
 /* Table */
-.table-container { flex:1; overflow-y:auto; padding:20px; }
-table { width:100%; border-collapse:collapse; background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.08); }
-thead { background:#f8f9fa; }
-th, td { text-align:left; padding:12px 15px; border-bottom:1px solid #eee; font-size:14px; }
-th { font-weight:600; color:#1e1e2f; }
-tr:hover { background:#f5f5f5; cursor:pointer; }
-td button { margin-right:5px; padding:6px 10px; border:none; border-radius:6px; cursor:pointer; font-size:13px; }
-.btn-edit { background:#f1c40f; color:#fff; }
-.btn-del { background:#e74c3c; color:#fff; }
-.btn-wa { background:#2ecc71; color:#fff; }
+.table-container{flex:1;overflow-y:auto;padding:20px;}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.08);}
+thead{background:#f8f9fa;}
+th,td{text-align:left;padding:12px 15px;border-bottom:1px solid #eee;font-size:14px;}
+th{font-weight:600;color:#1e1e2f;}
+tr:hover{background:#f5f5f5;cursor:pointer;}
+td button{margin-right:5px;padding:6px 10px;border:none;border-radius:6px;cursor:pointer;font-size:13px;}
+.btn-edit{background:#f1c40f;color:#fff;}
+.btn-del{background:#e74c3c;color:#fff;}
+.btn-wa{background:#2ecc71;color:#fff;}
 
 /* Modal */
-.modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); justify-content:center; align-items:center; z-index:50; }
-.modal { background:#fff; padding:18px; border-radius:15px; min-width:320px; max-width:420px; box-shadow:0 8px 30px rgba(0,0,0,.25); }
-.modal h3 { margin-bottom:12px; }
-.modal .row { margin-bottom:10px; }
-.modal input, .modal textarea { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; }
-.modal textarea { min-height:80px; resize:vertical; }
-.modal .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);justify-content:center;align-items:center;z-index:50;}
+.modal{background:#fff;padding:18px;border-radius:15px;min-width:320px;max-width:420px;box-shadow:0 8px 30px rgba(0,0,0,.25);}
+.modal h3{margin-bottom:12px;}
+.modal .row{margin-bottom:10px;}
+.modal input,.modal textarea{width:100%;padding:8px;border-radius:6px;border:1px solid #ccc;}
+.modal textarea{min-height:80px;resize:vertical;}
+.modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:10px;}
 
 /* Painel WhatsApp */
-#waPanel { display:none; margin:20px; background:#fff; padding:15px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.08); max-width:500px; }
-#waPanel input, #waPanel textarea { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; margin-bottom:10px; }
-#waPanel textarea { min-height:80px; }
+#waPanel{display:none;margin:20px;background:#fff;padding:15px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.08);max-width:500px;}
+#waPanel input,#waPanel textarea{width:100%;padding:8px;border-radius:6px;border:1px solid #ccc;margin-bottom:10px;}
+#waPanel textarea{min-height:80px;}
 
 /* Botões */
-.btn { padding:8px 12px; border-radius:6px; border:0; cursor:pointer; }
-.btn.primary { background:#1e1e2f; color:#fff; }
-.btn.ghost { background:#f1f3f5; }
+.btn{padding:8px 12px;border-radius:6px;border:0;cursor:pointer;}
+.btn.primary{background:#1e1e2f;color:#fff;}
+.btn.ghost{background:#f1f3f5;}
 
 /* Toast */
-.toast { position:fixed; right:20px; bottom:20px; background:#222; color:#fff; padding:8px 12px; border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.3); display:none; z-index:60; }
+.toast{position:fixed;right:20px;bottom:20px;background:#222;color:#fff;padding:8px 12px;border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.3);display:none;z-index:60;}
 </style>
 </head>
 <body>
@@ -193,9 +206,9 @@ const waMessage=document.getElementById('waMessage');
 const toast=document.getElementById('toast');
 let editIndex=null;
 
-function showToast(msg){ toast.innerText=msg; toast.style.display='block'; clearTimeout(toast._t); toast._t=setTimeout(()=>toast.style.display='none',3000); }
-function getContacts(){ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); }
-function saveContacts(c){ localStorage.setItem(STORAGE_KEY,JSON.stringify(c)); renderTable(); }
+function showToast(msg){toast.innerText=msg;toast.style.display='block';clearTimeout(toast._t);toast._t=setTimeout(()=>toast.style.display='none',3000);}
+function getContacts(){return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');}
+function saveContacts(c){localStorage.setItem(STORAGE_KEY,JSON.stringify(c));renderTable();}
 function renderTable(){
     const contacts=getContacts();
     contactsTable.innerHTML='';
@@ -211,18 +224,18 @@ function renderTable(){
     });
 }
 
-function openModal(){ modalBackdrop.style.display='flex'; }
-function closeModal(){ modalBackdrop.style.display='none'; contactForm.reset(); editIndex=null; }
+function openModal(){modalBackdrop.style.display='flex';}
+function closeModal(){modalBackdrop.style.display='none';contactForm.reset();editIndex=null;}
 
-btnAdd.addEventListener('click',()=>{ openModal(); });
-btnCancel.addEventListener('click',()=>{ closeModal(); });
+btnAdd.addEventListener('click',()=>{openModal();});
+btnCancel.addEventListener('click',()=>{closeModal();});
 
 contactForm.addEventListener('submit',(e)=>{
     e.preventDefault();
     const contacts=getContacts();
-    const newContact={ nome: inputNome.value, telefone: inputTelefone.value, cpf: inputCPF.value, processo: inputProcesso.value, obs: inputObs.value };
-    if(editIndex!==null){ contacts[editIndex]=newContact; editIndex=null; showToast('Contato atualizado'); }
-    else{ contacts.push(newContact); showToast('Contato adicionado'); }
+    const newContact={nome:inputNome.value,telefone:inputTelefone.value,cpf:inputCPF.value,processo:inputProcesso.value,obs:inputObs.value};
+    if(editIndex!==null){contacts[editIndex]=newContact;editIndex=null;showToast('Contato atualizado');}
+    else{contacts.push(newContact);showToast('Contato adicionado');}
     saveContacts(contacts);
     closeModal();
 });
@@ -254,12 +267,12 @@ function openWAPanel(number){
     waMessage.value='';
 }
 
-function closeWAPanel(){ waPanel.style.display='none'; }
+function closeWAPanel(){waPanel.style.display='none';}
 
 function sendWhatsApp(){
     const num=waNumber.value.trim();
     const msg=encodeURIComponent(waMessage.value.trim());
-    if(!num||!msg){ alert('Preencha número e mensagem'); return; }
+    if(!num||!msg){alert('Preencha número e mensagem');return;}
     window.open(`https://wa.me/${num}?text=${msg}`,'_blank');
     closeWAPanel();
 }
@@ -272,6 +285,12 @@ document.getElementById('searchInput').addEventListener('input',function(){
 });
 
 renderTable();
+
+// Sidebar hover + blur
+const sidebar=document.querySelector(".sidebar");
+const mainContent=document.querySelector(".main");
+sidebar.addEventListener('mouseenter',()=>{sidebar.classList.add('expanded');mainContent.classList.add('blur');});
+sidebar.addEventListener('mouseleave',()=>{sidebar.classList.remove('expanded');mainContent.classList.remove('blur');});
 </script>
 
 </body>

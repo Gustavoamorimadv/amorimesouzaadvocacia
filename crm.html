@@ -13,7 +13,7 @@ body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
     width:80px; background:#1e1e2f; display:flex; flex-direction:column; align-items:center;
     padding:20px 0; flex-shrink:0; transition:width 0.3s ease;
 }
-.sidebar:hover { width:220px; }
+.sidebar.expanded { width:220px; }
 
 .sidebar h2 {
     font-size:22px; font-family:'Poppins', sans-serif; font-weight:600; color:#fff;
@@ -22,7 +22,7 @@ body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
     transition:opacity 0.4s, transform 0.4s;
     opacity:0; transform:translateX(-20px);
 }
-.sidebar:hover h2 { opacity:1; transform:translateX(0); }
+.sidebar.expanded h2 { opacity:1; transform:translateX(0); }
 
 .sidebar button {
     width:100%; background:transparent; border:none; color:#fff;
@@ -32,11 +32,13 @@ body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
 }
 .sidebar button img { width:24px; height:24px; filter: invert(1); flex-shrink:0; transition:transform 0.3s; }
 .sidebar button span { display:inline-block; opacity:0; transform:translateX(-10px); transition:opacity 0.3s, transform 0.3s; }
-.sidebar:hover button span { opacity:1; transform:translateX(0); }
+.sidebar.expanded button span { opacity:1; transform:translateX(0); }
 
 .sidebar button:hover { background:#2a2a40; color:#fff; }
 
-.main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; transition:filter 0.3s; }
+.main.blur { filter: blur(4px) brightness(0.85); }
+
 header { height:60px; background:#fff; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; padding:0 20px; flex-shrink:0; }
 header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
 header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; border-radius:6px; cursor:pointer; }
@@ -81,12 +83,9 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 
 .toast { position:fixed; right:20px; bottom:20px; background:#222; color:#fff; padding:8px 12px; border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.3); display:none; z-index:60; }
 </style>
-<script type="module">
-// Seu script Firebase + funcionalidades permanece igual
-</script>
 </head>
 <body>
-<div class="sidebar">
+<div class="sidebar" id="sidebar">
     <h2 onclick="window.location.href='dashboard.html'">AMR ADV</h2>
     <button onclick="window.location.href='dashboard.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/dashboard.png"/><span>Dashboard</span></button>
     <button onclick="window.location.href='relatorios.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/combo-chart.png"/><span>Relatórios</span></button>
@@ -97,7 +96,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
     <button><img src="https://img.icons8.com/ios-filled/50/ffffff/settings.png"/><span>Configurações</span></button>
 </div>
 
-<div class="main">
+<div class="main" id="mainContent">
 <header>
 <h1>CRM</h1>
 <button id="btnAdd" class="btn primary">Adicionar Cliente</button>
@@ -146,5 +145,19 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 
 <div class="toast" id="toast"></div>
 <audio id="coinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-notification-2018.mp3" preload="auto"></audio>
+
+<script>
+const sidebar = document.getElementById('sidebar');
+const mainContent = document.getElementById('mainContent');
+
+sidebar.addEventListener('mouseenter', () => {
+    sidebar.classList.add('expanded');
+    mainContent.classList.add('blur');
+});
+sidebar.addEventListener('mouseleave', () => {
+    sidebar.classList.remove('expanded');
+    mainContent.classList.remove('blur');
+});
+</script>
 </body>
 </html>

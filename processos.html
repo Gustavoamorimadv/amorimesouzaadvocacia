@@ -88,14 +88,17 @@ async function carregarClientes() {
             const content = document.createElement("div");
             content.className = "card-content";
 
-            const ultimoMov = cliente.processo ? Object.values(cliente.processos || {}).map(p => p.ultimaMovimentacao).filter(Boolean).pop() : "-";
+            // Corrigido: pega a última movimentação de cliente.processos
+            const processosData = cliente.processos || {};
+            const ultimas = Object.values(processosData).map(p => p.ultimaMovimentacao).filter(Boolean);
+            const ultimaMov = ultimas.length ? ultimas[ultimas.length - 1] : "-";
 
             content.innerHTML = `
                 <h3>${cliente.nome}</h3>
                 <p>CPF: ${cliente.cpf||"-"}</p>
                 <p>Classe: ${cliente.classe||"-"}</p>
                 <p>Processo: ${cliente.processo||"-"}</p>
-                <p>Última Movimentação: ${ultimoMov || "-"}</p>
+                <p>Última Movimentação: ${ultimaMov}</p>
             `;
             card.appendChild(content);
 
@@ -166,16 +169,26 @@ processosForm.onsubmit = async function(e) {
 
     await updateDoc(docRef, updates);
 
-    // Atualiza histórico com arrayUnion
     for (const numero in historicoUpdates) {
         for (const mov of historicoUpdates[numero]) {
             await updateDoc(docRef, { [`processos.${numero}.historico`]: arrayUnion(mov) });
         }
     }
 
-    alert("Processos atualizados com histórico!");
+    // Atualiza modal e cards
+    for (const numero in historicoUpdates) {
+        const container = document.getElementById(`hist-${numero}`);
+        historicoUpdates[numero].forEach(mov => {
+            const div = document.createElement("div");
+            div.className = "hist-card";
+            div.innerHTML = `${mov.text}<span>${mov.data}</span>`;
+            container.appendChild(div);
+        });
+    }
+
+    alert("Processos atualizados!");
     modalBackdrop.style.display = "none";
-    carregarClientes(); // Recarrega cards para mostrar última movimentação
+    carregarClientes();
 };
 
 document.getElementById("btnCancel").onclick = () => { modalBackdrop.style.display = "none"; };

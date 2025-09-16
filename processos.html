@@ -18,7 +18,10 @@ body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; transiti
   font-size:22px; font-family:'Poppins', sans-serif; font-weight:600; color:#fff;
   letter-spacing:1px; margin-bottom:30px; text-align:center; cursor:pointer;
   width:100%; white-space:nowrap; overflow:hidden; transition:opacity 0.3s;
+  opacity:0;
 }
+.sidebar.expanded h2 { opacity:1; }
+
 .sidebar button {
   width:100%; background:transparent; border:none; color:#fff;
   display:flex; align-items:center; gap:15px; padding:12px 20px; margin:5px 0;
@@ -27,7 +30,7 @@ body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; transiti
 }
 .sidebar button img { width:28px; height:28px; filter: invert(1); flex-shrink:0; transition:transform 0.3s; }
 .sidebar button span { display:inline-block; opacity:0; transition:opacity 0.3s; font-weight:500; }
-.sidebar.expanded h2, .sidebar.expanded button span { opacity:1; }
+.sidebar.expanded button span { opacity:1; }
 .sidebar button:hover img { transform:scale(1.1); }
 .sidebar button:hover { background:#2a2a40; color:#fff; }
 

@@ -7,19 +7,34 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
+body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; transition:filter 0.3s; }
 
-.sidebar { width:80px; background:#1e1e2f; display:flex; flex-direction:column; align-items:center; padding:20px 0; flex-shrink:0; transition:width 0.3s; }
-.sidebar:hover { width:220px; }
-.sidebar h2 { font-size:22px; font-family:'Poppins', sans-serif; font-weight:600; color:#fff; letter-spacing:1px; margin-bottom:30px; text-align:center; cursor:pointer; width:100%; white-space:nowrap; overflow:hidden; transition:opacity 0.3s; }
-.sidebar button { width:100%; background:transparent; border:none; color:#fff; display:flex; align-items:center; gap:15px; padding:12px 20px; margin:5px 0; cursor:pointer; border-radius:10px; transition:background 0.2s, color 0.2s; font-size:14px; white-space:nowrap; overflow:hidden; }
+.sidebar {
+  width:80px; background:#1e1e2f; display:flex; flex-direction:column; align-items:center;
+  padding:20px 0; flex-shrink:0; transition:width 0.4s ease; position:relative; z-index:10;
+}
+.sidebar.expanded { width:220px; }
+.sidebar h2 {
+  font-size:22px; font-family:'Poppins', sans-serif; font-weight:600; color:#fff;
+  letter-spacing:1px; margin-bottom:30px; text-align:center; cursor:pointer;
+  width:100%; white-space:nowrap; overflow:hidden; transition:opacity 0.3s;
+}
+.sidebar button {
+  width:100%; background:transparent; border:none; color:#fff;
+  display:flex; align-items:center; gap:15px; padding:12px 20px; margin:5px 0;
+  cursor:pointer; border-radius:10px; transition:background 0.3s, color 0.3s; font-size:14px;
+  white-space:nowrap; overflow:hidden;
+}
+.sidebar button img { width:28px; height:28px; filter: invert(1); flex-shrink:0; transition:transform 0.3s; }
+.sidebar button span { display:inline-block; opacity:0; transition:opacity 0.3s; font-weight:500; }
+.sidebar.expanded h2, .sidebar.expanded button span { opacity:1; }
+.sidebar button:hover img { transform:scale(1.1); }
 .sidebar button:hover { background:#2a2a40; color:#fff; }
-.sidebar button img { width:24px; height:24px; filter: invert(1); flex-shrink:0; }
-.sidebar button span { display:inline-block; opacity:1; transition:opacity 0.3s; }
-.sidebar:not(:hover) h2, .sidebar:not(:hover) button span { opacity:0; }
 
-.main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
-header { height:60px; background:#fff; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; padding:0 20px; flex-shrink:0; }
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; transition:filter 0.3s; }
+.main.blur { filter:blur(4px) brightness(0.85); }
+
+header { height:60px; background:#fff; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; padding:0 20px; flex-shrink:0; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05);}
 header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
 header input { padding:6px 10px; border-radius:6px; border:1px solid #ccc; width:250px; }
 
@@ -67,6 +82,14 @@ const modalBackdrop = document.getElementById("modalBackdrop");
 const modalTitle = document.getElementById("modalTitle");
 const processosForm = document.getElementById("processosForm");
 const processosContainer = document.getElementById("processosContainer");
+const header = document.querySelector("header");
+const mainContent = document.querySelector(".main");
+const sidebar = document.querySelector(".sidebar");
+
+// Sidebar hover + blur
+sidebar.addEventListener('mouseenter', () => { sidebar.classList.add('expanded'); mainContent.classList.add('blur'); });
+sidebar.addEventListener('mouseleave', () => { sidebar.classList.remove('expanded'); mainContent.classList.remove('blur'); });
+
 const searchInput = document.createElement("input");
 searchInput.id = "searchInput";
 searchInput.placeholder = "Pesquisar clientes...";
@@ -74,8 +97,6 @@ searchInput.style.padding = "6px 10px";
 searchInput.style.borderRadius = "6px";
 searchInput.style.border = "1px solid #ccc";
 searchInput.style.width = "250px";
-
-const header = document.querySelector("header");
 header.appendChild(searchInput);
 
 let clienteAtual = null;
@@ -83,7 +104,6 @@ let clienteAtual = null;
 async function carregarClientes() {
     clientesContainer.innerHTML = "";
     const snapshot = await getDocs(collection(db,"clientes"));
-
     snapshot.forEach(docSnap => {
         const cliente = { id: docSnap.id, ...docSnap.data() };
         if (cliente.status === "fechado") {
@@ -110,17 +130,12 @@ async function carregarClientes() {
     });
 }
 
-// Filtro de pesquisa
 searchInput.addEventListener("input", () => {
     const termo = searchInput.value.toLowerCase();
     const cards = clientesContainer.querySelectorAll(".card");
     cards.forEach(card => {
         const nome = card.querySelector("h3").textContent.toLowerCase();
-        if (nome.includes(termo)) {
-            card.style.display = "flex";
-        } else {
-            card.style.display = "none";
-        }
+        card.style.display = nome.includes(termo) ? "flex" : "none";
     });
 });
 
@@ -134,7 +149,6 @@ async function abrirModal(cliente) {
     processosContainer.innerHTML = "";
 
     const processos = cliente.processo ? cliente.processo.split(",").map(p => p.trim()) : [];
-
     processos.forEach(numero => {
         const valor = clienteData?.processos?.[numero]?.valorCausa || "";
         const ultima = clienteData?.processos?.[numero]?.ultimaMovimentacao || "";
@@ -183,7 +197,6 @@ processosForm.onsubmit = async function(e) {
     });
 
     const docRef = doc(db,"clientes",clienteAtual.id);
-
     await updateDoc(docRef, updates);
 
     for (const numero in historicoUpdates) {

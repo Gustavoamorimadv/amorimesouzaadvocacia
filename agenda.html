@@ -57,7 +57,13 @@ body{display:flex;height:100vh;background:#f0f2f5;}
 .sidebar:not(:hover) button span{ opacity:0; }
 
 /* Main */
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  transition: filter 0.3s ease; /* transição suave do blur */
+}
 header{height:72px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid #ddd}
 header h1{font-size:22px;color:#1e1e2f;}
 header button{padding:8px 16px;background:#1e1e2f;color:#fff;border:none;border-radius:6px;cursor:pointer;}
@@ -215,6 +221,16 @@ function prevMonth(){ currentDate.setMonth(currentDate.getMonth()-1); renderCale
 function nextMonth(){ currentDate.setMonth(currentDate.getMonth()+1); renderCalendar(); }
 
 modalBackdrop.onclick = e=>{ if(e.target===modalBackdrop) closeModal(); }
+
+// === Blur Sidebar ===
+const sidebar = document.querySelector('.sidebar');
+const mainContent = document.querySelector('.main');
+sidebar.addEventListener('mouseenter', () => {
+  mainContent.style.filter = 'blur(4px) brightness(0.85)';
+});
+sidebar.addEventListener('mouseleave', () => {
+  mainContent.style.filter = 'none';
+});
 
 renderCalendar();
 </script>

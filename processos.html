@@ -37,8 +37,9 @@ header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
 .modal h3 { margin-bottom:12px; }
 .modal .row { margin-bottom:20px; }
 .modal input { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; margin-top:4px; }
-.hist-container { margin-top:10px; display:flex; flex-direction:column; gap:6px; }
-.hist-card { background:#f1f3f5; padding:6px 10px; border-radius:10px; box-shadow:0 2px 4px rgba(0,0,0,0.1); font-size:14px; color:#333; }
+.hist-container { margin-top:10px; display:flex; flex-direction:column; gap:6px; max-height:150px; overflow-y:auto; }
+.hist-card { background:#f1f3f5; padding:6px 10px; border-radius:10px; box-shadow:0 2px 4px rgba(0,0,0,0.1); font-size:14px; color:#333; display:flex; justify-content:space-between; }
+.hist-card span { font-size:12px; color:#888; margin-left:8px; }
 .modal .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
 .btn { padding:8px 12px; border-radius:6px; border:0; cursor:pointer; }
 .btn.primary { background:#1e1e2f; color:#fff; }
@@ -49,7 +50,7 @@ header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
 import { getFirestore, collection, getDocs, doc, updateDoc, getDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
-// 🔥 Configuração Firebase
+// Configuração Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
     authDomain: "dapapp-38637.firebaseapp.com",
@@ -122,13 +123,18 @@ async function abrirModal(cliente) {
             <input type="text" placeholder="Valor da causa" data-numero="${numero}" data-field="valorCausa" value="${valor}"/>
             <input type="text" placeholder="Última movimentação" data-numero="${numero}" data-field="ultimaMovimentacao" value="${ultima}"/>
             <div class="hist-container" id="hist-${numero}">
-                ${historico.map(mov => `<div class="hist-card">${mov}</div>`).join("")}
+                ${historico.map(mov => `<div class="hist-card">${mov.text}<span>${mov.data}</span></div>`).join("")}
             </div>
         `;
         processosContainer.appendChild(row);
     });
 
     modalBackdrop.style.display = "flex";
+}
+
+function agoraFormatado() {
+    const d = new Date();
+    return d.toLocaleString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" });
 }
 
 processosForm.onsubmit = async function(e) {
@@ -148,13 +154,12 @@ processosForm.onsubmit = async function(e) {
 
         if (field === "ultimaMovimentacao" && value !== "") {
             if (!historicoUpdates[numero]) historicoUpdates[numero] = [];
-            historicoUpdates[numero].push(value);
+            historicoUpdates[numero].push({ text: value, data: agoraFormatado() });
         }
     });
 
     const docRef = doc(db,"clientes",clienteAtual.id);
 
-    // Atualiza campos
     await updateDoc(docRef, updates);
 
     // Atualiza histórico com arrayUnion
@@ -164,18 +169,18 @@ processosForm.onsubmit = async function(e) {
         }
     }
 
-    // Atualiza cards no modal imediatamente
+    // Atualiza modal imediatamente
     for (const numero in historicoUpdates) {
         const container = document.getElementById(`hist-${numero}`);
         historicoUpdates[numero].forEach(mov => {
             const div = document.createElement("div");
             div.className = "hist-card";
-            div.textContent = mov;
+            div.innerHTML = `${mov.text}<span>${mov.data}</span>`;
             container.appendChild(div);
         });
     }
 
-    alert("Processos atualizados e histórico salvo!");
+    alert("Processos atualizados com histórico e timestamps!");
 };
 document.getElementById("btnCancel").onclick = () => { modalBackdrop.style.display = "none"; };
 

@@ -10,15 +10,55 @@
 /* Base */
 body { margin:0; font-family:'Segoe UI', sans-serif; background:#f0f2f5; display:flex; min-height:100vh; }
 
-/* Sidebar */
-.sidebar { width:80px; background:#1e1e2f; display:flex; flex-direction:column; align-items:center; padding:20px 0; transition:width 0.3s; }
+/* Sidebar com efeito blur */
+.sidebar {
+    width:80px;
+    background:rgba(30,30,47,0.8);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:20px 0;
+    transition:width 0.3s;
+    border-right:1px solid rgba(255,255,255,0.08);
+}
 .sidebar:hover { width:220px; }
-.sidebar .brand { color:#fff; font-weight:600; font-family:'Poppins',sans-serif; font-size:22px; margin-bottom:30px; cursor:pointer; text-align:center; width:100%; white-space:nowrap; overflow:hidden; transition:opacity 0.3s; }
-.sidebar button { width:100%; background:transparent; border:none; color:#fff; display:flex; align-items:center; gap:15px; padding:12px 20px; margin:5px 0; border-radius:10px; cursor:pointer; transition:background 0.2s; white-space:nowrap; overflow:hidden; font-size:14px; }
-.sidebar button:hover { background:#2e2e40; }
-.sidebar button img { width:24px; height:24px; filter: invert(1); }
+.sidebar .brand {
+    color:#fff;
+    font-weight:600;
+    font-family:'Poppins',sans-serif;
+    font-size:22px;
+    margin-bottom:30px;
+    cursor:pointer;
+    text-align:center;
+    width:100%;
+    white-space:nowrap;
+    overflow:hidden;
+    transition:opacity 0.3s;
+}
+.sidebar button {
+    width:100%;
+    background:transparent;
+    border:none;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    gap:15px;
+    padding:12px 20px;
+    margin:5px 0;
+    border-radius:10px;
+    cursor:pointer;
+    transition:background 0.2s;
+    white-space:nowrap;
+    overflow:hidden;
+    font-size:14px;
+}
+.sidebar button:hover { background:rgba(255,255,255,0.08); }
+.sidebar button img { width:24px; height:24px; filter:invert(1); }
 .sidebar button span { display:inline-block; opacity:1; transition:opacity 0.3s; }
-.sidebar:not(:hover) .brand, .sidebar:not(:hover) button span { opacity:0; }
+.sidebar:not(:hover) .brand,
+.sidebar:not(:hover) button span { opacity:0; }
 
 /* Main */
 .main { flex:1; display:flex; flex-direction:column; overflow:hidden; }

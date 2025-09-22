@@ -91,41 +91,23 @@ button:hover { background:#eaeaea; }
   filter:brightness(0.5);
 }
 
+/* TEXTO NO TOPO DO VÍDEO */
 .video-overlay {
   position:absolute;
-  top:0; left:0;
-  width:100%; height:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#fff;
+  top:0;
+  left:0;
+  width:100%;
+  padding:30px 0;
   text-align:center;
-  padding:20px;
-  z-index:1;
+  z-index:2;
 }
 
 .video-overlay h2 {
-  font-size:36px;
+  font-size:28px;
   font-family:'Poppins', sans-serif;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
-}
-
-.sound-toggle {
-  position:absolute;
-  top:20px;
-  right:20px;
-  z-index:2;
-  background:rgba(0,0,0,0.5);
+  font-weight:600;
   color:#fff;
-  border:none;
-  border-radius:50%;
-  width:40px;
-  height:40px;
-  font-size:18px;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
 }
 
 .toast {
@@ -163,19 +145,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const errorMsg = document.getElementById("errorMsg");
   const toast = document.getElementById("toast");
   const video = document.getElementById("bgVideo");
-  const soundToggle = document.getElementById("soundToggle");
 
   // Garante que o vídeo inicie corretamente
   video.muted = true;
   video.play().catch(() => {
     console.warn("Autoplay bloqueado, aguardando interação do usuário.");
     document.body.addEventListener("click", () => video.play(), { once: true });
-  });
-
-  // Botão de som on/off
-  soundToggle.addEventListener("click", () => {
-    video.muted = !video.muted;
-    soundToggle.textContent = video.muted ? "🔇" : "🔊";
   });
 
   function showToast(msg){
@@ -218,7 +193,6 @@ document.addEventListener("DOMContentLoaded", () => {
       <source src="video.mp4" type="video/mp4">
       Seu navegador não suporta vídeo.
     </video>
-    <button id="soundToggle" class="sound-toggle">🔇</button>
     <div class="video-overlay">
       <h2>Gerencie sua advocacia de forma inteligente</h2>
     </div>

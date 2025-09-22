@@ -7,72 +7,102 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+
 body {
   display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
+  min-height:100vh;
   background:#f0f2f5;
 }
-.login-container {
-  background:#fff;
-  padding:40px 30px;
-  border-radius:15px;
-  box-shadow:0 8px 25px rgba(0,0,0,.15);
-  max-width:380px;
-  width:100%;
+
+/* SIDEBAR LOGIN */
+.sidebar-login {
+  width:400px;
+  background:#1e1e2f;
   display:flex;
   flex-direction:column;
-  align-items:center;
-  gap:20px;
+  justify-content:center;
+  padding:40px;
+  color:#fff;
 }
-.login-container h1 {
+
+.sidebar-login h1 {
   font-family:'Poppins', sans-serif;
-  font-size:26px;
-  color:#1e1e2f;
-}
-.login-container p {
-  font-size:14px;
-  color:#666;
+  font-size:28px;
   margin-bottom:10px;
   text-align:center;
 }
+
+.sidebar-login p {
+  font-size:14px;
+  text-align:center;
+  margin-bottom:30px;
+  color:#bbb;
+}
+
 .input-group {
-  width:100%;
   display:flex;
   flex-direction:column;
-  gap:8px;
+  gap:15px;
 }
+
 .input-group input {
-  width:100%;
   padding:12px;
   border-radius:10px;
-  border:1px solid #ccc;
+  border:none;
   font-size:15px;
   outline:none;
-  transition:border-color 0.2s;
 }
-.input-group input:focus { border-color:#1e1e2f; }
 
 button {
-  width:100%;
   padding:12px;
-  background:#1e1e2f;
-  color:#fff;
+  background:#fff;
+  color:#1e1e2f;
   border:none;
   border-radius:10px;
   font-size:16px;
   cursor:pointer;
-  transition:background 0.3s;
+  transition:all 0.3s ease;
 }
-button:hover { background:#2a2a40; }
+button:hover { background:#eaeaea; }
 
 .error {
-  color:#c0392b;
+  color:#ff7675;
   font-size:13px;
   display:none;
-  margin-top:-10px;
 }
+
+.right-panel {
+  flex:1;
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding:40px;
+  text-align:center;
+}
+
+.right-panel h2 {
+  font-size:30px;
+  font-family:'Poppins', sans-serif;
+  color:#1e1e2f;
+  margin-bottom:15px;
+}
+
+.right-panel p {
+  font-size:16px;
+  max-width:420px;
+  color:#555;
+  margin-bottom:20px;
+}
+
+.right-panel img {
+  max-width:350px;
+  width:100%;
+  border-radius:15px;
+  box-shadow:0 6px 20px rgba(0,0,0,.1);
+}
+
 .toast {
   position:fixed;
   bottom:20px;
@@ -131,9 +161,9 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </head>
 <body>
-  <div class="login-container">
+  <div class="sidebar-login">
     <h1>AMR ADV</h1>
-    <p>Faça login para acessar seu CRM</p>
+    <p>Bem-vindo ao seu CRM. Faça login para continuar.</p>
     <form id="loginForm" class="input-group">
       <input type="email" id="email" placeholder="E-mail" required />
       <input type="password" id="password" placeholder="Senha" required />
@@ -141,6 +171,13 @@ document.addEventListener("DOMContentLoaded", () => {
       <button type="submit">Entrar</button>
     </form>
   </div>
+
+  <div class="right-panel">
+    <h2>Meu Aplicativo</h2>
+    <p>Gerencie seus clientes, processos e negociações de forma simples e rápida, tudo em um só lugar.</p>
+    <img src="https://img.icons8.com/external-flaticons-flat-flat-icons/512/external-crm-marketing-agency-flaticons-flat-flat-icons.png" alt="Meu Aplicativo">
+  </div>
+
   <div class="toast" id="toast"></div>
 </body>
 </html>

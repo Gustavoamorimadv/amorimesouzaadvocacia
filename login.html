@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - CRM AMR ADV</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+body {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  background:#f0f2f5;
+}
+.login-container {
+  background:#fff;
+  padding:40px 30px;
+  border-radius:15px;
+  box-shadow:0 8px 25px rgba(0,0,0,.15);
+  max-width:380px;
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:20px;
+}
+.login-container h1 {
+  font-family:'Poppins', sans-serif;
+  font-size:26px;
+  color:#1e1e2f;
+}
+.login-container p {
+  font-size:14px;
+  color:#666;
+  margin-bottom:10px;
+  text-align:center;
+}
+.input-group {
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.input-group input {
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  font-size:15px;
+  outline:none;
+  transition:border-color 0.2s;
+}
+.input-group input:focus { border-color:#1e1e2f; }
+
+button {
+  width:100%;
+  padding:12px;
+  background:#1e1e2f;
+  color:#fff;
+  border:none;
+  border-radius:10px;
+  font-size:16px;
+  cursor:pointer;
+  transition:background 0.3s;
+}
+button:hover { background:#2a2a40; }
+
+.error {
+  color:#c0392b;
+  font-size:13px;
+  display:none;
+  margin-top:-10px;
+}
+.toast {
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#222;
+  color:#fff;
+  padding:8px 12px;
+  border-radius:8px;
+  display:none;
+}
+</style>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
+    authDomain: "dapapp-38637.firebaseapp.com",
+    projectId: "dapapp-38637",
+    storageBucket: "dapapp-38637.appspot.com",
+    messagingSenderId: "628852295313",
+    appId: "1:628852295313:web:1234567890abcdef123456"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("loginForm");
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+  const errorMsg = document.getElementById("errorMsg");
+  const toast = document.getElementById("toast");
+
+  function showToast(msg){
+    toast.innerText=msg;
+    toast.style.display='block';
+    clearTimeout(toast._t);
+    toast._t=setTimeout(()=>toast.style.display='none',3000);
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorMsg.style.display = "none";
+    try {
+      await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+      showToast("Login realizado com sucesso!");
+      setTimeout(() => window.location.href = "crm.html", 1000);
+    } catch (error) {
+      errorMsg.innerText = "E-mail ou senha inválidos.";
+      errorMsg.style.display = "block";
+    }
+  });
+});
+</script>
+</head>
+<body>
+  <div class="login-container">
+    <h1>AMR ADV</h1>
+    <p>Faça login para acessar seu CRM</p>
+    <form id="loginForm" class="input-group">
+      <input type="email" id="email" placeholder="E-mail" required />
+      <input type="password" id="password" placeholder="Senha" required />
+      <span id="errorMsg" class="error"></span>
+      <button type="submit">Entrar</button>
+    </form>
+  </div>
+  <div class="toast" id="toast"></div>
+</body>
+</html>

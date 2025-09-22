@@ -11,7 +11,7 @@
 body {
   display:flex;
   min-height:100vh;
-  background:#f0f2f5;
+  background:#000;
 }
 
 /* SIDEBAR LOGIN */
@@ -23,6 +23,8 @@ body {
   justify-content:center;
   padding:40px;
   color:#fff;
+  z-index:2;
+  position:relative;
 }
 
 .sidebar-login h1 {
@@ -71,36 +73,41 @@ button:hover { background:#eaeaea; }
   display:none;
 }
 
-.right-panel {
+/* ÁREA DO VÍDEO */
+.video-container {
   flex:1;
-  background:#fff;
+  position:relative;
+  overflow:hidden;
+}
+
+.video-container video {
+  position:absolute;
+  top:50%;
+  left:50%;
+  min-width:100%;
+  min-height:100%;
+  transform:translate(-50%, -50%);
+  object-fit:cover;
+  filter:brightness(0.5); /* escurece para destacar o login */
+}
+
+.video-overlay {
+  position:absolute;
+  top:0; left:0;
+  width:100%; height:100%;
   display:flex;
-  flex-direction:column;
-  justify-content:center;
   align-items:center;
-  padding:40px;
+  justify-content:center;
+  color:#fff;
   text-align:center;
+  padding:20px;
+  z-index:1;
 }
 
-.right-panel h2 {
-  font-size:30px;
+.video-overlay h2 {
+  font-size:36px;
   font-family:'Poppins', sans-serif;
-  color:#1e1e2f;
-  margin-bottom:15px;
-}
-
-.right-panel p {
-  font-size:16px;
-  max-width:420px;
-  color:#555;
-  margin-bottom:20px;
-}
-
-.right-panel img {
-  max-width:350px;
-  width:100%;
-  border-radius:15px;
-  box-shadow:0 6px 20px rgba(0,0,0,.1);
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
 }
 
 .toast {
@@ -172,10 +179,15 @@ document.addEventListener("DOMContentLoaded", () => {
     </form>
   </div>
 
-  <div class="right-panel">
-    <h2>Meu Aplicativo</h2>
-    <p>Gerencie seus clientes, processos e negociações de forma simples e rápida, tudo em um só lugar.</p>
-    <img src="https://img.icons8.com/external-flaticons-flat-flat-icons/512/external-crm-marketing-agency-flaticons-flat-flat-icons.png" alt="Meu Aplicativo">
+  <!-- VÍDEO EM TELA CHEIA NO RESTANTE DA PÁGINA -->
+  <div class="video-container">
+    <video autoplay muted loop playsinline>
+      <source src="meu-video.mp4" type="video/mp4">
+      Seu navegador não suporta vídeo.
+    </video>
+    <div class="video-overlay">
+      <h2>Gerencie sua advocacia de forma inteligente</h2>
+    </div>
   </div>
 
   <div class="toast" id="toast"></div>

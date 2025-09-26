@@ -1,181 +1,217 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Processos - CRM AMR ADV</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
-<style>
-* { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amorim & Souza Advocacia</title>
+  <link rel="icon" href="hhttps://img.icons8.com/?size=100&id=65200&format=png&color=000000" type="image/png">
+  <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=65200&format=png&color=000000">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Roboto', sans-serif; background: #ffffff; color: #333; }
 
-.sidebar { width:80px; background:#1e1e2f; display:flex; flex-direction:column; align-items:center; padding:20px 0; flex-shrink:0; transition:width 0.3s; }
-.sidebar:hover { width:220px; }
-.sidebar h2 { font-size:22px; font-family:'Poppins', sans-serif; font-weight:600; color:#fff; letter-spacing:1px; margin-bottom:30px; text-align:center; cursor:pointer; width:100%; white-space:nowrap; overflow:hidden; transition:opacity 0.3s; }
-.sidebar button { width:100%; background:transparent; border:none; color:#fff; display:flex; align-items:center; gap:15px; padding:12px 20px; margin:5px 0; cursor:pointer; border-radius:10px; transition:background 0.2s, color 0.2s; font-size:14px; white-space:nowrap; overflow:hidden; }
-.sidebar button:hover { background:#2a2a40; color:#fff; }
-.sidebar button img { width:24px; height:24px; filter: invert(1); flex-shrink:0; }
-.sidebar button span { display:inline-block; opacity:1; transition:opacity 0.3s; }
-.sidebar:not(:hover) h2, .sidebar:not(:hover) button span { opacity:0; }
+    header {
+      background-image: url('https://images.squarespace-cdn.com/content/v1/581c7148be6594d155f50234/1581617132961-PNOIJYH2ZYILG6JP9XRV/macroarq_arquitetura_interiores_corporativo_projeto_escritorio_advocacia_hall_entrada_piso_elevado_carpete_madeira_cumaru_divisoria_serralheria_vidro_funcional_clean.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      color: white;
+      padding: 100px 20px 60px;
+      text-align: center;
+      position: relative;
+    }
+    header::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 1;
+    }
+    html { scroll-behavior: smooth; overflow-x: hidden; }
+    body { font-family: 'Roboto', sans-serif; background: #ffffff; color: #333; overflow-x: hidden; }
+    header { background-image: url('https://images.squarespace-cdn.com/content/v1/581c7148be6594d155f50234/1581617132961-PNOIJYH2ZYILG6JP9XRV/macroarq_arquitetura_interiores_corporativo_projeto_escritorio_advocacia_hall_entrada_piso_elevado_carpete_madeira_cumaru_divisoria_serralheria_vidro_funcional_clean.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat; color: white; padding: 120px 20px 80px; text-align: center; position: relative; }
+    header::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3); z-index: 1; }
+    header h1, header p { position: relative; z-index: 2; }
+    header h1 a {
+      color: white;
+      text-decoration: none;
+      font-size: 2em;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    header img { width: 40px; }
 
-.main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
-header { height:60px; background:#fff; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center; padding:0 20px; flex-shrink:0; }
-header h1 { font-size:22px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
+    nav {
+      background: #002244;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      overflow-x: auto;
+    }
+    nav a {
+      display: inline-block;
+      padding: 15px 16px;
+      color: white;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    header h1 a { color: white; text-decoration: none; font-size: 2.8em; font-family: 'Montserrat', sans-serif; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; transition: color 0.3s, transform 0.3s; display: inline-flex; align-items: center; gap: 10px; }
+    header h1 a:hover { color: #ccc; transform: scale(1.05); }
+    header img { width: 45px; }
+    header p { margin-top: 12px; font-size: 18px; }
+    nav { background: #002244; text-align: center; position: sticky; top: 0; z-index: 999; overflow-x: hidden; }
+    nav a { display: inline-block; padding: 15px 20px; color: white; text-decoration: none; transition: background 0.3s; }
+    nav a:hover { background: #004080; }
 
-.kanban-container { flex:1; overflow-y:auto; padding:20px; }
-.kanban { display:flex; flex-wrap:wrap; gap:20px; }
-.card { display:flex; background:#fff; border-radius:15px; box-shadow:0 12px 30px rgba(0,0,0,0.12); cursor:pointer; overflow:hidden; transition:0.3s; min-height:160px; flex-direction:row; position:relative; width:320px; }
-.card:hover { transform:scale(1.03); }
-.card .color-bar { width:8px; height:100%; border-radius:15px 0 0 15px; }
-.card-content { padding:20px; flex:1; display:flex; flex-direction:column; justify-content:center; }
-.card h3 { font-size:20px; margin-bottom:6px; color:#333; }
-.card p { font-size:14px; color:#555; margin:3px 0; }
-.fechado .color-bar { background:#2ecc71; }
+    section {
+      padding: 80px 15px;
+      text-align: center;
+    }
+    h2 {
+      font-size: 28px;
+      color: #003366;
+      margin-bottom: 20px;
+    }
 
-.modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); justify-content:center; align-items:center; z-index:50; }
-.modal { background:#fff; padding:18px; border-radius:15px; min-width:320px; max-width:500px; box-shadow:0 8px 30px rgba(0,0,0,.25); }
-.modal h3 { margin-bottom:12px; }
-.modal .row { margin-bottom:10px; }
-.modal input { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; }
-.modal .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
-.btn { padding:8px 12px; border-radius:6px; border:0; cursor:pointer; }
-.btn.primary { background:#1e1e2f; color:#fff; }
-.btn.ghost { background:#f1f3f5; }
-</style>
+    .area-boxes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+    .box {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      width: 100%;
+      max-width: 300px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .box:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    }
+    .box img {
+      width: 50px;
+      margin-bottom: 15px;
+    }
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+    .testimonials {
+      background: #f2f2f2;
+      padding: 60px 15px;
+    }
+    .testimonial {
+      max-width: 500px;
+      margin: 0 auto 30px;
+      font-style: italic;
+    }
+    .testimonial span {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
 
-// 🔥 Configuração Firebase
-const firebaseConfig = {
-    apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
-    authDomain: "dapapp-38637.firebaseapp.com",
-    projectId: "dapapp-38637",
-    storageBucket: "dapapp-38637.appspot.com",
-    messagingSenderId: "628852295313",
-    appId: "1:628852295313:web:1234567890abcdef123456"
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+    .acompanhamento-button {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 12px 24px;
+      background: #003366;
+      color: white;
+      font-weight: bold;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+    .acompanhamento-button:hover {
+      background: #0055aa;
+    }
 
-const clientesContainer = document.getElementById("clientesContainer");
-const modalBackdrop = document.getElementById("modalBackdrop");
-const modalTitle = document.getElementById("modalTitle");
-const processosForm = document.getElementById("processosForm");
-const processosContainer = document.getElementById("processosContainer");
+    .back-to-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #003366;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 50px;
+      font-size: 16px;
+      text-decoration: none;
+      display: none;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      z-index: 999;
+    }
+    .back-to-top:hover {
+      background: #0055aa;
+    }
 
-let clienteAtual = null;
+    footer {
+      background: #003366;
+      color: white;
+      text-align: center;
+      padding: 40px 20px;
+      font-size: 14px;
+    }
+    footer a {
+      color: white;
+      text-decoration: underline;
+    }
 
-async function carregarClientes() {
-    clientesContainer.innerHTML = "";
-    const snapshot = await getDocs(collection(db,"clientes"));
-
-    snapshot.forEach(docSnap => {
-        const cliente = { id: docSnap.id, ...docSnap.data() };
-        if (cliente.status === "fechado") {
-            const card = document.createElement("div");
-            card.className = "card fechado";
-            card.onclick = () => abrirModal(cliente);
-
-            const colorBar = document.createElement("div");
-            colorBar.className = "color-bar";
-            card.appendChild(colorBar);
-
-            const content = document.createElement("div");
-            content.className = "card-content";
-            content.innerHTML = `
-                <h3>${cliente.nome}</h3>
-                <p>CPF: ${cliente.cpf||"-"}</p>
-                <p>Classe: ${cliente.classe||"-"}</p>
-                <p>Processo: ${cliente.processo||"-"}</p>
-            `;
-            card.appendChild(content);
-
-            clientesContainer.appendChild(card);
-        }
-    });
-}
-
-function abrirModal(cliente) {
-    clienteAtual = cliente;
-    modalTitle.textContent = `Processos de ${cliente.nome}`;
-    processosContainer.innerHTML = "";
-
-    const processos = cliente.processo ? cliente.processo.split(",").map(p => p.trim()) : [];
-
-    processos.forEach(numero => {
-        const row = document.createElement("div");
-        row.className = "row";
-        row.innerHTML = `
-            <p><b>Nº ${numero}</b></p>
-            <input type="text" placeholder="Valor da causa" data-numero="${numero}" data-field="valorCausa"/>
-            <input type="text" placeholder="Última movimentação" data-numero="${numero}" data-field="ultimaMovimentacao"/>
-        `;
-        processosContainer.appendChild(row);
-    });
-
-    modalBackdrop.style.display = "flex";
-}
-
-processosForm.onsubmit = async function(e) {
-    e.preventDefault();
-    if (!clienteAtual) return;
-
-    const updates = {};
-    processosContainer.querySelectorAll("input").forEach(input => {
-        const numero = input.dataset.numero;
-        const field = input.dataset.field;
-        const value = input.value;
-        if (!updates[`processos.${numero}`]) updates[`processos.${numero}`] = {};
-        updates[`processos.${numero}`][field] = value;
-    });
-
-    const docRef = doc(db,"clientes",clienteAtual.id);
-    await updateDoc(docRef, updates);
-
-    alert("Processos atualizados com histórico!");
-    modalBackdrop.style.display = "none";
-};
-
-document.getElementById("btnCancel").onclick = () => {
-    modalBackdrop.style.display = "none";
-};
-
-carregarClientes();
-</script>
+    @media (max-width: 600px) {
+      header h1 a { font-size: 1.5em; }
+      nav a { padding: 12px; font-size: 13px; }
+      h2 { font-size: 24px; }
+      .testimonial { font-size: 14px; }
+    }
+    section { padding: 120px 20px; text-align: center; overflow-x: hidden; }
+    h2 { font-size: 32px; color: #003366; margin-bottom: 20px; }
+    .area-boxes { display: flex; justify-content: center; flex-wrap: wrap; gap: 30px; margin-top: 40px; }
+    .box { background: white; border-radius: 12px; padding: 30px; width: 300px; box-shadow: 0 6px 15px rgba(0,0,0,0.1); text-align: center; text-decoration: none; color: inherit; transition: transform 0.3s, box-shadow 0.3s; }
+    .box:hover { transform: translateY(-8px); box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
+    .box img { width: 60px; margin-bottom: 20px; }
+    .testimonials { background: #f2f2f2; padding: 80px 20px; }
+    .testimonials h2 { color: #003366; margin-bottom: 40px; }
+    .testimonial { max-width: 600px; margin: 0 auto 30px; font-style: italic; }
+    .testimonial span { display: block; margin-top: 10px; font-weight: bold; }
+    .back-to-top { position: fixed; bottom: 30px; right: 30px; background: #003366; color: white; padding: 10px 15px; border-radius: 50px; font-size: 16px; text-decoration: none; display: none; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 999; }
+    .back-to-top:hover { background: #0055aa; }
+    .acompanhamento-button { display: inline-block; margin-top: 40px; padding: 15px 30px; background: #003366; color: white; font-weight: bold; border-radius: 8px; text-decoration: none; transition: background 0.3s; }
+    .acompanhamento-button:hover { background: #0055aa; }
+    footer { background: #003366; color: white; text-align: center; padding: 50px 20px; font-size: 14px; overflow-x: hidden; }
+    footer a { color: white; text-decoration: underline; }
+  </style>
 </head>
 <body>
-<div class="sidebar">
-    <h2 onclick="window.location.href='dashboard.html'">AMR ADV</h2>
-    <button onclick="window.location.href='dashboard.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/dashboard.png"/><span>Dashboard</span></button>
-    <button onclick="window.location.href='relatorios.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/combo-chart.png"/><span>Relatórios</span></button>
-    <button onclick="window.location.href='agenda.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/calendar.png"/><span>Agenda</span></button>
-    <button onclick="window.location.href='contatos.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/contacts.png"/><span>Contatos</span></button>
-    <button><img src="https://img.icons8.com/ios-filled/50/ffffff/settings.png"/><span>Configurações</span></button>
-</div>
+@@ -178,7 +52,7 @@ <h1>
+    <a href="#areas">Áreas de Atuação</a>
+    <a href="contato.html">Contato</a>
+    <a href="enderecos.html">Endereços</a>
+    <a href="acompanhamento.html">Acompanhamento</a>
+    <a href="acompanhamento.html">Acompanhamento Processual</a>
+  </nav>
 
-<div class="main">
-<header>
-    <h1>Processos</h1>
-</header>
+  <section id="sobre">
+@@ -210,6 +84,7 @@ <h3>Direito Previdenciário</h3>
+        <p>Aposentadorias, pensões, revisões e benefícios do INSS.</p>
+      </a>
+    </div>
 
-<div class="kanban-container">
-    <div class="kanban" id="clientesContainer"></div>
-</div>
-</div>
+    <a href="acompanhamento.html" class="acompanhamento-button">Acompanhamento Processual</a>
+  </section>
 
-<div class="modal-backdrop" id="modalBackdrop">
-<div class="modal">
-    <h3 id="modalTitle">Processos</h3>
-    <form id="processosForm">
-        <div id="processosContainer"></div>
-        <div class="actions">
-            <button type="submit" class="btn primary">Salvar</button>
-            <button type="button" class="btn ghost" id="btnCancel">Cancelar</button>
-        </div>
-    </form>
-</div>
-</div>
+@@ -239,3 +114,4 @@ <h2>O que dizem nossos clientes</h2>
+  </script>
 </body>
 </html>

@@ -6,6 +6,7 @@
 <title>Discador CRM - AMR ADV</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
 <style>
+/* === Mantive seu CSS === */
 * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
 body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
 .sidebar { width:80px; background:#1e1e2f; display:flex; flex-direction:column; align-items:center; padding:20px 0; flex-shrink:0; transition:width 0.4s ease; position:relative; z-index:10; }
@@ -85,16 +86,16 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
-    authDomain: "dapapp-38637.firebaseapp.com",
+    apiKey: "SUA_API_KEY",
+    authDomain: "SEU_PROJETO.firebaseapp.com",
     projectId: "dapapp-38637",
-    storageBucket: "dapapp-38637.appspot.com",
-    messagingSenderId: "628852295313",
-    appId: "1:628852295313:web:INSERIR_SEU_APP_ID"
+    storageBucket: "SEU_PROJETO.appspot.com",
+    messagingSenderId: "SEU_SENDER_ID",
+    appId: "SEU_APP_ID"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -106,21 +107,29 @@ function showToast(msg){ toastEl.innerText=msg; toastEl.style.display='block'; c
 
 let clientes=[], currentUser=null;
 
-// Função para mostrar todos os clientes nas colunas
-function mostrarClientes(){
-    // Limpa colunas
+// Carrega clientes do Firestore
+async function carregarClientes(){
+    if(!currentUser) return;
+    const q = query(collection(db,"clientes"), where("userId","==",currentUser.uid));
+    const snap = await getDocs(q);
+    clientes = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    renderKanban();
+}
+
+// Renderiza o Kanban
+function renderKanban(){
     ['lista-fria','negociacao','contrato-assinado','fechado'].forEach(id=>{
         const col = document.getElementById(id);
-        col.innerHTML = `<h2>${document.getElementById(id).querySelector('h2').innerText}</h2>`;
+        col.innerHTML=`<h2>${col.querySelector('h2').innerText}</h2>`;
     });
-
-    if(clientes.length===0) return;
 
     clientes.forEach(cliente=>{
         const status = cliente.status || 'lista-fria';
         const col = document.getElementById(status);
         const card = document.createElement('div');
         card.className = `card ${status}`;
+        card.draggable = true;
+        card.dataset.id = cliente.id;
         card.innerHTML = `<div class="color-bar"></div>
         <div class="card-content">
             <h3>${cliente.nome}</h3>
@@ -134,33 +143,49 @@ function mostrarClientes(){
         </div>`;
         col.appendChild(card);
     });
+
+    addDragAndDrop();
 }
 
-async function carregarClientes(){
-    if(!currentUser) return;
-    try{
-        const q = query(collection(db,"clientes"), where("userId","==",currentUser.uid));
-        const snap = await getDocs(q);
-        clientes = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        mostrarClientes();
-    } catch(e){
-        showToast('Erro ao carregar clientes');
-        console.error(e);
-    }
+// Drag and Drop
+function addDragAndDrop(){
+    const cards = document.querySelectorAll('.card');
+    const columns = document.querySelectorAll('.column');
+
+    cards.forEach(card=>{
+        card.addEventListener('dragstart', e=>{
+            e.dataTransfer.setData('text/plain', card.dataset.id);
+        });
+    });
+
+    columns.forEach(col=>{
+        col.addEventListener('dragover', e=> e.preventDefault());
+        col.addEventListener('drop', async e=>{
+            e.preventDefault();
+            const id = e.dataTransfer.getData('text/plain');
+            const card = document.querySelector(`.card[data-id='${id}']`);
+            col.appendChild(card);
+
+            // Atualiza status no Firestore
+            const clienteRef = doc(db,'clientes',id);
+            await updateDoc(clienteRef, { status: col.id });
+            clientes = clientes.map(c => c.id===id ? {...c, status: col.id} : c);
+        });
+    });
 }
 
-function ligar(numero){ if(!numero){ showToast("Número não informado"); return; } window.open(`tel:${numero.replace(/\D/g,'')}`); }
-function whatsapp(numero){ if(!numero){ showToast("Número não informado"); return; } window.open(`https://wa.me/55${numero.replace(/\D/g,'')}`,'_blank'); }
+// Discador
+function ligar(numero){ if(!numero){ showToast("Número não informado"); return; } fetch('/call', { method:'POST', body:JSON.stringify({ numero }) }); }
+function whatsapp(numero){ if(!numero){ showToast("Número não informado"); return; } fetch('/whatsapp', { method:'POST', body:JSON.stringify({ numero }) }); }
 
-// Detecta usuário logado corretamente
-auth.onAuthStateChanged(user=>{
-    if(user){
-        currentUser = user;
-        carregarClientes();
-    } else {
-        // Só redireciona se não estiver logado
-        window.location.href='login.html';
-    }
+// Busca e filtro
+document.getElementById('searchInput').addEventListener('input', ()=>{ renderKanban(); });
+document.getElementById('filterStatus').addEventListener('change', ()=>{ renderKanban(); });
+
+// Autenticação
+onAuthStateChanged(auth, user=>{
+    if(user){ currentUser=user; carregarClientes(); }
+    else window.location.href='login.html';
 });
 </script>
 

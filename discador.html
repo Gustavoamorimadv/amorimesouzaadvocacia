@@ -53,7 +53,7 @@
             border: 2px dashed #007bff;
         }
         .column.drag-over {
-            background: #e0e6ec; /* Um fundo mais claro para indicar que a coluna está pronta para receber */
+            background: #e0e6ec;
             border: 2px dashed #007bff;
         }
 
@@ -65,14 +65,14 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.7);
-            display: none; /* Inicia oculto */
+            display: none;
             justify-content: center;
             align-items: center;
             z-index: 50;
             padding: 20px;
         }
         .dialer-mode-overlay.active {
-            display: flex; /* Ativado pelo JS */
+            display: flex;
         }
         .dialer-card-display {
             background: #fff;
@@ -216,7 +216,6 @@
     let dialerQueue = [];
     let currentClientIndex = -1;
 
-    // Carrega clientes do Firestore
     async function carregarClientes(){
         if(!currentUser) {
             console.log("Usuário não autenticado. Não é possível carregar clientes.");
@@ -233,7 +232,6 @@
         }
     }
 
-    // Renderiza o Kanban
     function renderKanban(){
         ['lista-fria','negociacao','contrato-assinado','fechado'].forEach(id=>{
             const col = document.getElementById(id);
@@ -245,8 +243,8 @@
 
         clientes.filter(cliente => {
             const matchesSearch = searchTerm === '' ||
-                                 cliente.nome.toLowerCase().includes(searchTerm) ||
-                                 (cliente.cpf && cliente.cpf.includes(searchTerm));
+                                   cliente.nome.toLowerCase().includes(searchTerm) ||
+                                   (cliente.cpf && cliente.cpf.includes(searchTerm));
             const matchesStatus = filterStatus === '' || (cliente.status === filterStatus);
             return matchesSearch && matchesStatus;
         }).forEach(cliente => {
@@ -278,7 +276,6 @@
         addDragAndDrop();
     }
 
-    // Drag and Drop
     function addDragAndDrop(){
         const cards = document.querySelectorAll('.card');
         const columns = document.querySelectorAll('.column');
@@ -327,16 +324,15 @@
                     } catch (error) {
                         console.error("Erro ao atualizar status do cliente:", error);
                         showToast("Erro ao atualizar status.");
-                        document.getElementById(oldStatus).appendChild(card); // Reverte em caso de erro
-                        card.classList.remove(newStatus); // Remove a nova classe
-                        card.classList.add(oldStatus); // Adiciona a antiga de volta
+                        document.getElementById(oldStatus).appendChild(card);
+                        card.classList.remove(newStatus);
+                        card.classList.add(oldStatus);
                     }
                 }
             });
         });
     }
 
-    // === Funções do Discador ===
     const callTwilioFunction = httpsCallable(functions, 'dialer');
 
     window.ligarManual = async function(numerosString){
@@ -352,8 +348,7 @@
 
         showToast("Iniciando chamada manual...");
         try {
-            // A sua função espera 'to' no formato '+55NUMERO'
-            const formattedNumber = "+55" + numeros[0].replace(/\D/g, ''); 
+            const formattedNumber = "+55" + numeros[0].replace(/\D/g, '');
             const result = await callTwilioFunction({ to: formattedNumber });
             console.log("SID da chamada Twilio:", result.data.sid);
             showToast("Chamada manual iniciada com sucesso!");
@@ -362,7 +357,6 @@
             showToast(`Erro ao fazer chamada manual: ${error.message}`);
         }
     }
-
 
     window.whatsapp = function(numerosString){
         if(!numerosString){
@@ -374,13 +368,11 @@
             showToast("Número(s) inválido(s)");
             return;
         }
-        // Para WhatsApp, o número deve ser apenas os dígitos, sem o '+' e outros caracteres
-        const formattedNumber = numeros[0].replace(/\D/g, ''); 
+        const formattedNumber = numeros[0].replace(/\D/g, '');
         window.open(`https://api.whatsapp.com/send?phone=${formattedNumber}`, '_blank');
         showToast("Redirecionando para o WhatsApp...");
     }
 
-    // === Lógica do Modo Discador ===
     let isDialerActive = false;
 
     startDialerButton.addEventListener('click', () => {
@@ -410,15 +402,20 @@
         dialerOverlay.classList.remove('active');
         dialerQueue = [];
         currentClientIndex = -1;
+        currentDialerCard.innerHTML = `
+            <h2>Nenhum cliente selecionado</h2>
+            <p>Aguardando o início do discador.</p>
+            <div class="dialer-actions">
+                <button class="call-button" id="dialerCallButton" disabled>Ligar</button>
+                <button class="next-button" id="dialerNextButton" disabled>Próximo</button>
+                <button class="stop-button" id="dialerStopButton">Parar Discador</button>
+            </div>
+            <div class="dialer-status" id="dialerStatusMessage"></div>
+        `;
+        setupDialerListeners();
     }
 
-    function updateDialerButtonsListeners() {
-        document.querySelectorAll('.dialer-actions button').forEach(btn => {
-            // Remove listeners antigos para evitar duplicação
-            const newBtn = btn.cloneNode(true);
-            btn.parentNode.replaceChild(newBtn, btn);
-        });
-
+    function setupDialerListeners() {
         const dialerCallButton = document.getElementById('dialerCallButton');
         const dialerNextButton = document.getElementById('dialerNextButton');
         const dialerStopButton = document.getElementById('dialerStopButton');
@@ -441,8 +438,7 @@
                 document.getElementById('dialerStatusMessage').innerText = "Iniciando chamada, aguarde...";
 
                 try {
-                    // Formata o número para o padrão E.164 (+55NUMERO)
-                    const formattedNumber = "+55" + numeros[0].replace(/\D/g, ''); 
+                    const formattedNumber = "+55" + numeros[0].replace(/\D/g, '');
                     const result = await callTwilioFunction({ to: formattedNumber });
                     console.log("SID da chamada Twilio:", result.data.sid);
                     showToast("Discagem iniciada! A Twilio tentará conectar você.");
@@ -483,7 +479,7 @@
                 </div>
                 <div class="dialer-status" id="dialerStatusMessage">Cliente ${currentClientIndex + 1} de ${dialerQueue.length}</div>
             `;
-            updateDialerButtonsListeners();
+            setupDialerListeners();
             
             if (currentClientIndex === dialerQueue.length - 1) {
                 document.getElementById('dialerNextButton').innerText = "Fim da Lista";
@@ -498,15 +494,13 @@
                 </div>
                 <div class="dialer-status" id="dialerStatusMessage"></div>
             `;
-            updateDialerButtonsListeners();
+            setupDialerListeners();
         }
     }
 
-    // Busca e filtro
     document.getElementById('searchInput').addEventListener('input', renderKanban);
     document.getElementById('filterStatus').addEventListener('change', renderKanban);
 
-    // Autenticação Firebase
     onAuthStateChanged(auth, (user) => {
         if (user) {
             currentUser = user;
@@ -518,7 +512,7 @@
         }
     });
 
-    updateDialerButtonsListeners();
+    setupDialerListeners();
 </script>
 
 </body>

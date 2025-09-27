@@ -174,6 +174,7 @@
     import { getFirestore, collection, getDocs, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
     import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-functions.js";
+
     // Suas configurações do Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
@@ -183,23 +184,28 @@
         messagingSenderId: "628852295313",
         appId: "1:628852295313:web:INSERIR_SEU_APP_ID"
     };
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
     const functions = getFunctions(app);
+
     const toastEl = document.getElementById('toast');
     const dialerOverlay = document.getElementById('dialerOverlay');
     const currentDialerCard = document.getElementById('currentDialerCard');
     const startDialerButton = document.getElementById('startDialerButton');
+
     function showToast(msg){
         toastEl.innerText = msg;
         toastEl.style.display = 'block';
         clearTimeout(toastEl._t);
         toastEl._t = setTimeout(() => toastEl.style.display = 'none', 3000);
     }
+
     let clientes = [], currentUser = null;
     let dialerQueue = [];
     let currentClientIndex = -1;
+
     async function carregarClientes(){
         if(!currentUser) {
             console.log("Usuário não autenticado. Não é possível carregar clientes.");
@@ -215,6 +221,7 @@
             showToast("Erro ao carregar clientes.");
         }
     }
+
     function renderKanban(){
         ['lista-fria','negociacao','contrato-assinado','fechado'].forEach(id=>{
             const col = document.getElementById(id);
@@ -254,6 +261,7 @@
         });
         addDragAndDrop();
     }
+
     function addDragAndDrop(){
         const cards = document.querySelectorAll('.card');
         const columns = document.querySelectorAll('.column');
@@ -302,8 +310,10 @@
             });
         });
     }
+
     const makeDialerCallFunction = httpsCallable(functions, 'makeDialerCall');
     const sendWhatsappMessageFunction = httpsCallable(functions, 'sendWhatsappMessage');
+
     window.ligarManual = async function(numerosString){
         if(!numerosString){
             showToast("Número(s) não informado(s)");
@@ -328,6 +338,7 @@
             showToast(`Erro ao fazer chamada manual: ${error.message}`);
         }
     }
+
     window.whatsapp = async function(numerosString){
         if(!numerosString){
             showToast("Número(s) não informado(s)");
@@ -348,6 +359,7 @@
             showToast(`Erro ao enviar WhatsApp: ${error.message}`);
         }
     }
+
     startDialerButton.addEventListener('click', () => {
         dialerQueue = clientes.filter(c => c.status === 'lista-fria');
         if (dialerQueue.length === 0) {
@@ -358,6 +370,7 @@
         dialerOverlay.classList.add('active');
         loadNextClient();
     });
+
     function loadNextClient() {
         currentClientIndex++;
         if (currentClientIndex < dialerQueue.length) {
@@ -375,22 +388,19 @@
                 </div>
                 <div class="dialer-status" id="dialerStatusMessage">Cliente ${currentClientIndex + 1} de ${dialerQueue.length}</div>
             `;
-            const dialerCallButton = document.getElementById('dialerCallButton');
-            const dialerNextButton = document.getElementById('dialerNextButton');
-            const dialerStopButton = document.getElementById('dialerStopButton');
-            const dialerStatusMessage = document.getElementById('dialerStatusMessage');
-            dialerCallButton.addEventListener('click', async () => {
+
+            document.getElementById('dialerCallButton').addEventListener('click', async () => {
                 if (!dialerQueue[currentClientIndex]) return;
                 const cliente = dialerQueue[currentClientIndex];
                 const numerosString = cliente.numeros || '';
                 const numeros = numerosString.split(',').map(n => n.trim()).filter(n => n);
                 if (numeros.length === 0) {
                     showToast("Cliente sem números para ligar.");
-                    dialerStatusMessage.innerText = "Cliente sem números. Avance.";
+                    document.getElementById('dialerStatusMessage').innerText = "Cliente sem números. Avance.";
                     return;
                 }
-                dialerCallButton.disabled = true;
-                dialerStatusMessage.innerText = "Iniciando chamada, aguarde...";
+                document.getElementById('dialerCallButton').disabled = true;
+                document.getElementById('dialerStatusMessage').innerText = "Iniciando chamada, aguarde...";
                 try {
                     const result = await makeDialerCallFunction({
                         targetNumbers: numeros,
@@ -399,30 +409,32 @@
                     });
                     console.log("SID da chamada Twilio:", result.data.sid);
                     showToast("Discagem iniciada! A Twilio tentará conectar você.");
-                    dialerStatusMessage.innerText = "Discagem ativa. Aguardando conexão...";
+                    document.getElementById('dialerStatusMessage').innerText = "Discagem ativa. Aguardando conexão...";
                 } catch (error) {
                     console.error("Erro ao fazer chamada no discador:", error.code, error.message);
                     showToast(`Erro ao ligar: ${error.message}`);
-                    dialerStatusMessage.innerText = `Erro: ${error.message}`;
+                    document.getElementById('dialerStatusMessage').innerText = `Erro: ${error.message}`;
                 } finally {
-                    dialerCallButton.disabled = false;
+                    document.getElementById('dialerCallButton').disabled = false;
                 }
             });
-            dialerNextButton.addEventListener('click', loadNextClient);
-            dialerStopButton.addEventListener('click', () => {
+
+            document.getElementById('dialerNextButton').addEventListener('click', loadNextClient);
+            document.getElementById('dialerStopButton').addEventListener('click', () => {
                 dialerOverlay.classList.remove('active');
                 dialerQueue = [];
                 currentClientIndex = -1;
-                dialerStatusMessage.innerText = '';
+                document.getElementById('dialerStatusMessage').innerText = '';
             });
+
             if (currentClientIndex === dialerQueue.length - 1) {
-                dialerNextButton.innerText = "Fim da Lista";
-                dialerNextButton.disabled = true;
+                document.getElementById('dialerNextButton').innerText = "Fim da Lista";
+                document.getElementById('dialerNextButton').disabled = true;
             } else {
-                dialerNextButton.innerText = "Próximo";
-                dialerNextButton.disabled = false;
+                document.getElementById('dialerNextButton').innerText = "Próximo";
+                document.getElementById('dialerNextButton').disabled = false;
             }
-            dialerCallButton.disabled = false;
+            document.getElementById('dialerCallButton').disabled = false;
         } else {
             currentDialerCard.innerHTML = `
                 <h2>Fim da Lista!</h2>
@@ -432,18 +444,18 @@
                 </div>
                 <div class="dialer-status" id="dialerStatusMessage"></div>
             `;
-            const dialerStopButton = document.getElementById('dialerStopButton');
-            const dialerStatusMessage = document.getElementById('dialerStatusMessage');
-            dialerStopButton.addEventListener('click', () => {
+            document.getElementById('dialerStopButton').addEventListener('click', () => {
                 dialerOverlay.classList.remove('active');
                 dialerQueue = [];
                 currentClientIndex = -1;
-                dialerStatusMessage.innerText = '';
+                document.getElementById('dialerStatusMessage').innerText = '';
             });
         }
     }
+
     document.getElementById('searchInput').addEventListener('input', renderKanban);
     document.getElementById('filterStatus').addEventListener('change', renderKanban);
+
     onAuthStateChanged(auth, (user) => {
         if (user) {
             currentUser = user;

@@ -183,6 +183,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
     import { getFirestore, collection, getDocs, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
+    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-functions.js";
 
     // Suas configurações do Firebase
     const firebaseConfig = {
@@ -197,12 +198,12 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
+    const functions = getFunctions(app);
 
     const toastEl = document.getElementById('toast');
     const dialerOverlay = document.getElementById('dialerOverlay');
     const currentDialerCard = document.getElementById('currentDialerCard');
     const startDialerButton = document.getElementById('startDialerButton');
-    const firebaseFunctionsUrl = "https://us-central1-dapapp-38637.cloudfunctions.net"; // URL da sua função
 
     function showToast(msg){
         toastEl.innerText = msg;
@@ -335,7 +336,9 @@
         });
     }
 
-    // === Funções do Discador (AGORA COM UMA REQUISIÇÃO FETCH) ===
+    // === Funções do Discador (AGORA CHAMAM A SUA FUNÇÃO DO FIREBASE) ===
+    const callTwilioFunction = httpsCallable(functions, 'dialer');
+
     window.ligarManual = async function(numerosString){
         if(!numerosString){
             showToast("Número(s) não informado(s)");
@@ -346,31 +349,18 @@
             showToast("Número(s) inválido(s)");
             return;
         }
-        const numeroParaLigar = `+55${numeros[0].replace(/\D/g, '')}`;
 
         showToast("Iniciando chamada manual...");
         try {
-            const response = await fetch(`${firebaseFunctionsUrl}/dialer`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ to: numeroParaLigar }),
-            });
-
-            const data = await response.json();
-            if (response.ok) {
-                console.log("SID da chamada Twilio:", data.sid);
-                showToast("Chamada manual iniciada com sucesso!");
-            } else {
-                console.error("Erro no servidor:", data.error);
-                showToast(`Erro ao fazer chamada: ${data.error}`);
-            }
+            const result = await callTwilioFunction({ to: numeros[0] });
+            console.log("SID da chamada Twilio:", result.data.sid);
+            showToast("Chamada manual iniciada com sucesso!");
         } catch (error) {
-            console.error("Erro na requisição:", error);
-            showToast(`Erro de rede: ${error.message}`);
+            console.error("Erro ao fazer chamada manual:", error.code, error.message);
+            showToast(`Erro ao fazer chamada manual: ${error.message}`);
         }
     }
+
 
     window.whatsapp = function(numerosString){
         if(!numerosString){
@@ -382,9 +372,10 @@
             showToast("Número(s) inválido(s)");
             return;
         }
-        window.open(`https://api.whatsapp.com/send?phone=55${numeros[0].replace(/\D/g, '')}`, '_blank');
+        window.open(`https://api.whatsapp.com/send?phone=${numeros[0]}`, '_blank');
         showToast("Redirecionando para o WhatsApp...");
     }
+
     // === Lógica do Modo Discador ===
     startDialerButton.addEventListener('click', () => {
         dialerQueue = clientes.filter(c => c.status === 'lista-fria');
@@ -409,7 +400,6 @@
                 const cliente = dialerQueue[currentClientIndex];
                 const numerosString = cliente.numeros || '';
                 const numeros = numerosString.split(',').map(n => n.trim()).filter(n => n);
-                const numeroParaLigar = `+55${numeros[0].replace(/\D/g, '')}`;
 
                 if (numeros.length === 0) {
                     showToast("Cliente sem números para ligar.");
@@ -421,28 +411,14 @@
                 document.getElementById('dialerStatusMessage').innerText = "Iniciando chamada, aguarde...";
 
                 try {
-                    const response = await fetch(`${firebaseFunctionsUrl}/dialer`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ to: numeroParaLigar }),
-                    });
-
-                    const data = await response.json();
-                    if (response.ok) {
-                        console.log("SID da chamada Twilio:", data.sid);
-                        showToast("Discagem iniciada! A Twilio tentará conectar você.");
-                        document.getElementById('dialerStatusMessage').innerText = "Discagem ativa. Aguardando conexão...";
-                    } else {
-                        console.error("Erro no servidor:", data.error);
-                        showToast(`Erro ao ligar: ${data.error}`);
-                        document.getElementById('dialerStatusMessage').innerText = `Erro: ${data.error}`;
-                    }
+                    const result = await callTwilioFunction({ to: numeros[0] }); // Envia o primeiro número
+                    console.log("SID da chamada Twilio:", result.data.sid);
+                    showToast("Discagem iniciada! A Twilio tentará conectar você.");
+                    document.getElementById('dialerStatusMessage').innerText = "Discagem ativa. Aguardando conexão...";
                 } catch (error) {
-                    console.error("Erro na requisição:", error);
-                    showToast(`Erro de rede: ${error.message}`);
-                    document.getElementById('dialerStatusMessage').innerText = `Erro de rede: ${error.message}`;
+                    console.error("Erro ao fazer chamada no discador:", error.code, error.message);
+                    showToast(`Erro ao ligar: ${error.message}`);
+                    document.getElementById('dialerStatusMessage').innerText = `Erro: ${error.message}`;
                 } finally {
                     dialerCallButton.disabled = false;
                 }

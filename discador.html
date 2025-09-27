@@ -166,7 +166,7 @@
             <button class="stop-button" id="dialerStopButton">Parar Discador</button>
         </div>
         <div class="dialer-status" id="dialerStatusMessage"></div>
-      </div>
+    </div>
 </div>
 <div class="toast" id="toast"></div>
 <script type="module">
@@ -311,11 +311,11 @@
         });
     }
 
-    // Altere aqui o nome da função que será chamada.
-    const dialerFunction = httpsCallable(functions, 'dialer');
-    const sendSmsFunction = httpsCallable(functions, 'sendSms');
+    // CORREÇÃO APLICADA AQUI
+    const dialerFunction = httpsCallable(functions, 'dialer');
+    const sendSmsFunction = httpsCallable(functions, 'sendSms');
 
-    window.ligarManual = async function(numerosString){
+    window.ligarManual = async function(numerosString){
         if(!numerosString){
             showToast("Número(s) não informado(s)");
             return;
@@ -327,7 +327,6 @@
         }
         showToast("Iniciando chamada manual...");
         try {
-            // A chamada agora usa a função 'dialer' e passa o número para 'to'
             const result = await dialerFunction({ to: numeros[0] });
             console.log("SID da chamada Twilio:", result.data.sid);
             showToast("Chamada manual iniciada com sucesso!");
@@ -400,7 +399,6 @@
                 document.getElementById('dialerCallButton').disabled = true;
                 document.getElementById('dialerStatusMessage').innerText = "Iniciando chamada, aguarde...";
                 try {
-                    // A chamada agora usa a função 'dialer' e passa o número para 'to'
                     const result = await dialerFunction({ to: numeros[0] });
                     console.log("SID da chamada Twilio:", result.data.sid);
                     showToast("Discagem iniciada! A Twilio tentará conectar você.");

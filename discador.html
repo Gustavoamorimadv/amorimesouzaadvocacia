@@ -6,7 +6,6 @@
 <title>Discador CRM - AMR ADV</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
 <style>
-/* ======= Mantenho todo o CSS do seu CRM ======= */
 * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
 body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
 .sidebar { width:80px; background:#1e1e2f; display:flex; flex-direction:column; align-items:center; padding:20px 0; flex-shrink:0; transition:width 0.4s ease; position:relative; z-index:10; }
@@ -95,7 +94,7 @@ const firebaseConfig = {
     projectId: "dapapp-38637",
     storageBucket: "dapapp-38637.appspot.com",
     messagingSenderId: "628852295313",
-    appId: "1:628852295313:web:1234567890abcdef123456"
+    appId: "1:628852295313:web:INSERIR_SEU_APP_ID"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -105,44 +104,63 @@ const auth = getAuth(app);
 const toastEl=document.getElementById('toast');
 function showToast(msg){ toastEl.innerText=msg; toastEl.style.display='block'; clearTimeout(toastEl._t); toastEl._t=setTimeout(()=>toastEl.style.display='none',3000); }
 
-let clientes=[], currentUser=null, clienteIndex=0;
+let clientes=[], currentUser=null;
+
+// Função para mostrar todos os clientes nas colunas
+function mostrarClientes(){
+    // Limpa colunas
+    ['lista-fria','negociacao','contrato-assinado','fechado'].forEach(id=>{
+        const col = document.getElementById(id);
+        col.innerHTML = `<h2>${document.getElementById(id).querySelector('h2').innerText}</h2>`;
+    });
+
+    if(clientes.length===0) return;
+
+    clientes.forEach(cliente=>{
+        const status = cliente.status || 'lista-fria';
+        const col = document.getElementById(status);
+        const card = document.createElement('div');
+        card.className = `card ${status}`;
+        card.innerHTML = `<div class="color-bar"></div>
+        <div class="card-content">
+            <h3>${cliente.nome}</h3>
+            <p>CPF: ${cliente.cpf||'-'}</p>
+            <p>Classe: ${cliente.classe||'-'}</p>
+            <p>Valor: R$ ${cliente.valor||0}</p>
+        </div>
+        <div class="card-actions">
+            <button onclick="ligar('${cliente.numeros||''}')"><img src="https://img.icons8.com/ios-glyphs/30/000000/phone.png"/></button>
+            <button onclick="whatsapp('${cliente.numeros||''}')"><img src="https://img.icons8.com/ios-glyphs/30/000000/whatsapp.png"/></button>
+        </div>`;
+        col.appendChild(card);
+    });
+}
 
 async function carregarClientes(){
     if(!currentUser) return;
-    const q = query(collection(db,"clientes"), where("userId","==",currentUser.uid));
-    const snap = await getDocs(q);
-    clientes = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    clienteIndex=0;
-    mostrarClienteAtual();
-}
-
-function mostrarClienteAtual(){
-    const col = document.getElementById('lista-fria');
-    col.innerHTML='<h2>LISTA FRIA</h2>';
-    if(clientes.length===0){ col.innerHTML+='<p>Nenhum cliente</p>'; return; }
-    const cliente = clientes[clienteIndex];
-    const card=document.createElement('div');
-    card.className='card lista-fria';
-    card.innerHTML=`<div class="color-bar"></div>
-    <div class="card-content">
-    <h3>${cliente.nome}</h3>
-    <p>CPF: ${cliente.cpf||'-'}</p>
-    <p>Classe: ${cliente.classe||'-'}</p>
-    <p>Valor: R$ ${cliente.valor||0}</p>
-    </div>
-    <div class="card-actions">
-    <button onclick="ligar('${cliente.numeros||''}')"><img src="https://img.icons8.com/ios-glyphs/30/000000/phone.png"/></button>
-    <button onclick="whatsapp('${cliente.numeros||''}')"><img src="https://img.icons8.com/ios-glyphs/30/000000/whatsapp.png"/></button>
-    </div>`;
-    col.appendChild(card);
+    try{
+        const q = query(collection(db,"clientes"), where("userId","==",currentUser.uid));
+        const snap = await getDocs(q);
+        clientes = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        mostrarClientes();
+    } catch(e){
+        showToast('Erro ao carregar clientes');
+        console.error(e);
+    }
 }
 
 function ligar(numero){ if(!numero){ showToast("Número não informado"); return; } window.open(`tel:${numero.replace(/\D/g,'')}`); }
 function whatsapp(numero){ if(!numero){ showToast("Número não informado"); return; } window.open(`https://wa.me/55${numero.replace(/\D/g,'')}`,'_blank'); }
 
-onAuthStateChanged(auth,user=>{
-    if(user){ currentUser=user; carregarClientes(); }
-    else window.location.href='login.html';
+// Detecta usuário logado corretamente
+auth.onAuthStateChanged(user=>{
+    if(user){
+        currentUser = user;
+        carregarClientes();
+    } else {
+        // Só redireciona se não estiver logado
+        window.location.href='login.html';
+    }
 });
 </script>
 

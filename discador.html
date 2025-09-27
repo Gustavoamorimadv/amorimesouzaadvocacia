@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Discador CRM - Amorim & Souza</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f5f5f5; }
+  header { padding: 10px 20px; background: #1a73e8; color: white; text-align: center; }
+  .container { display: flex; gap: 20px; padding: 20px; }
+  .column { flex: 1; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  .card { border: 1px solid #ddd; padding: 10px; border-radius: 6px; margin-bottom: 10px; }
+  .card h3 { margin: 0 0 5px 0; }
+  button { margin-right: 5px; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; }
+  button.call { background: #28a745; color: white; }
+  button.sms { background: #ffc107; color: black; }
+  button.next { background: #007bff; color: white; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Discador CRM - Amorim & Souza Advocacia</h1>
+</header>
+
+<div class="container">
+  <div class="column" id="listaFriaColumn">
+    <h2>Lista Fria</h2>
+    <div id="clienteCard"></div>
+    <button class="call" onclick="ligar()">Ligar</button>
+    <button class="sms" onclick="enviarSms()">Enviar SMS</button>
+    <button class="next" onclick="proximoCliente()">Próximo</button>
+  </div>
+
+  <div class="column" id="negociacaoColumn">
+    <h2>Negociação</h2>
+    <!-- Futuro conteúdo de negociação -->
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+<script>
+  // Config Firebase
+  const firebaseConfig = {
+    apiKey: "SUA_API_KEY",
+    authDomain: "SEU_PROJETO.firebaseapp.com",
+    projectId: "dapapp-38637",
+    storageBucket: "SEU_PROJETO.appspot.com",
+    messagingSenderId: "SEU_SENDER_ID",
+    appId: "SEU_APP_ID"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  let clienteAtual = null;
+
+  async function carregarCliente() {
+    const snap = await db.collection("clientes").where("status","==","lista fria").limit(1).get();
+    if (snap.empty) {
+      document.getElementById('clienteCard').innerHTML = "<p>Nenhum cliente disponível</p>";
+      clienteAtual = null;
+      return;
+    }
+    const doc = snap.docs[0];
+    clienteAtual = { id: doc.id, ...doc.data() };
+    mostrarCliente(clienteAtual);
+  }
+
+  function mostrarCliente(cliente) {
+    document.getElementById('clienteCard').innerHTML = `
+      <div class="card">
+        <h3>${cliente.nome}</h3>
+        <p><strong>CPF:</strong> ${cliente.cpf}</p>
+        <p><strong>Valor da causa:</strong> R$ ${cliente.valorCausa}</p>
+        <p><strong>Tipo de ação:</strong> ${cliente.tipoAcao}</p>
+        <p><strong>Parte autora:</strong> ${cliente.parteAutora}</p>
+      </div>
+    `;
+  }
+
+  async function ligar() {
+    if (!clienteAtual) return alert("Nenhum cliente selecionado");
+    try {
+      const telefone = clienteAtual.telefones[0]; // primeiro telefone
+      const res = await fetch("https://us-central1-dapapp-38637.cloudfunctions.net/dialer", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ to: telefone })
+      });
+      const data = await res.json();
+      alert("Ligação iniciada. SID: " + data.sid);
+    } catch (err) {
+      alert("Erro ao ligar: " + err.message);
+    }
+  }
+
+  async function enviarSms() {
+    if (!clienteAtual) return alert("Nenhum cliente selecionado");
+    try {
+      const telefone = clienteAtual.telefones[0];
+      const mensagem = prompt("Digite a mensagem SMS:", "Olá, atualização do seu processo.");
+      if (!mensagem) return;
+      const res = await fetch("https://us-central1-dapapp-38637.cloudfunctions.net/sendSms", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ to: telefone, message: mensagem })
+      });
+      const data = await res.json();
+      alert("SMS enviado. SID: " + data.sid);
+    } catch (err) {
+      alert("Erro ao enviar SMS: " + err.message);
+    }
+  }
+
+  async function proximoCliente() {
+    if (clienteAtual) {
+      // opcional: marcar como processado ou mover para outra lista
+    }
+    await carregarCliente();
+  }
+
+  // Carrega primeiro cliente ao abrir
+  carregarCliente();
+</script>
+
+</body>
+</html>

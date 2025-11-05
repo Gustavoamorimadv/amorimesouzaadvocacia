@@ -6,7 +6,7 @@
 <title>CRM AMR ADV</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
 <style>
-/* ======= CSS Geral ======= */
+/* ======= CSS Mantido ======= */
 * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
 body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
 .sidebar { width:80px; background:#1e1e2f; display:flex; flex-direction:column; align-items:center; padding:20px 0; flex-shrink:0; transition:width 0.4s ease; position:relative; z-index:10; }
@@ -29,100 +29,68 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 .search-bar input { flex:1; }
 .kanban-container { flex:1; overflow-x:auto; padding:20px; }
 .kanban { display:flex; gap:20px; min-width:max-content; height:100%; }
-.column { background:#f8f9fa; border-radius:15px; padding:15px; min-width:320px; max-height:calc(100%); display:flex; flex-direction:column; gap:12px; box-shadow:0 4px 18px rgba(0,0,0,0.06); overflow-y:auto; } 
-.column h2 { margin-bottom:10px; font-size:18px; color:#343a40; text-transform:uppercase; border-bottom: 2px solid #dee2e6; padding-bottom: 5px;}
-
-/* ======= CSS DOS CARDS - MELHORADO COM BLUR ======= */
-.card { 
-    display:flex; 
-    background:rgba(255, 255, 255, 0.8); /* Fundo semi-transparente para o Blur */
-    border-radius:12px; 
-    box-shadow:0 6px 20px rgba(0,0,0,0.1); 
-    cursor:pointer; 
-    overflow:hidden; 
-    transition:0.3s; 
-    min-height:130px; 
-    flex-direction:row; 
-    position:relative; 
-    min-width: 100%; 
-    /* Aplica o BLUR no fundo do card (moderno, mas requer que o background tenha transparência) */
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px); /* Suporte para Webkit */
-    border: 1px solid rgba(255, 255, 255, 0.2); /* Borda de vidro */
+.column { background:#fff; border-radius:15px; padding:15px; min-width:320px; max-height:calc(100%); display:flex; flex-direction:column; gap:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); overflow-y:auto; }
+.column h2 { margin-bottom:10px; font-size:18px; color:#1e1e2f; text-transform:uppercase; }
+.card { 
+    display:flex; 
+    background:#fff; 
+    border-radius:15px; 
+    box-shadow:0 12px 30px rgba(0,0,0,0.12); 
+    cursor:pointer; 
+    overflow:hidden; 
+    transition:0.3s; 
+    min-height:160px; 
+    flex-direction:row; 
+    position:relative; 
+    /* Garante que o card se ajuste bem e não seja espremido */
+    min-width: 100%; 
 }
-.card:hover { 
-    transform:translateY(-3px) scale(1.01); 
-    box-shadow:0 10px 30px rgba(0,0,0,0.15);
-}
-.card .color-bar { width:6px; height:100%; border-radius:12px 0 0 12px; flex-shrink: 0;} 
+.card:hover { transform:scale(1.03); }
+.card .color-bar { width:8px; height:100%; border-radius:15px 0 0 15px; }
 .card-content { 
-    padding:15px 18px; 
+    padding:20px; 
     flex:1; 
     display:flex; 
     flex-direction:column; 
     justify-content:center; 
+    /* GARANTIA DE ESPAÇO PARA O TEXTO */
     min-width: 0; 
     overflow: hidden;
 }
 .card h3 { 
-    font-size:19px; 
-    margin-bottom:6px; 
-    color:#1e1e2f; 
-    font-weight: 700; 
-    white-space: nowrap; 
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size:20px; 
+    margin-bottom:6px; 
+    color:#333; 
+    /* PERMITE QUEBRA DE LINHA para exibir o nome completo */
+    white-space: normal; 
+    word-break: break-word; 
+    /* Garante que o h3 não tenha limite de altura */
+    line-height: 1.2;
 }
-.card p { 
-    font-size:12px; 
-    color:#555; 
-    margin:1px 0; 
-}
+.card p { font-size:14px; color:#555; margin:3px 0; }
 .lista-fria .color-bar { background:#3498db; }
 .negociacao .color-bar { background:#f1c40f; }
 .contrato-assinado .color-bar { background:#9b59b6; }
 .fechado .color-bar { background:#2ecc71; }
-
-/* POSICIONAMENTO DOS BOTÕES DE AÇÃO (Canto Superior Esquerdo) */
-.card-actions { 
-    position:absolute; 
-    top:10px; 
-    right:10px; /* Movido para o canto superior direito (mais comum) */
-    display:flex; 
-    gap:6px; 
-} 
-.card-actions button { 
-    /* Ajustado para fundo mais translúcido para combinar com o blur */
-    background:rgba(255,255,255,0.7); 
-    border:1px solid rgba(255,255,255,0.5); 
-    border-radius: 50%; 
-    cursor:pointer; 
-    padding:5px; 
-    transition: background 0.2s;
-    line-height: 0; /* Alinha o ícone */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-.card-actions button:hover { background:rgba(255,255,255,1); }
-.card-actions img { width:18px; height:18px; opacity:0.8; filter: none; } 
+.card-actions { position:absolute; top:10px; right:10px; display:flex; gap:10px; }
+.card-actions button { background:none; border:none; cursor:pointer; padding:4px; }
+.card-actions img { width:20px; height:20px; opacity:0.7; transition:opacity 0.2s; }
 .card-actions img:hover { opacity:1; }
-
-
-/* RESTANTE DO CSS ORIGINAL */
 .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); justify-content:center; align-items:center; z-index:50; }
 .modal { background:#fff; padding:18px; border-radius:15px; min-width:320px; max-width:420px; box-shadow:0 8px 30px rgba(0,0,0,.25); }
 .modal h3 { margin-bottom:12px; }
 .modal .row { margin-bottom:10px; }
 .modal input, .modal textarea, .modal select { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; }
 .modal textarea { min-height:80px; resize:vertical; }
-.modal .actions { display:flex; gap:8px; justify-content:space-between; margin-top:10px; } 
+.modal .actions { display:flex; gap:8px; justify-content:space-between; margin-top:10px; } /* Alterado para justificar entre */
 .btn { padding:8px 12px; border-radius:6px; border:0; cursor:pointer; }
 .btn.primary { background:#1e1e2f; color:#fff; }
-.btn.ghost { background:#f1f3f5; color:#333; }
-.btn.danger { background:#e74c3c; color:#fff; } 
+.btn.ghost { background:#f1f3f5; }
+.btn.danger { background:#e74c3c; color:#fff; } /* Estilo para o botão de Excluir */
 .processo-row { display:flex; gap:5px; margin-bottom:5px; }
 .processo-row input { flex:1; }
 .toast { position:fixed; right:20px; bottom:20px; background:#222; color:#fff; padding:8px 12px; border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.3); display:none; z-index:60; }
-.form-actions-right { display:flex; gap:8px; } 
+.form-actions-right { display:flex; gap:8px; } /* Para agrupar Salvar e Cancelar */
 </style>
 
 <script type="module">
@@ -300,15 +268,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const contentDiv=document.createElement('div'); contentDiv.className='card-content';
         const processosArray = cliente.processo ? cliente.processo.split(',').map(p=>p.trim()) : [];
         const primeiroProcesso = processosArray.length > 0 ? processosArray[0] : '-';
-        
-        // CORREÇÃO e OTIMIZAÇÃO: Estrutura final desejada para o card
+        
+        // CORREÇÃO PRINCIPAL: Adicionado de volta o nome do cliente (h3)
         contentDiv.innerHTML=`
-            <h3>${cliente.nome}</h3> 
-            <p><strong>CPF:</strong> ${cliente.cpf||'-'}</p>
-            <p><strong>Classe:</strong> ${cliente.classe||'-'}</p>
-            <p><strong>Processo:</strong> ${primeiroProcesso}</p>
-            <p><strong>Valor:</strong> R$ ${cliente.valor||'0,00'}</p>
-            <p><strong>Andamento:</strong> ${cliente.andamento || '-'}</p>`; 
+            <h3>${cliente.nome}</h3> 
+            <p>CPF: ${cliente.cpf||'-'}</p>
+            <p>Classe: ${cliente.classe||'-'}</p>
+            <p>Processo: ${primeiroProcesso}</p>
+            <p>Valor: R$ ${cliente.valor||'0,00'}</p>
+            <p>Andamento: ${cliente.andamento || '-'}</p>`; 
         card.appendChild(contentDiv);
 
         card.onclick=()=>openModal(true,cliente);

@@ -6,7 +6,6 @@
 <title>Clientes Fechados - Gerar Boletos</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
 <style>
-/* --- CSS Mantido --- */
 * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
 body { display:flex; background:#f4f6fa; height:100vh; overflow:hidden; transition:filter 0.3s; }
 
@@ -172,11 +171,11 @@ async function carregarClientes() {
   }
   container.innerHTML = "<p>Carregando clientes...</p>";
   
-  // 🔑 Query com DUAS cláusulas 'where'
+  // 🔑 Query com DUAS cláusulas 'where': status=fechado E userId=UID_LOGADO
   const q = query(
     collection(db, "clientes"), 
-    where("status", "==", "fechado"), // Filtra por status
-    where("userId", "==", currentUser.uid) // Filtra por usuário logado
+    where("status", "==", "fechado"), 
+    where("userId", "==", currentUser.uid)
   );
   
   try {
@@ -220,7 +219,7 @@ document.getElementById('buscarCliente').addEventListener('input', (e) => {
   exibirClientes(filtrados);
 });
 
-// --- Lógica do Modal (Mantida) ---
+// --- Lógica do Modal ---
 const modal = document.getElementById('modalBoleto');
 const modalNome = document.getElementById('modalNome');
 const modalCpf = document.getElementById('modalCpf');
@@ -241,8 +240,7 @@ function abrirModal(cliente, id) {
   modalNome.value = cliente.nome || "";
   modalCpf.value = cliente.cpf || "";
   modalEmail.value = cliente.email || "";
-  modalTelefone.value = cliente.numeros || ""; // Usando 'numeros' do cliente CRM
-  // Os campos de endereço geralmente não são salvos no CRM, mas aqui preenchemos
+  modalTelefone.value = cliente.numeros || ""; 
   modalCep.value = cliente.cep || "";
   modalEndereco.value = cliente.endereco || "";
   modalCidade.value = cliente.cidade || "";
@@ -253,16 +251,15 @@ function abrirModal(cliente, id) {
 }
 
 confirmBtn.onclick = async () => {
-  if(!clienteAtualId || !currentUser) return;
-  
-  // ... (Restante da lógica de validação e chamada API de boletos) ...
-  // Este trecho foi omitido por ser boilerplate e depender de uma API externa (localhost:3000/api/gerarBoletos)
-  // Certifique-se de que a lógica de persistência e atualização do Firestore está correta no seu ambiente.
-  
-  // Exemplo da lógica de persistência no Firestore:
+  if(!clienteAtualId) return;
   const nome = modalNome.value.trim();
   const cpf = modalCpf.value.trim();
   const email = modalEmail.value.trim();
+  const telefone = modalTelefone.value.trim();
+  const cep = modalCep.value.trim();
+  const endereco = modalEndereco.value.trim();
+  const cidade = modalCidade.value.trim();
+  const estado = modalEstado.value.trim();
   const valor = modalValor.value.trim();
   const vencimento = modalVencimento.value;
 
@@ -271,36 +268,46 @@ confirmBtn.onclick = async () => {
     return;
   }
 
-  // Simulando a resposta da API de boletos
-  const mockApiSuccess = true;
-  const mockBoletoCodigo = "9999999999999999999999999999999999999999999"; 
-
-  if(mockApiSuccess) {
-    alert("Boleto gerado com sucesso! (Simulado)");
-    const docRef = doc(db, "clientes", clienteAtualId);
-    const clienteData = clientesData.find(c => c.id === clienteAtualId);
-    const novosBoletos = clienteData.boletos || [];
-    
-    novosBoletos.push({
-      valor,
-      vencimento,
-      codigo: mockBoletoCodigo,
-      classe: "Boleto"
+  try {
+    // REVERTIDO: Chamada original para o seu back-end
+    const res = await fetch("http://localhost:3000/api/gerarBoletos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        nome, cpf, email, telefone, cep, endereco, cidade, estado,
+        boletos: [{ valor, vencimento }]
+      })
     });
-    await updateDoc(docRef, { boletos: novosBoletos });
-    
-    // Atualiza a lista local e o card
-    clienteData.boletos = novosBoletos;
-    const boletosContainer = document.getElementById(`boletos-${clienteAtualId}`);
-    boletosContainer.innerHTML = novosBoletos.map(b => `
-      <div class="boleto">
-        Boleto R$${b.valor} - ${b.vencimento}<br>
-        <small>Código: ${b.codigo || "-"}</small>
-      </div>`).join('');
-    fecharModal();
-  } else {
-    // Lógica de erro real da API
-    alert("Erro ao gerar boleto.");
+    const data = await res.json();
+    if(data.sucesso) {
+      alert("Boleto gerado com sucesso!");
+      
+      // Lógica de persistência no Firestore (mantida e essencial)
+      const docRef = doc(db, "clientes", clienteAtualId);
+      const clienteData = clientesData.find(c => c.id === clienteAtualId);
+      const novosBoletos = clienteData.boletos || [];
+      const novo = data.boletos[0];
+      novosBoletos.push({
+        valor,
+        vencimento,
+        codigo: novo.codigo,
+        qrCodeUrl: novo.qrCodeUrl,
+        classe: "Boleto"
+      });
+      await updateDoc(docRef, { boletos: novosBoletos });
+      clienteData.boletos = novosBoletos;
+      const boletosContainer = document.getElementById(`boletos-${clienteAtualId}`);
+      boletosContainer.innerHTML = novosBoletos.map(b => `
+        <div class="boleto">
+          Boleto R$${b.valor} - ${b.vencimento}<br>
+          <small>Código: ${b.codigo || "-"}</small>
+        </div>`).join('');
+      fecharModal();
+    } else {
+      alert("Erro ao gerar boleto: " + JSON.stringify(data.erro));
+    }
+  } catch(err) {
+    alert("Erro ao conectar ao servidor de boletos (localhost:3000). Verifique se o seu back-end está rodando: " + err.message);
   }
 };
 
@@ -308,9 +315,9 @@ confirmBtn.onclick = async () => {
 onAuthStateChanged(auth, user => {
   if (user) {
     currentUser = user;
-    carregarClientes(); // Só carrega os dados quando o usuário estiver autenticado
+    carregarClientes(); // Carrega os dados do usuário logado
   } else {
-    // Usuário não logado: redireciona
+    // Redireciona se não estiver logado
     window.location.href = "login.html";
   }
 });

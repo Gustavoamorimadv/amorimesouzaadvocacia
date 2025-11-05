@@ -35,7 +35,14 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 .card:hover { transform:scale(1.03); }
 .card .color-bar { width:8px; height:100%; border-radius:15px 0 0 15px; }
 .card-content { padding:20px; flex:1; display:flex; flex-direction:column; justify-content:center; }
-.card h3 { font-size:20px; margin-bottom:6px; color:#333; }
+.card h3 { 
+    font-size:20px; 
+    margin-bottom:6px; 
+    color:#333; 
+    /* CORREÇÃO APLICADA: Permite quebra de linha para exibir o nome completo */
+    white-space: normal; /* Permite quebra de linha */
+    word-break: break-word; /* Ajuda a quebrar palavras longas, se necessário */
+}
 .card p { font-size:14px; color:#555; margin:3px 0; }
 .lista-fria .color-bar { background:#3498db; }
 .negociacao .color-bar { background:#f1c40f; }
@@ -208,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const status = cliente.status || 'lista-fria';
         const col=document.getElementById(status);
         if(!col) return;
-        
+        
         // Remove o card antigo se existir para evitar duplicidade ao atualizar
         const existingCard = cardsMap[cliente.id];
         if (existingCard) {
@@ -243,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <p>Classe: ${cliente.classe||'-'}</p>
             <p>Processo: ${primeiroProcesso}</p>
             <p>Valor: R$ ${cliente.valor||'0,00'}</p>
-            <p>Andamento: ${cliente.andamento || '-'}</p>`; 
+            <p>Andamento: ${cliente.andamento || '-'}</p>`; 
         card.appendChild(contentDiv);
 
         card.onclick=()=>openModal(true,cliente);
@@ -401,17 +408,17 @@ document.addEventListener('DOMContentLoaded', () => {
 <div class="row"><input id="inputValor" type="text" placeholder="Valor da Causa (R$)" /></div>
 
 <div class="row">
-    <textarea id="inputAndamento" placeholder="Andamento Processual do Cliente" rows="3"></textarea>
+    <textarea id="inputAndamento" placeholder="Andamento Processual do Cliente" rows="3"></textarea>
 </div>
 <div id="processosContainer"></div>
 <div class="row"><textarea id="inputObs" maxlength="300" placeholder="Observações (máx. 300 caracteres)"></textarea></div>
 <div class="row"><select id="inputStatus"><option value="lista-fria">Lista Fria</option><option value="negociacao">Negociação</option><option value="contrato-assinado">Contrato Assinado</option><option value="fechado">Fechado</option></select></div>
 <div class="actions">
-    <button type="button" class="btn danger" id="btnDelete" style="display:none;">Excluir Cliente</button>
-    <div class="form-actions-right">
-        <button type="submit" class="btn primary">Salvar</button>
-        <button type="button" class="btn ghost" id="btnCancel">Cancelar</button>
-    </div>
+    <button type="button" class="btn danger" id="btnDelete" style="display:none;">Excluir Cliente</button>
+    <div class="form-actions-right">
+        <button type="submit" class="btn primary">Salvar</button>
+        <button type="button" class="btn ghost" id="btnCancel">Cancelar</button>
+    </div>
 </div>
 </form>
 </div>

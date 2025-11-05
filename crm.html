@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CRM AMR ADV</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght=600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
 <style>
 /* ======= CSS Geral ======= */
 * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
@@ -29,30 +29,34 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 .search-bar input { flex:1; }
 .kanban-container { flex:1; overflow-x:auto; padding:20px; }
 .kanban { display:flex; gap:20px; min-width:max-content; height:100%; }
-.column { background:#f8f9fa; border-radius:15px; padding:15px; min-width:320px; max-height:calc(100%); display:flex; flex-direction:column; gap:12px; box-shadow:0 4px 18px rgba(0,0,0,0.06); overflow-y:auto; } /* Fundo da coluna levemente alterado */
+.column { background:#f8f9fa; border-radius:15px; padding:15px; min-width:320px; max-height:calc(100%); display:flex; flex-direction:column; gap:12px; box-shadow:0 4px 18px rgba(0,0,0,0.06); overflow-y:auto; } 
 .column h2 { margin-bottom:10px; font-size:18px; color:#343a40; text-transform:uppercase; border-bottom: 2px solid #dee2e6; padding-bottom: 5px;}
 
-/* ======= CSS DOS CARDS - MELHORADO ======= */
+/* ======= CSS DOS CARDS - MELHORADO COM BLUR ======= */
 .card { 
     display:flex; 
-    background:#ffffff; 
-    border-radius:12px; /* Bordas mais arredondadas */
-    box-shadow:0 6px 20px rgba(0,0,0,0.1); /* Sombra mais sutil e moderna */
+    background:rgba(255, 255, 255, 0.8); /* Fundo semi-transparente para o Blur */
+    border-radius:12px; 
+    box-shadow:0 6px 20px rgba(0,0,0,0.1); 
     cursor:pointer; 
     overflow:hidden; 
     transition:0.3s; 
-    min-height:130px; /* Mais compacto */
+    min-height:130px; 
     flex-direction:row; 
     position:relative; 
     min-width: 100%; 
+    /* Aplica o BLUR no fundo do card (moderno, mas requer que o background tenha transparência) */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px); /* Suporte para Webkit */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Borda de vidro */
 }
-.card:hover { 
-    transform:translateY(-3px) scale(1.01); /* Efeito de elevação sutil ao passar o mouse */
-    box-shadow:0 10px 30px rgba(0,0,0,0.15);
+.card:hover { 
+    transform:translateY(-3px) scale(1.01); 
+    box-shadow:0 10px 30px rgba(0,0,0,0.15);
 }
-.card .color-bar { width:6px; height:100%; border-radius:12px 0 0 12px; flex-shrink: 0;} /* Barra de cor mais fina */
+.card .color-bar { width:6px; height:100%; border-radius:12px 0 0 12px; flex-shrink: 0;} 
 .card-content { 
-    padding:15px 18px; /* Padding ajustado */
+    padding:15px 18px; 
     flex:1; 
     display:flex; 
     flex-direction:column; 
@@ -62,17 +66,17 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 }
 .card h3 { 
     font-size:19px; 
-    margin-bottom:6px; /* Espaçamento menor */
+    margin-bottom:6px; 
     color:#1e1e2f; 
-    font-weight: 700; 
-    white-space: nowrap; /* Mantido para não quebrar o nome do título */
+    font-weight: 700; 
+    white-space: nowrap; 
     overflow: hidden;
-    text-overflow: ellipsis;
+    text-overflow: ellipsis;
 }
 .card p { 
-    font-size:12px; /* Fonte menor para detalhes */
+    font-size:12px; 
     color:#555; 
-    margin:1px 0; 
+    margin:1px 0; 
 }
 .lista-fria .color-bar { background:#3498db; }
 .negociacao .color-bar { background:#f1c40f; }
@@ -80,17 +84,28 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 .fechado .color-bar { background:#2ecc71; }
 
 /* POSICIONAMENTO DOS BOTÕES DE AÇÃO (Canto Superior Esquerdo) */
-.card-actions { 
-    position:absolute; 
-    top:10px; /* Afastado um pouco da borda */
-    left:10px; /* Alinhado à esquerda, respeitando a barra de cor */
-    display:flex; 
-    gap:6px; /* Botões mais próximos */
-} 
-.card-actions button { background:rgba(255,255,255,0.8); border:1px solid #ddd; border-radius: 50%; cursor:pointer; padding:5px; transition: background 0.2s;}
+.card-actions { 
+    position:absolute; 
+    top:10px; 
+    right:10px; /* Movido para o canto superior direito (mais comum) */
+    display:flex; 
+    gap:6px; 
+} 
+.card-actions button { 
+    /* Ajustado para fundo mais translúcido para combinar com o blur */
+    background:rgba(255,255,255,0.7); 
+    border:1px solid rgba(255,255,255,0.5); 
+    border-radius: 50%; 
+    cursor:pointer; 
+    padding:5px; 
+    transition: background 0.2s;
+    line-height: 0; /* Alinha o ícone */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
 .card-actions button:hover { background:rgba(255,255,255,1); }
-.card-actions img { width:18px; height:18px; opacity:0.8; filter: none; } /* Ícones com cores normais, já que o fundo é claro */
+.card-actions img { width:18px; height:18px; opacity:0.8; filter: none; } 
 .card-actions img:hover { opacity:1; }
+
 
 /* RESTANTE DO CSS ORIGINAL */
 .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); justify-content:center; align-items:center; z-index:50; }

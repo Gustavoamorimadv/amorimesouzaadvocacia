@@ -41,7 +41,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
     cursor:pointer; 
     overflow:hidden; 
     transition:0.3s; 
-    **min-height:140px;** /* Ajustado para ser mais compacto */
+    min-height:140px; 
     flex-direction:row; 
     position:relative; 
     min-width: 100%; 
@@ -49,7 +49,7 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 .card:hover { transform:scale(1.03); }
 .card .color-bar { width:8px; height:100%; border-radius:15px 0 0 15px; }
 .card-content { 
-    **padding:12px 20px;** /* Ajustado para ser mais compacto */
+    padding:12px 20px; 
     flex:1; 
     display:flex; 
     flex-direction:column; 
@@ -59,23 +59,32 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 }
 .card h3 { 
     font-size:20px; 
-    **margin-bottom:8px;** /* Ajustado o espaçamento */
-    **color:#1e1e2f;** /* Cor mais escura para maior contraste */
-    **font-weight: 700;** /* Negrito forte para o nome */
+    margin-bottom:8px; 
+    color:#1e1e2f; 
+    font-weight: 700; 
     white-space: normal; 
     word-break: break-word; 
     line-height: 1.2;
 }
-.card p { 
-    **font-size:13px;** /* Fonte ligeiramente menor */
-    color:#555; 
-    **margin:1px 0;** /* Espaçamento vertical reduzido */
+.card p { 
+    font-size:13px; 
+    color:#555; 
+    margin:1px 0; 
 }
 .lista-fria .color-bar { background:#3498db; }
 .negociacao .color-bar { background:#f1c40f; }
 .contrato-assinado .color-bar { background:#9b59b6; }
 .fechado .color-bar { background:#2ecc71; }
-.card-actions { **position:absolute; top:8px; right:8px;** display:flex; gap:8px; } /* Ajuste de posição */
+
+/* ALTERAÇÃO CHAVE AQUI: MUDAR O ALINHAMENTO DOS BOTÕES */
+.card-actions { 
+    position:absolute; 
+    top:8px; 
+    left:20px; /* Alterado de 'right: 8px' para 'left: 20px' (para dar espaço à barra de cor) */
+    display:flex; 
+    gap:8px; 
+} 
+
 .card-actions button { background:none; border:none; cursor:pointer; padding:4px; }
 .card-actions img { width:20px; height:20px; opacity:0.7; transition:opacity 0.2s; }
 .card-actions img:hover { opacity:1; }
@@ -86,15 +95,15 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 .modal .row { margin-bottom:10px; }
 .modal input, .modal textarea, .modal select { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; }
 .modal textarea { min-height:80px; resize:vertical; }
-.modal .actions { display:flex; gap:8px; justify-content:space-between; margin-top:10px; } 
+.modal .actions { display:flex; gap:8px; justify-content:space-between; margin-top:10px; } 
 .btn { padding:8px 12px; border-radius:6px; border:0; cursor:pointer; }
 .btn.primary { background:#1e1e2f; color:#fff; }
 .btn.ghost { background:#f1f3f5; }
-.btn.danger { background:#e74c3c; color:#fff; } 
+.btn.danger { background:#e74c3c; color:#fff; } 
 .processo-row { display:flex; gap:5px; margin-bottom:5px; }
 .processo-row input { flex:1; }
 .toast { position:fixed; right:20px; bottom:20px; background:#222; color:#fff; padding:8px 12px; border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.3); display:none; z-index:60; }
-.form-actions-right { display:flex; gap:8px; } 
+.form-actions-right { display:flex; gap:8px; } 
 </style>
 
 <script type="module">
@@ -260,6 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const colorBar=document.createElement('div'); colorBar.className='color-bar'; card.appendChild(colorBar);
 
+        // BOTÕES DE AÇÃO AGORA SÃO POSICIONADOS VIA CSS PARA A ESQUERDA
         const actionsDiv=document.createElement('div'); actionsDiv.className='card-actions';
         const btnCall=document.createElement('button');
         btnCall.onclick=(e)=>{ e.stopPropagation(); ligar(cliente.numeros||''); };
@@ -267,13 +277,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnWa=document.createElement('button');
         btnWa.onclick=(e)=>{ e.stopPropagation(); whatsapp(cliente.numeros||''); };
         btnWa.innerHTML='<img src="https://img.icons8.com/ios-glyphs/30/000000/whatsapp.png"/>';
-        actionsDiv.appendChild(btnCall); actionsDiv.appendChild(btnWa); card.appendChild(actionsDiv);
+        actionsDiv.appendChild(btnCall); 
+        actionsDiv.appendChild(btnWa); 
+        card.appendChild(actionsDiv);
 
         const contentDiv=document.createElement('div'); contentDiv.className='card-content';
         const processosArray = cliente.processo ? cliente.processo.split(',').map(p=>p.trim()) : [];
         const primeiroProcesso = processosArray.length > 0 ? processosArray[0] : '-';
         
-        // CORREÇÃO e OTIMIZAÇÃO: Estrutura final desejada para o card
         contentDiv.innerHTML=`
             <h3>${cliente.nome}</h3> 
             <p><strong>CPF:</strong> ${cliente.cpf||'-'}</p>
@@ -321,8 +332,8 @@ document.addEventListener('DOMContentLoaded', () => {
             numeros: inputNumeros.value,
             processo: processos.join(', '),
             classe: inputClasse.value,
-            valor: inputValor.value, // Valor agora é salvo como string (aceita qualquer formato)
-            andamento: inputAndamento.value.trim() // Salva o novo campo
+            valor: inputValor.value, 
+            andamento: inputAndamento.value.trim() 
         };
 
         if(clientForm.dataset.editId){

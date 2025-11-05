@@ -132,8 +132,7 @@ header h1 { font-size:24px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
 import { getFirestore, collection, query, where, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
-// 🔑 Adicionando Firebase Auth para controle de usuário logado
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js"; 
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js"; // Novo import para Auth
 
 const firebaseConfig = {
   apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
@@ -146,13 +145,13 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const auth = getAuth(app); // Inicializa Auth
+const auth = getAuth(app); // Inicializa o Auth
 const container = document.getElementById("clientesContainer");
 const sidebar = document.getElementById("sidebar");
 const mainContent = document.getElementById("mainContent");
 let clienteAtualId = null;
 let clientesData = [];
-let currentUser = null; // Variável para armazenar o usuário logado
+let usuarioLogadoId = null; // Variável para armazenar o UID do usuário
 
 // Hover expand sidebar + blur
 sidebar.addEventListener('mouseenter', () => { 
@@ -164,19 +163,31 @@ sidebar.addEventListener('mouseleave', () => { 
   mainContent.classList.remove('blur');
 });
 
-// 🚀 FUNÇÃO CORRIGIDA: Incluindo filtro de usuário
+// Listener para o estado de autenticação
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    usuarioLogadoId = user.uid;
+    carregarClientes(); // Carrega os clientes após saber quem é o usuário
+  } else {
+    // Se não houver usuário logado (pode redirecionar para tela de login ou mostrar aviso)
+    usuarioLogadoId = null;
+    container.innerHTML = "<p>Por favor, faça login para ver seus clientes.</p>";
+  }
+});
+
 async function carregarClientes() {
-  if (!currentUser) {
-    container.innerHTML = "<p>Autenticando usuário...</p>";
+  if (!usuarioLogadoId) {
+    container.innerHTML = "<p>Usuário não autenticado. Aguardando login...</p>";
     return;
   }
+  
   container.innerHTML = "<p>Carregando clientes...</p>";
   
-  // 🔑 Duas cláusulas 'where': status=fechado E userId=UID_LOGADO
+  // **ALTERAÇÃO CHAVE:** Adicionando a condição where para o ID do usuário
   const q = query(
-    collection(db, "clientes"), 
+    collection(db, "clientes"),
     where("status", "==", "fechado"),
-    where("userId", "==", currentUser.uid)
+    where("userId", "==", usuarioLogadoId) // Assumindo que o campo é 'userId'
   );
   
   try {
@@ -185,14 +196,14 @@ async function carregarClientes() {
     exibirClientes(clientesData);
   } catch (error) {
     console.error("Erro ao carregar clientes: ", error);
-    container.innerHTML = "<p>Erro ao carregar clientes. Verifique as regras de segurança do Firestore.</p>";
+    container.innerHTML = "<p>Erro ao carregar clientes.</p>";
   }
 }
 
 function exibirClientes(lista) {
   container.innerHTML = "";
   if(lista.length === 0) {
-    container.innerHTML = "<p>Nenhum cliente fechado encontrado para este usuário.</p>";
+    container.innerHTML = "<p>Nenhum cliente encontrado.</p>";
     return;
   }
   lista.forEach(cliente => {
@@ -309,17 +320,7 @@ confirmBtn.onclick = async () => {
   }
 };
 
-// 🔒 FUNÇÃO DE CONTROLE DE AUTENTICAÇÃO
-onAuthStateChanged(auth, user => {
-  if (user) {
-    currentUser = user;
-    carregarClientes(); // Inicia o carregamento com o UID do usuário
-  } else {
-    // Opcional: Redirecionar para login se não houver usuário
-    container.innerHTML = "<p>Usuário não autenticado. Redirecionando para login...</p>";
-    // window.location.href = "login.html"; 
-  }
-});
+// **Removi a chamada direta a carregarClientes()** para que ela seja chamada *após* a autenticação.
 </script>
 </body>
 </html>

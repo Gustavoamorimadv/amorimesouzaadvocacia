@@ -34,14 +34,23 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 .card { display:flex; background:#fff; border-radius:15px; box-shadow:0 12px 30px rgba(0,0,0,0.12); cursor:pointer; overflow:hidden; transition:0.3s; min-height:160px; flex-direction:row; position:relative; }
 .card:hover { transform:scale(1.03); }
 .card .color-bar { width:8px; height:100%; border-radius:15px 0 0 15px; }
-.card-content { padding:20px; flex:1; display:flex; flex-direction:column; justify-content:center; }
+.card-content { 
+    padding:20px; 
+    flex:1; 
+    display:flex; 
+    flex-direction:column; 
+    justify-content:center; 
+    /* GARANTIA DE ESPAÇO PARA O TEXTO */
+    min-width: 0; 
+    overflow: hidden;
+}
 .card h3 { 
     font-size:20px; 
     margin-bottom:6px; 
     color:#333; 
-    /* CORREÇÃO APLICADA: Permite quebra de linha para exibir o nome completo */
-    white-space: normal; /* Permite quebra de linha */
-    word-break: break-word; /* Ajuda a quebrar palavras longas, se necessário */
+    /* PERMITE QUEBRA DE LINHA */
+    white-space: normal; 
+    word-break: break-word; 
 }
 .card p { font-size:14px; color:#555; margin:3px 0; }
 .lista-fria .color-bar { background:#3498db; }

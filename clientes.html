@@ -132,7 +132,8 @@ header h1 { font-size:24px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
 import { getFirestore, collection, query, where, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js"; // Importa Auth
+// 🔑 Adicionando Firebase Auth para controle de usuário logado
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js"; 
 
 const firebaseConfig = {
   apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
@@ -153,7 +154,7 @@ let clienteAtualId = null;
 let clientesData = [];
 let currentUser = null; // Variável para armazenar o usuário logado
 
-// --- Efeitos de Sidebar (Mantido) ---
+// Hover expand sidebar + blur
 sidebar.addEventListener('mouseenter', () => { 
   sidebar.classList.add('expanded'); 
   mainContent.classList.add('blur');
@@ -163,7 +164,7 @@ sidebar.addEventListener('mouseleave', () => { 
   mainContent.classList.remove('blur');
 });
 
-// --- FUNÇÃO CORRIGIDA: Filtra por Status E por userId ---
+// 🚀 FUNÇÃO CORRIGIDA: Incluindo filtro de usuário
 async function carregarClientes() {
   if (!currentUser) {
     container.innerHTML = "<p>Autenticando usuário...</p>";
@@ -171,10 +172,10 @@ async function carregarClientes() {
   }
   container.innerHTML = "<p>Carregando clientes...</p>";
   
-  // 🔑 Query com DUAS cláusulas 'where': status=fechado E userId=UID_LOGADO
+  // 🔑 Duas cláusulas 'where': status=fechado E userId=UID_LOGADO
   const q = query(
     collection(db, "clientes"), 
-    where("status", "==", "fechado"), 
+    where("status", "==", "fechado"),
     where("userId", "==", currentUser.uid)
   );
   
@@ -184,14 +185,14 @@ async function carregarClientes() {
     exibirClientes(clientesData);
   } catch (error) {
     console.error("Erro ao carregar clientes: ", error);
-    container.innerHTML = "<p>Erro ao carregar clientes.</p>";
+    container.innerHTML = "<p>Erro ao carregar clientes. Verifique as regras de segurança do Firestore.</p>";
   }
 }
 
 function exibirClientes(lista) {
   container.innerHTML = "";
   if(lista.length === 0) {
-    container.innerHTML = "<p>Nenhum cliente 'fechado' encontrado para este usuário.</p>";
+    container.innerHTML = "<p>Nenhum cliente fechado encontrado para este usuário.</p>";
     return;
   }
   lista.forEach(cliente => {
@@ -219,7 +220,7 @@ document.getElementById('buscarCliente').addEventListener('input', (e) => {
   exibirClientes(filtrados);
 });
 
-// --- Lógica do Modal ---
+// Modal
 const modal = document.getElementById('modalBoleto');
 const modalNome = document.getElementById('modalNome');
 const modalCpf = document.getElementById('modalCpf');
@@ -233,14 +234,12 @@ const modalValor = document.getElementById('modalValor');
 const modalVencimento = document.getElementById('modalVencimento');
 const confirmBtn = document.getElementById('confirmBoletoBtn');
 
-window.fecharModal = function() { modal.style.display = "none"; clienteAtualId = null; }
-
 function abrirModal(cliente, id) {
   clienteAtualId = id;
   modalNome.value = cliente.nome || "";
   modalCpf.value = cliente.cpf || "";
   modalEmail.value = cliente.email || "";
-  modalTelefone.value = cliente.numeros || ""; 
+  modalTelefone.value = cliente.telefone || "";
   modalCep.value = cliente.cep || "";
   modalEndereco.value = cliente.endereco || "";
   modalCidade.value = cliente.cidade || "";
@@ -249,6 +248,8 @@ function abrirModal(cliente, id) {
   modalVencimento.value = new Date().toISOString().split('T')[0];
   modal.style.display = "flex";
 }
+
+function fecharModal() { modal.style.display = "none"; clienteAtualId = null; }
 
 confirmBtn.onclick = async () => {
   if(!clienteAtualId) return;
@@ -269,7 +270,6 @@ confirmBtn.onclick = async () => {
   }
 
   try {
-    // REVERTIDO: Chamada original para o seu back-end
     const res = await fetch("http://localhost:3000/api/gerarBoletos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -281,8 +281,6 @@ confirmBtn.onclick = async () => {
     const data = await res.json();
     if(data.sucesso) {
       alert("Boleto gerado com sucesso!");
-      
-      // Lógica de persistência no Firestore (mantida e essencial)
       const docRef = doc(db, "clientes", clienteAtualId);
       const clienteData = clientesData.find(c => c.id === clienteAtualId);
       const novosBoletos = clienteData.boletos || [];
@@ -307,18 +305,19 @@ confirmBtn.onclick = async () => {
       alert("Erro ao gerar boleto: " + JSON.stringify(data.erro));
     }
   } catch(err) {
-    alert("Erro ao conectar ao servidor de boletos (localhost:3000). Verifique se o seu back-end está rodando: " + err.message);
+    alert("Erro ao conectar ao servidor: " + err.message);
   }
 };
 
-// --- Controle de Login ---
+// 🔒 FUNÇÃO DE CONTROLE DE AUTENTICAÇÃO
 onAuthStateChanged(auth, user => {
   if (user) {
     currentUser = user;
-    carregarClientes(); // Carrega os dados do usuário logado
+    carregarClientes(); // Inicia o carregamento com o UID do usuário
   } else {
-    // Redireciona se não estiver logado
-    window.location.href = "login.html";
+    // Opcional: Redirecionar para login se não houver usuário
+    container.innerHTML = "<p>Usuário não autenticado. Redirecionando para login...</p>";
+    // window.location.href = "login.html"; 
   }
 });
 </script>

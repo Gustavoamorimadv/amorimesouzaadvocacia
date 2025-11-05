@@ -130,10 +130,8 @@ header h1 { font-size:24px; color:#1e1e2f; font-family:'Poppins', sans-serif; }
 </div>
 
 <script type="module">
-// Importações necessárias para Firebase Firestore e Auth
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
 import { getFirestore, collection, query, where, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
@@ -146,67 +144,37 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const auth = getAuth(app);
 const container = document.getElementById("clientesContainer");
 const sidebar = document.getElementById("sidebar");
 const mainContent = document.getElementById("mainContent");
 let clienteAtualId = null;
 let clientesData = [];
-let usuarioLogadoUID = null;
 
-// --- Configuração da Sidebar (Sem Alteração) ---
-sidebar.addEventListener('mouseenter', () => {  
-  sidebar.classList.add('expanded');  
+// Hover expand sidebar + blur
+sidebar.addEventListener('mouseenter', () => { 
+  sidebar.classList.add('expanded'); 
   mainContent.classList.add('blur');
 });
-sidebar.addEventListener('mouseleave', () => {  
-  sidebar.classList.remove('expanded');  
+sidebar.addEventListener('mouseleave', () => { 
+  sidebar.classList.remove('expanded'); 
   mainContent.classList.remove('blur');
 });
 
-// --- Controle de Autenticação e Carregamento (Essencial) ---
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        usuarioLogadoUID = user.uid;
-        console.log("Usuário logado. UID:", usuarioLogadoUID);
-        carregarClientes(); // Inicia o carregamento após obter o UID
-    } else {
-        container.innerHTML = "<p>Você precisa estar logado para visualizar os clientes.</p>";
-        console.log("Nenhum usuário logado.");
-    }
-});
-
-// --- Função de Carregamento de Clientes (Filtragem por Status e Usuário) ---
 async function carregarClientes() {
-  if (!usuarioLogadoUID) {
-    container.innerHTML = "<p>Aguardando autenticação do usuário...</p>";
-    return;
-  }
-  
   container.innerHTML = "<p>Carregando clientes...</p>";
-  
-  // **FILTRAGEM DE CLIENTES FECHADOS DO USUÁRIO LOGADO**
-  const q = query(
-    collection(db, "clientes"), 
-    where("status", "==", "fechado"), // Filtra por status "fechado"
-    where("uid_proprietario", "==", usuarioLogadoUID) // Filtra pelo usuário logado
-  );
-  
-  try {
-    const snapshot = await getDocs(q);
-    clientesData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
-    exibirClientes(clientesData);
-  } catch (error) {
-    console.error("Erro ao carregar clientes (Verifique o índice no Firestore!):", error);
-    container.innerHTML = "<p>Erro ao carregar clientes. Certifique-se de que o **ÍNDICE COMPOSTO** para `status` e `uid_proprietario` foi criado no Firebase.</p>";
-  }
+  
+  // RESTAURADO: Apenas a filtragem por status "fechado"
+  const q = query(collection(db, "clientes"), where("status", "==", "fechado"));
+  
+  const snapshot = await getDocs(q);
+  clientesData = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+  exibirClientes(clientesData);
 }
 
-// --- Funções de Exibição e Busca (Sem Alteração na Lógica/Formato) ---
 function exibirClientes(lista) {
   container.innerHTML = "";
   if(lista.length === 0) {
-    container.innerHTML = "<p>Nenhum cliente fechado encontrado para este usuário.</p>";
+    container.innerHTML = "<p>Nenhum cliente encontrado.</p>";
     return;
   }
   lista.forEach(cliente => {
@@ -234,7 +202,7 @@ document.getElementById('buscarCliente').addEventListener('input', (e) => {
   exibirClientes(filtrados);
 });
 
-// --- Lógica do Modal/Boleto (Sem Alteração) ---
+// Modal
 const modal = document.getElementById('modalBoleto');
 const modalNome = document.getElementById('modalNome');
 const modalCpf = document.getElementById('modalCpf');
@@ -322,6 +290,8 @@ confirmBtn.onclick = async () => {
     alert("Erro ao conectar ao servidor: " + err.message);
   }
 };
+
+carregarClientes();
 </script>
 </body>
 </html>

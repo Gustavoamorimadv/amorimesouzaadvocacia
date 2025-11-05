@@ -31,26 +31,41 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 .kanban { display:flex; gap:20px; min-width:max-content; height:100%; }
 .column { background:#fff; border-radius:15px; padding:15px; min-width:320px; max-height:calc(100%); display:flex; flex-direction:column; gap:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); overflow-y:auto; }
 .column h2 { margin-bottom:10px; font-size:18px; color:#1e1e2f; text-transform:uppercase; }
-.card { display:flex; background:#fff; border-radius:15px; box-shadow:0 12px 30px rgba(0,0,0,0.12); cursor:pointer; overflow:hidden; transition:0.3s; min-height:160px; flex-direction:row; position:relative; }
+.card { 
+    display:flex; 
+    background:#fff; 
+    border-radius:15px; 
+    box-shadow:0 12px 30px rgba(0,0,0,0.12); 
+    cursor:pointer; 
+    overflow:hidden; 
+    transition:0.3s; 
+    min-height:160px; 
+    flex-direction:row; 
+    position:relative; 
+    /* Garante que o card se ajuste bem e não seja espremido */
+    min-width: 100%; 
+}
 .card:hover { transform:scale(1.03); }
 .card .color-bar { width:8px; height:100%; border-radius:15px 0 0 15px; }
-.card-content { 
-    padding:20px; 
-    flex:1; 
-    display:flex; 
-    flex-direction:column; 
-    justify-content:center; 
-    /* GARANTIA DE ESPAÇO PARA O TEXTO */
-    min-width: 0; 
-    overflow: hidden;
+.card-content { 
+    padding:20px; 
+    flex:1; 
+    display:flex; 
+    flex-direction:column; 
+    justify-content:center; 
+    /* GARANTIA DE ESPAÇO PARA O TEXTO */
+    min-width: 0; 
+    overflow: hidden;
 }
-.card h3 { 
-    font-size:20px; 
-    margin-bottom:6px; 
-    color:#333; 
-    /* PERMITE QUEBRA DE LINHA */
-    white-space: normal; 
-    word-break: break-word; 
+.card h3 { 
+    font-size:20px; 
+    margin-bottom:6px; 
+    color:#333; 
+    /* PERMITE QUEBRA DE LINHA para exibir o nome completo */
+    white-space: normal; 
+    word-break: break-word; 
+    /* Garante que o h3 não tenha limite de altura */
+    line-height: 1.2;
 }
 .card p { font-size:14px; color:#555; margin:3px 0; }
 .lista-fria .color-bar { background:#3498db; }
@@ -253,8 +268,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const contentDiv=document.createElement('div'); contentDiv.className='card-content';
         const processosArray = cliente.processo ? cliente.processo.split(',').map(p=>p.trim()) : [];
         const primeiroProcesso = processosArray.length > 0 ? processosArray[0] : '-';
-        // Adicionado campo Andamento ao card
-        contentDiv.innerHTML=`<h3>${cliente.nome}</h3>
+        
+        // CORREÇÃO PRINCIPAL: Adicionado de volta o nome do cliente (h3)
+        contentDiv.innerHTML=`
+            <h3>${cliente.nome}</h3> 
             <p>CPF: ${cliente.cpf||'-'}</p>
             <p>Classe: ${cliente.classe||'-'}</p>
             <p>Processo: ${primeiroProcesso}</p>

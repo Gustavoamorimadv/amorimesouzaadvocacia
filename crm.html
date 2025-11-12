@@ -15,7 +15,6 @@ body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
 .sidebar.expanded h2 { opacity:1; }
 .sidebar button { width:100%; background:transparent; border:none; color:#fff; display:flex; align-items:center; gap:15px; padding:12px 20px; margin:5px 0; cursor:pointer; border-radius:10px; transition:background 0.3s, color 0.3s; font-size:14px; white-space:nowrap; overflow:hidden; }
 .sidebar button img { width:28px; height:28px; filter: invert(1); flex-shrink:0; transition:transform 0.3s; }
-.sidebar button span { display:inline-block; opacity:0; transition:opacity 0.3s; font-weight:500; }
 .sidebar.expanded button span { opacity:1; }
 .sidebar button:hover img { transform:scale(1.1); }
 .sidebar button:hover { background:#2a2a40; color:#fff; }
@@ -102,10 +101,8 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-// Adicionado getDoc para recarregar um único cliente
 import { getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc, updateDoc, query, where, deleteDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
-// NOVAS IMPORTAÇÕES PARA FIREBASE STORAGE
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-storage.js";
 
 const firebaseConfig = {
@@ -120,7 +117,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
-// INICIALIZAÇÃO DO FIREBASE STORAGE
 const storage = getStorage(app);
 
 window.firebaseDB = db;
@@ -136,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const STATUS=['lista-fria','negociacao','contrato-assinado','fechado'];
     const cardsMap={};
     const modalBackdrop=document.getElementById('modalBackdrop');
-    const documentModalBackdrop=document.getElementById('documentModalBackdrop'); // NOVA MODAL
+    const documentModalBackdrop=document.getElementById('documentModalBackdrop');
     const clientForm=document.getElementById('clientForm');
     const inputNome=document.getElementById('inputNome');
     const inputCPF=document.getElementById('inputCPF');
@@ -145,10 +141,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputNumeros=document.getElementById('inputNumeros');
     const inputClasse=document.getElementById('inputClasse');
     const inputValor=document.getElementById('inputValor');
-    const inputAndamento=document.getElementById('inputAndamento'); // Novo campo de andamento
+    const inputAndamento=document.getElementById('inputAndamento');
     const btnAdd=document.getElementById('btnAdd');
     const btnCancel=document.getElementById('btnCancel');
-    const btnDelete=document.getElementById('btnDelete'); // Novo botão de excluir
+    const btnDelete=document.getElementById('btnDelete');
     const searchInput=document.getElementById('searchInput');
     const filterStatus=document.getElementById('filterStatus');
     const toastEl=document.getElementById('toast');
@@ -161,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnUploadDoc=document.getElementById('btnUploadDoc');
     const documentList=document.getElementById('documentList');
     const documentModalTitle=document.getElementById('documentModalTitle');
-    let currentClienteDocId = null; // Para saber qual cliente estamos anexando documentos
+    let currentClienteDocId = null; 
     let currentClienteData = null; // Para armazenar os dados atuais do cliente para o modal de documentos
 
     let currentUser=null;
@@ -175,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     }
     
-    // NOVO: Função para obter um único cliente (corrigida)
+    // Função para obter um único cliente
     async function getSingleCliente(id) {
         if (!id) return null;
         const docRef = doc(db, "clientes", id);
@@ -188,10 +184,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function saveCliente(cliente){
         if(!currentUser) return;
-        cliente.userId = currentUser.uid; // garante que pertence ao usuário logado
+        cliente.userId = currentUser.uid;
         if(cliente.id){
             const docRef = doc(db, "clientes", cliente.id);
-            await setDoc(docRef, cliente, { merge: true }); // Usar merge para garantir que não sobrescreva campos que não estão no formulário
+            await setDoc(docRef, cliente, { merge: true });
         } else {
             const docRef = await addDoc(collection(db,"clientes"), cliente);
             cliente.id = docRef.id;
@@ -226,19 +222,19 @@ document.addEventListener('DOMContentLoaded', () => {
             inputNumeros.value=data.numeros||"";
             inputClasse.value=data.classe||"Outros";
             inputValor.value=data.valor||"";
-            inputAndamento.value=data.andamento||""; // Popula novo campo
+            inputAndamento.value=data.andamento||"";
             const processos = data.processo ? data.processo.split(',').map(p=>p.trim()) : [''];
             processos.forEach(p=>addProcessoField(p));
             clientForm.dataset.editId=data.id;
-            btnDelete.style.display='inline-block'; // Mostra botão de excluir na edição
+            btnDelete.style.display='inline-block';
             btnDelete.onclick=()=>deleteCliente(data.id);
         } else {
             addProcessoField();
             inputNome.value=""; inputCPF.value=""; inputObs.value=""; inputStatus.value="lista-fria";
             inputNumeros.value=""; inputClasse.value="Outros"; inputValor.value="";
-            inputAndamento.value=""; // Limpa novo campo
+            inputAndamento.value="";
             delete clientForm.dataset.editId;
-            btnDelete.style.display='none'; // Esconde botão de excluir em novo cliente
+            btnDelete.style.display='none';
             btnDelete.onclick=null;
         }
     }
@@ -297,9 +293,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const colorBar=document.createElement('div'); colorBar.className='color-bar'; card.appendChild(colorBar);
 
         const actionsDiv=document.createElement('div'); actionsDiv.className='card-actions';
-        const btnDoc=document.createElement('button'); // NOVO BOTÃO DE DOCUMENTOS
-        // Correção 1: Garante que a função openDocumentModal receba o objeto cliente
-        btnDoc.onclick=(e)=>{ e.stopPropagation(); openDocumentModal(cliente); };
+        const btnDoc=document.createElement('button'); // BOTÃO DE DOCUMENTOS
+        // CORREÇÃO AQUI: Passa apenas o ID do cliente para openDocumentModal
+        btnDoc.onclick=(e)=>{ e.stopPropagation(); openDocumentModal(cliente.id); };
         btnDoc.innerHTML='<img src="https://img.icons8.com/ios-filled/30/000000/document.png"/>';
         
         const btnCall=document.createElement('button');
@@ -309,7 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnWa.onclick=(e)=>{ e.stopPropagation(); whatsapp(cliente.numeros||''); };
         btnWa.innerHTML='<img src="https://img.icons8.com/ios-glyphs/30/000000/whatsapp.png"/>';
         
-        actionsDiv.appendChild(btnDoc); // Adiciona o botão de documentos
+        actionsDiv.appendChild(btnDoc);
         actionsDiv.appendChild(btnCall); 
         actionsDiv.appendChild(btnWa); 
         card.appendChild(actionsDiv);
@@ -318,7 +314,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const processosArray = cliente.processo ? cliente.processo.split(',').map(p=>p.trim()) : [];
         const primeiroProcesso = processosArray.length > 0 ? processosArray[0] : '-';
         
-        // CORREÇÃO PRINCIPAL: Adicionado de volta o nome do cliente (h3)
         contentDiv.innerHTML=`            <h3>${cliente.nome}</h3> 
             <p>CPF: ${cliente.cpf||'-'}</p>
             <p>Classe: ${cliente.classe||'-'}</p>
@@ -338,7 +333,6 @@ document.addEventListener('DOMContentLoaded', () => {
     async function render(){
         STATUS.forEach(s=>{
             const col=document.getElementById(s);
-            // Mantém o título H2 e limpa o restante
             const cards = col.querySelectorAll('.card');
             cards.forEach(card => card.remove());
         });
@@ -350,13 +344,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ========= LÓGICA DE DOCUMENTOS =========
     
-    // Abre a modal de documentos e preenche a lista
-    function openDocumentModal(clienteData){
-        // Armazena a ID e os dados do cliente
+    // CORREÇÃO PRINCIPAL: Recarrega os dados do cliente ao abrir a modal
+    async function openDocumentModal(clienteId){
+        if (!clienteId) return;
+
+        // PASSO CRÍTICO: Busca os dados mais recentes do cliente diretamente do Firestore
+        const clienteData = await getSingleCliente(clienteId);
+        if (!clienteData) {
+            showToast("Erro: Dados do cliente não encontrados para documentos.");
+            return;
+        }
+
+        // Armazena a ID e os dados do cliente FRESCOS
         currentClienteDocId = clienteData.id;
         currentClienteData = clienteData; 
         documentModalTitle.innerText = `Documentos de: ${clienteData.nome}`;
-        // Correção 2: Renderiza documentos usando os dados passados (que serão atualizados nas funções de upload/delete)
+        // Renderiza documentos usando os dados FRESCOS
         renderDocumentos(currentClienteData); 
         documentModalBackdrop.style.display='flex';
     }
@@ -364,7 +367,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Renderiza a lista de documentos na modal
     function renderDocumentos(clienteData){
         documentList.innerHTML = '';
-        // Correção 3: Usa o objeto clienteData diretamente
         const documentos = clienteData.documentos || []; 
         
         if(documentos.length === 0){
@@ -386,7 +388,6 @@ document.addEventListener('DOMContentLoaded', () => {
             btnDeleteDoc.innerHTML = '&times;';
             btnDeleteDoc.onclick = (e) => {
                 e.stopPropagation();
-                // Correção 4: Passa apenas o ID e o nome do documento para deleteDocumento
                 deleteDocumento(clienteData.id, doc.nome);
             };
 
@@ -407,7 +408,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const snapshot = await uploadBytes(storageRef, file);
             const downloadURL = await getDownloadURL(snapshot.ref);
 
-            // CORREÇÃO PRINCIPAL: Recarrega o cliente do banco para obter a lista de documentos mais recente
+            // Recarrega o cliente do banco para obter a lista de documentos mais recente
             const clientBeforeUpdate = await getSingleCliente(clienteId);
             if (!clientBeforeUpdate) {
                 showToast("Erro: Cliente não encontrado para atualização.");
@@ -495,9 +496,8 @@ document.addEventListener('DOMContentLoaded', () => {
             numeros: inputNumeros.value,
             processo: processos.join(', '),
             classe: inputClasse.value,
-            valor: inputValor.value, // Valor agora é salvo como string (aceita qualquer formato)
-            andamento: inputAndamento.value.trim() // Salva o novo campo
-            // O campo 'documentos' será adicionado/atualizado apenas pela modal de documentos
+            valor: inputValor.value, 
+            andamento: inputAndamento.value.trim()
         };
 
         if(clientForm.dataset.editId){
@@ -515,7 +515,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnAdd.onclick=()=>openModal();
     btnCancel.onclick=()=>closeModal();
-    document.getElementById('btnCancelDoc').onclick=()=>closeDocumentModal(); // Botão cancelar da modal de documentos
+    document.getElementById('btnCancelDoc').onclick=()=>closeDocumentModal();
 
     let draggedCard=null;
     function addDragEvents(card){

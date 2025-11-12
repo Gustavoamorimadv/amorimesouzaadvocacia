@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CRM AMR ADV</title>
+<title>CRM - AMR ADV</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
 <style>
-/* ======= CSS Mantido ======= */
+/* === Seu CSS Original com algumas adições === */
 * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
 body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
 .sidebar { width:80px; background:#1e1e2f; display:flex; flex-direction:column; align-items:center; padding:20px 0; flex-shrink:0; transition:width 0.4s ease; position:relative; z-index:10; }
@@ -15,6 +15,7 @@ body { display:flex; background:#f0f2f5; height:100vh; overflow:hidden; }
 .sidebar.expanded h2 { opacity:1; }
 .sidebar button { width:100%; background:transparent; border:none; color:#fff; display:flex; align-items:center; gap:15px; padding:12px 20px; margin:5px 0; cursor:pointer; border-radius:10px; transition:background 0.3s, color 0.3s; font-size:14px; white-space:nowrap; overflow:hidden; }
 .sidebar button img { width:28px; height:28px; filter: invert(1); flex-shrink:0; transition:transform 0.3s; }
+.sidebar button span { display:inline-block; opacity:0; transition:opacity 0.3s; font-weight:500; }
 .sidebar.expanded button span { opacity:1; }
 .sidebar button:hover img { transform:scale(1.1); }
 .sidebar button:hover { background:#2a2a40; color:#fff; }
@@ -28,44 +29,14 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 .search-bar input { flex:1; }
 .kanban-container { flex:1; overflow-x:auto; padding:20px; }
 .kanban { display:flex; gap:20px; min-width:max-content; height:100%; }
-.column { background:#fff; border-radius:15px; padding:15px; min-width:320px; max-height:calc(100%); display:flex; flex-direction:column; gap:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); overflow-y:auto; }
+.column { background:#fff; border-radius:15px; padding:15px; min-width:320px; max-height:calc(100% - 20px); display:flex; flex-direction:column; gap:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); overflow-y:auto; }
 .column h2 { margin-bottom:10px; font-size:18px; color:#1e1e2f; text-transform:uppercase; }
-.card { 
-    display:flex; 
-    background:#fff; 
-    border-radius:15px; 
-    box-shadow:0 12px 30px rgba(0,0,0,0.12); 
-    cursor:pointer; 
-    overflow:hidden; 
-    transition:0.3s; 
-    min-height:160px; 
-    flex-direction:row; 
-    position:relative; 
-    /* Garante que o card se ajuste bem e não seja espremido */
-    min-width: 100%; 
-}
+.card { display:flex; background:#fff; border-radius:15px; box-shadow:0 12px 30px rgba(0,0,0,0.12); overflow:hidden; transition:0.3s; min-height:160px; flex-direction:row; position:relative; }
+/* Removido cursor:pointer do card, pois agora os botões internos são clicáveis */
 .card:hover { transform:scale(1.03); }
 .card .color-bar { width:8px; height:100%; border-radius:15px 0 0 15px; }
-.card-content { 
-    padding:20px; 
-    flex:1; 
-    display:flex; 
-    flex-direction:column; 
-    justify-content:center; 
-    /* GARANTIA DE ESPAÇO PARA O TEXTO */
-    min-width: 0; 
-    overflow: hidden;
-}
-.card h3 { 
-    font-size:20px; 
-    margin-bottom:6px; 
-    color:#333; 
-    /* PERMITE QUEBRA DE LINHA para exibir o nome completo */
-    white-space: normal; 
-    word-break: break-word; 
-    /* Garante que o h3 não tenha limite de altura */
-    line-height: 1.2;
-}
+.card-content { padding:20px; flex:1; display:flex; flex-direction:column; justify-content:center; }
+.card h3 { font-size:20px; margin-bottom:6px; color:#333; }
 .card p { font-size:14px; color:#555; margin:3px 0; }
 .lista-fria .color-bar { background:#3498db; }
 .negociacao .color-bar { background:#f1c40f; }
@@ -75,588 +46,570 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 .card-actions button { background:none; border:none; cursor:pointer; padding:4px; }
 .card-actions img { width:20px; height:20px; opacity:0.7; transition:opacity 0.2s; }
 .card-actions img:hover { opacity:1; }
-.modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); justify-content:center; align-items:center; z-index:50; }
-.modal { background:#fff; padding:18px; border-radius:15px; min-width:320px; max-width:420px; box-shadow:0 8px 30px rgba(0,0,0,.25); }
-.modal h3 { margin-bottom:12px; }
-.modal .row { margin-bottom:10px; }
-.modal input, .modal textarea, .modal select { width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; }
-.modal textarea { min-height:80px; resize:vertical; }
-.modal .actions { display:flex; gap:8px; justify-content:space-between; margin-top:10px; } /* Alterado para justificar entre */
-.btn { padding:8px 12px; border-radius:6px; border:0; cursor:pointer; }
-.btn.primary { background:#1e1e2f; color:#fff; }
-.btn.ghost { background:#f1f3f5; }
-.btn.danger { background:#e74c3c; color:#fff; } /* Estilo para o botão de Excluir */
-.processo-row { display:flex; gap:5px; margin-bottom:5px; }
-.processo-row input { flex:1; }
+
+/* Drag and Drop Feedback */
+.card.dragging {
+    opacity: 0.5;
+    border: 2px dashed #007bff;
+}
+.column.drag-over {
+    background: #e0e6ec;
+    border: 2px dashed #007bff;
+}
+
+/* Estilo para a lista de documentos nos cards */
+.document-list-container {
+    margin-top: 10px;
+    padding-top: 5px;
+    border-top: 1px dashed #eee;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.document-link {
+    font-size: 12px;
+    color: #007bff;
+    text-decoration: none;
+    background: #f0f8ff;
+    padding: 3px 6px;
+    border-radius: 4px;
+    transition: background 0.2s;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.document-link:hover {
+    background: #e0f0ff;
+    color: #0056b3;
+}
+.document-info {
+    font-size: 12px;
+    color: #999;
+    margin-top: 10px !important;
+}
+
+/* Modal de Documentos */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: none; /* Inicia oculto */
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+.modal-overlay.active {
+    display: flex; /* Ativado pelo JS */
+}
+.modal-content {
+    background: #fff;
+    border-radius: 15px;
+    padding: 30px;
+    width: 500px;
+    max-width: 90%;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.modal-content h2 {
+    font-size: 24px;
+    color: #1e1e2f;
+    margin-bottom: 10px;
+    text-align: center;
+}
+.modal-content input[type="text"],
+.modal-content input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+}
+.modal-content button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s;
+}
+.modal-content .upload-button {
+    background: #1e1e2f;
+    color: #fff;
+}
+.modal-content .upload-button:hover {
+    background: #333;
+}
+.modal-content .close-button {
+    background: #f0f0f0;
+    color: #555;
+    margin-top: 10px;
+}
+.modal-content .close-button:hover {
+    background: #e0e0e0;
+}
+.modal-document-list {
+    margin-top: 15px;
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+.modal-document-list h3 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 10px;
+}
+.modal-document-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px dashed #f0f0f0;
+}
+.modal-document-item:last-child {
+    border-bottom: none;
+}
+.modal-document-item a {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 15px;
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.modal-document-item a:hover {
+    text-decoration: underline;
+}
+.modal-document-item button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    margin-left: 10px;
+}
+.modal-document-item button img {
+    width: 18px;
+    height: 18px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+.modal-document-item button img:hover {
+    opacity: 1;
+}
+
 .toast { position:fixed; right:20px; bottom:20px; background:#222; color:#fff; padding:8px 12px; border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,.3); display:none; z-index:60; }
-.form-actions-right { display:flex; gap:8px; } /* Para agrupar Salvar e Cancelar */
-/* Estilos adicionais para o modal de documentos */
-#documentModal .modal { max-width: 500px; }
-#documentList { max-height: 200px; overflow-y: auto; padding: 5px; border: 1px solid #eee; border-radius: 6px; margin-top: 10px; }
-.document-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px dotted #ccc; }
-.document-item:last-child { border-bottom: none; }
-.document-item a { color: #3498db; text-decoration: none; max-width: 70%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.document-item button { background: none; border: none; color: #e74c3c; cursor: pointer; font-size: 18px; line-height: 1; }
 </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h2 onclick="window.location.href='dashboard.html'">AMR ADV</h2>
+    <button onclick="window.location.href='crm.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/dashboard.png"/><span>CRM</span></button>
+    <button onclick="window.location.href='discador.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/phone.png"/><span>Discador</span></button>
+</div>
+
+<div class="main">
+    <header>
+        <h1>CRM</h1>
+        <button id="addClientButton">Adicionar Cliente</button>
+    </header>
+
+    <div class="search-bar">
+        <input id="searchInput" placeholder="Buscar cliente..." />
+        <select id="filterStatus">
+            <option value="">Todos os status</option>
+            <option value="lista-fria">Lista Fria</option>
+            <option value="negociacao">Negociação</option>
+            <option value="contrato-assinado">Contrato Assinado</option>
+            <option value="fechado">Fechado</option>
+        </select>
+    </div>
+
+    <div class="kanban-container">
+        <main class="kanban" id="kanban">
+            <div class="column" id="lista-fria"><h2>LISTA FRIA</h2></div>
+            <div class="column" id="negociacao"><h2>NEGOCIAÇÃO</h2></div>
+            <div class="column" id="contrato-assinado"><h2>CONTRATO ASSINADO</h2></div>
+            <div class="column" id="fechado"><h2>FECHADO</h2></div>
+        </main>
+    </div>
+</div>
+
+<div class="modal-overlay" id="documentModalOverlay">
+    <div class="modal-content">
+        <h2 id="documentModalTitle">Documentos de [Nome do Cliente]</h2>
+        
+        <label for="documentNameInput">Nome do Documento (Ex: RG, Contrato)</label>
+        <input type="text" id="documentNameInput" placeholder="Nome do Documento" />
+        
+        <input type="file" id="documentFileInput" />
+        <button class="upload-button" id="uploadDocumentButton">Upload e Salvar Documento</button>
+        
+        <div class="modal-document-list">
+            <h3>Documentos Anexados</h3>
+            <div id="attachedDocumentsList">
+                <p>Nenhum documento anexado.</p>
+            </div>
+        </div>
+        
+        <button class="close-button" id="closeDocumentModalButton">Fechar</button>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc, updateDoc, query, where, deleteDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, updateDoc, query, where, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-storage.js";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-storage.js";
 
+// Suas configurações do Firebase
 const firebaseConfig = {
-    apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
-    authDomain: "dapapp-38637.firebaseapp.com",
-    projectId: "dapapp-38637",
-    storageBucket: "dapapp-38637.appspot.com",
-    messagingSenderId: "628852295313",
-    appId: "1:628852295313:web:1234567890abcdef123456"
+    apiKey: "AIzaSyAFJJAqVf3ge0WDHBpmS9E6sXKvnjuFkhw",
+    authDomain: "dapapp-38637.firebaseapp.com",
+    projectId: "dapapp-38637",
+    storageBucket: "dapapp-38637.appspot.com",
+    messagingSenderId: "628852295313",
+    appId: "1:628852295313:web:INSERIR_SEU_APP_ID"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
-const storage = getStorage(app);
+const storage = getStorage(app); // Inicializa o Firebase Storage
 
-window.firebaseDB = db;
+const toastEl = document.getElementById('toast');
 
-document.addEventListener('DOMContentLoaded', () => {
-    const sidebar = document.querySelector(".sidebar");
-    const mainContent = document.querySelector(".main");
-    if (sidebar && mainContent) {
-        sidebar.addEventListener('mouseenter', () => { sidebar.classList.add('expanded'); mainContent.classList.add('blur'); });
-        sidebar.addEventListener('mouseleave', () => { sidebar.classList.remove('expanded'); mainContent.classList.remove('blur'); });
-    }
+// Elementos do Modal de Documentos
+const documentModalOverlay = document.getElementById('documentModalOverlay');
+const documentModalTitle = document.getElementById('documentModalTitle');
+const documentNameInput = document.getElementById('documentNameInput');
+const documentFileInput = document.getElementById('documentFileInput');
+const uploadDocumentButton = document.getElementById('uploadDocumentButton');
+const attachedDocumentsList = document.getElementById('attachedDocumentsList');
+const closeDocumentModalButton = document.getElementById('closeDocumentModalButton');
 
-    const STATUS=['lista-fria','negociacao','contrato-assinado','fechado'];
-    const cardsMap={};
-    const modalBackdrop=document.getElementById('modalBackdrop');
-    const documentModalBackdrop=document.getElementById('documentModalBackdrop');
-    const clientForm=document.getElementById('clientForm');
-    const inputNome=document.getElementById('inputNome');
-    const inputCPF=document.getElementById('inputCPF');
-    const inputObs=document.getElementById('inputObs');
-    const inputStatus=document.getElementById('inputStatus');
-    const inputNumeros=document.getElementById('inputNumeros');
-    const inputClasse=document.getElementById('inputClasse');
-    const inputValor=document.getElementById('inputValor');
-    const inputAndamento=document.getElementById('inputAndamento');
-    const btnAdd=document.getElementById('btnAdd');
-    const btnCancel=document.getElementById('btnCancel');
-    const btnDelete=document.getElementById('btnDelete');
-    const searchInput=document.getElementById('searchInput');
-    const filterStatus=document.getElementById('filterStatus');
-    const toastEl=document.getElementById('toast');
-    const coinSound=document.getElementById('coinSound');
-    const processosContainer=document.getElementById('processosContainer');
-    
-    // Elementos do Document Modal
-    const docFile=document.getElementById('docFile');
-    const docName=document.getElementById('docName');
-    const btnUploadDoc=document.getElementById('btnUploadDoc');
-    const documentList=document.getElementById('documentList');
-    const documentModalTitle=document.getElementById('documentModalTitle');
-    let currentClienteDocId = null; 
-    let currentClienteData = null; // Para armazenar os dados atuais do cliente para o modal de documentos
+let clientes = [], currentUser = null;
+let currentClientForDocuments = null; // Armazena o ID do cliente cujo modal de documentos está aberto
 
-    let currentUser=null;
+function showToast(msg){
+    toastEl.innerText = msg;
+    toastEl.style.display = 'block';
+    clearTimeout(toastEl._t);
+    toastEl._t = setTimeout(() => toastEl.style.display = 'none', 3000);
+}
 
-    function showToast(msg){ toastEl.innerText=msg; toastEl.style.display='block'; clearTimeout(toastEl._t); toastEl._t=setTimeout(()=>toastEl.style.display='none',3000); }
-
-    async function getClientes(){
-        if(!currentUser) return [];
-        const q = query(collection(db,"clientes"), where("userId","==",currentUser.uid));
-        const snapshot = await getDocs(q);
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    }
-    
-    // Função para obter um único cliente
-    async function getSingleCliente(id) {
-        if (!id) return null;
-        const docRef = doc(db, "clientes", id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            return { id: docSnap.id, ...docSnap.data() };
-        }
-        return null;
+// Carrega clientes do Firestore
+async function carregarClientes(){
+    if(!currentUser) {
+        console.log("Usuário não autenticado. Não é possível carregar clientes.");
+        return;
     }
-
-    async function saveCliente(cliente){
-        if(!currentUser) return;
-        cliente.userId = currentUser.uid;
-        if(cliente.id){
-            const docRef = doc(db, "clientes", cliente.id);
-            await setDoc(docRef, cliente, { merge: true });
-        } else {
-            const docRef = await addDoc(collection(db,"clientes"), cliente);
-            cliente.id = docRef.id;
-        }
-    }
-
-    async function deleteCliente(id){
-        if(!currentUser || !id) return;
-        if(confirm("Tem certeza que deseja excluir este cliente? Esta ação é irreversível.")){
-            try{
-                await deleteDoc(doc(db,"clientes",id));
-                showToast("Cliente excluído!");
-                closeModal();
-                render();
-            } catch(e){
-                console.error("Erro ao excluir cliente: ", e);
-                showToast("Erro ao excluir cliente.");
-            }
-        }
-    }
-
-    function openModal(edit=false,data=null){
-        modalBackdrop.style.display='flex';
-        document.getElementById('modalTitle').innerText=edit?"Editar Cliente":"Novo Cliente";
-        processosContainer.innerHTML='';
-
-        if(edit && data){
-            inputNome.value=data.nome;
-            inputCPF.value=data.cpf||"";
-            inputObs.value=data.obs||"";
-            inputStatus.value=data.status||"lista-fria";
-            inputNumeros.value=data.numeros||"";
-            inputClasse.value=data.classe||"Outros";
-            inputValor.value=data.valor||"";
-            inputAndamento.value=data.andamento||"";
-            const processos = data.processo ? data.processo.split(',').map(p=>p.trim()) : [''];
-            processos.forEach(p=>addProcessoField(p));
-            clientForm.dataset.editId=data.id;
-            btnDelete.style.display='inline-block';
-            btnDelete.onclick=()=>deleteCliente(data.id);
-        } else {
-            addProcessoField();
-            inputNome.value=""; inputCPF.value=""; inputObs.value=""; inputStatus.value="lista-fria";
-            inputNumeros.value=""; inputClasse.value="Outros"; inputValor.value="";
-            inputAndamento.value="";
-            delete clientForm.dataset.editId;
-            btnDelete.style.display='none';
-            btnDelete.onclick=null;
-        }
-    }
-
-    function closeModal(){ modalBackdrop.style.display='none'; }
-    function closeDocumentModal(){ 
-        documentModalBackdrop.style.display='none'; 
-        // Limpar inputs da modal de doc
-        docFile.value = '';
-        docName.value = '';
-        currentClienteData = null; // Limpa os dados do cliente
+    const q = query(collection(db,"clientes"), where("userId","==",currentUser.uid));
+    try {
+        const snap = await getDocs(q);
+        clientes = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderKanban();
+    } catch (error) {
+        console.error("Erro ao carregar clientes:", error);
+        showToast("Erro ao carregar clientes.");
     }
+}
 
-    function addProcessoField(value=""){
-        const row = document.createElement('div');
-        row.className='processo-row';
-        const input = document.createElement('input');
-        input.className='inputProcesso';
-        input.placeholder='0000000-00.0000.0.00.0000';
-        input.value = value;
-        const btnAdd = document.createElement('button');
-        btnAdd.type='button';
-        btnAdd.className='btn ghost btnAddProcesso';
-        btnAdd.textContent='+';
-        btnAdd.onclick=()=>addProcessoField();
-        const btnRemove = document.createElement('button');
-        btnRemove.type='button';
-        btnRemove.className='btn ghost btnRemoveProcesso';
-        btnRemove.textContent='-';
-        btnRemove.onclick=()=>row.remove();
-        row.appendChild(input);
-        row.appendChild(btnAdd);
-        row.appendChild(btnRemove);
-        processosContainer.appendChild(row);
-    }
+// Função auxiliar para criar links de documentos
+function createDocumentLinks(documentos) {
+    if (!documentos || documentos.length === 0) {
+        return '<p class="document-info">Nenhum documento anexado.</p>';
+    }
+    const links = documentos.map(doc => `
+        <a href="${doc.url}" target="_blank" class="document-link" title="Abrir ${doc.nome}">
+            🔗 ${doc.nome}
+        </a>
+    `).join('');
+    return `<div class="document-list-container">${links}</div>`;
+}
 
-    function criarCard(cliente){
-        const status = cliente.status || 'lista-fria';
-        const col=document.getElementById(status);
-        if(!col) return;
-        
-        // Remove o card antigo se existir para evitar duplicidade ao atualizar
-        const existingCard = cardsMap[cliente.id];
-        if (existingCard) {
-            existingCard.remove();
-            delete cardsMap[cliente.id];
-        }
 
-        const card=document.createElement('div');
-        card.className=`card ${status}`;
-        card.dataset.id=cliente.id;
-        card.dataset.status=status;
-        card.dataset.nome=cliente.nome.toLowerCase();
-        card.draggable=true;
+// Renderiza o Kanban
+function renderKanban(){
+    ['lista-fria','negociacao','contrato-assinado','fechado'].forEach(id=>{
+        const col = document.getElementById(id);
+        col.innerHTML = `<h2>${col.querySelector('h2').innerText}</h2>`; 
+    });
 
-        const colorBar=document.createElement('div'); colorBar.className='color-bar'; card.appendChild(colorBar);
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const filterStatus = document.getElementById('filterStatus').value;
 
-        const actionsDiv=document.createElement('div'); actionsDiv.className='card-actions';
-        const btnDoc=document.createElement('button'); // BOTÃO DE DOCUMENTOS
-        // CORREÇÃO AQUI: Passa apenas o ID do cliente para openDocumentModal
-        btnDoc.onclick=(e)=>{ e.stopPropagation(); openDocumentModal(cliente.id); };
-        btnDoc.innerHTML='<img src="https://img.icons8.com/ios-filled/30/000000/document.png"/>';
-        
-        const btnCall=document.createElement('button');
-        btnCall.onclick=(e)=>{ e.stopPropagation(); ligar(cliente.numeros||''); };
-        btnCall.innerHTML='<img src="https://img.icons8.com/ios-glyphs/30/000000/phone.png"/>';
-        const btnWa=document.createElement('button');
-        btnWa.onclick=(e)=>{ e.stopPropagation(); whatsapp(cliente.numeros||''); };
-        btnWa.innerHTML='<img src="https://img.icons8.com/ios-glyphs/30/000000/whatsapp.png"/>';
-        
-        actionsDiv.appendChild(btnDoc);
-        actionsDiv.appendChild(btnCall); 
-        actionsDiv.appendChild(btnWa); 
-        card.appendChild(actionsDiv);
-
-        const contentDiv=document.createElement('div'); contentDiv.className='card-content';
-        const processosArray = cliente.processo ? cliente.processo.split(',').map(p=>p.trim()) : [];
-        const primeiroProcesso = processosArray.length > 0 ? processosArray[0] : '-';
-        
-        contentDiv.innerHTML=`            <h3>${cliente.nome}</h3> 
-            <p>CPF: ${cliente.cpf||'-'}</p>
-            <p>Classe: ${cliente.classe||'-'}</p>
-            <p>Processo: ${primeiroProcesso}</p>
-            <p>Valor: R$ ${cliente.valor||'0,00'}</p>
-            <p>Andamento: ${cliente.andamento || '-'}</p>`;         card.appendChild(contentDiv);
-
-        card.onclick=()=>openModal(true,cliente);
-        addDragEvents(card);
-        col.appendChild(card);
-        cardsMap[cliente.id]=card;
-    }
-
-    function ligar(numero){ if(!numero){ showToast("Número não informado"); return; } window.open(`tel:${numero.replace(/\D/g,'')}`); }
-    function whatsapp(numero){ if(!numero){ showToast("Número não informado"); return; } const num=numero.replace(/\D/g,''); window.open(`https://wa.me/55${num}`,'_blank'); }
-
-    async function render(){
-        STATUS.forEach(s=>{
-            const col=document.getElementById(s);
-            const cards = col.querySelectorAll('.card');
-            cards.forEach(card => card.remove());
-        });
-        for(const k in cardsMap) delete cardsMap[k];
-        const clientes = await getClientes();
-        for(const c of clientes) criarCard(c);
-        filtragemAplicada();
-    }
-
-    // ========= LÓGICA DE DOCUMENTOS =========
-    
-    // CORREÇÃO PRINCIPAL: Recarrega os dados do cliente ao abrir a modal
-    async function openDocumentModal(clienteId){
-        if (!clienteId) return;
-
-        // PASSO CRÍTICO: Busca os dados mais recentes do cliente diretamente do Firestore
-        const clienteData = await getSingleCliente(clienteId);
-        if (!clienteData) {
-            showToast("Erro: Dados do cliente não encontrados para documentos.");
+    clientes.filter(cliente => {
+        const matchesSearch = searchTerm === '' || 
+                              cliente.nome.toLowerCase().includes(searchTerm) ||
+                              (cliente.cpf && cliente.cpf.includes(searchTerm)); 
+        const matchesStatus = filterStatus === '' || (cliente.status === filterStatus);
+        return matchesSearch && matchesStatus;
+    }).forEach(cliente => {
+        const status = cliente.status || 'lista-fria'; 
+        const col = document.getElementById(status);
+        if (!col) {
+            console.warn(`Coluna com status '${status}' não encontrada para o cliente ${cliente.id}`);
             return;
         }
 
-        // Armazena a ID e os dados do cliente FRESCOS
-        currentClienteDocId = clienteData.id;
-        currentClienteData = clienteData; 
-        documentModalTitle.innerText = `Documentos de: ${clienteData.nome}`;
-        // Renderiza documentos usando os dados FRESCOS
-        renderDocumentos(currentClienteData); 
-        documentModalBackdrop.style.display='flex';
-    }
-    
-    // Renderiza a lista de documentos na modal
-    function renderDocumentos(clienteData){
-        documentList.innerHTML = '';
-        const documentos = clienteData.documentos || []; 
-        
-        if(documentos.length === 0){
-            documentList.innerHTML = '<p style="text-align:center; color:#777;">Nenhum documento anexado.</p>';
-            return;
-        }
-
-        documentos.forEach(doc => {
-            const item = document.createElement('div');
-            item.className = 'document-item';
-            
-            const link = document.createElement('a');
-            link.href = doc.url;
-            link.target = '_blank';
-            link.title = doc.nome;
-            link.textContent = doc.nome;
-            
-            const btnDeleteDoc = document.createElement('button');
-            btnDeleteDoc.innerHTML = '&times;';
-            btnDeleteDoc.onclick = (e) => {
-                e.stopPropagation();
-                deleteDocumento(clienteData.id, doc.nome);
-            };
-
-            item.appendChild(link);
-            item.appendChild(btnDeleteDoc);
-            documentList.appendChild(item);
-        });
-    }
-
-    // Faz o upload do arquivo para o Storage e atualiza o Firestore
-    async function uploadFile(clienteId, file, nomeDoc){
-        if(!currentUser || !file || !clienteId) return;
-
-        try {
-            showToast(`Iniciando upload de ${nomeDoc}...`);
-            
-            const storageRef = ref(storage, `${currentUser.uid}/${clienteId}/${nomeDoc}_${Date.now()}_${file.name}`);
-            const snapshot = await uploadBytes(storageRef, file);
-            const downloadURL = await getDownloadURL(snapshot.ref);
-
-            // Recarrega o cliente do banco para obter a lista de documentos mais recente
-            const clientBeforeUpdate = await getSingleCliente(clienteId);
-            if (!clientBeforeUpdate) {
-                showToast("Erro: Cliente não encontrado para atualização.");
-                return;
-            }
-
-            // Prepara a nova lista de documentos
-            const novosDocumentos = [...(clientBeforeUpdate.documentos || []), { nome: nomeDoc, url: downloadURL, fileRef: snapshot.ref.fullPath }];
-            
-            // Salva a nova lista no Firestore
-            const docRef = doc(db, "clientes", clienteId);
-            await updateDoc(docRef, { documentos: novosDocumentos });
-            showToast("Documento enviado e salvo!");
-            
-            // Atualiza a variável global e a modal para exibição imediata
-            currentClienteData.documentos = novosDocumentos; 
-            renderDocumentos(currentClienteData);
-            
-        } catch (error) {
-            console.error("Erro ao fazer upload: ", error);
-            showToast("Erro ao enviar documento.");
-        }
-    }
-
-    // Lógica para remover o documento
-    async function deleteDocumento(clienteId, docName){
-        if(!confirm(`Tem certeza que deseja remover o documento "${docName}"?`)) return;
-
-        try {
-            // Recarrega os dados mais recentes do cliente
-            const clientBeforeUpdate = await getSingleCliente(clienteId);
-            if (!clientBeforeUpdate) {
-                showToast("Erro: Cliente não encontrado.");
-                return;
-            }
+        const card = document.createElement('div');
+        card.className = `card ${status}`; 
+        card.draggable = true;
+        card.dataset.id = cliente.id;
+        card.innerHTML = `<div class="color-bar"></div>
+        <div class="card-content">
+            <h3>${cliente.nome}</h3>
+            <p>CPF: ${cliente.cpf || '-'}</p>
+            <p>Classe: ${cliente.classe || '-'}</p>
+            <p>Valor: R$ ${cliente.valor || 0}</p>
+            <p>Andamento: ${cliente.andamento || '-'}</p>
             
-            const docRef = doc(db, "clientes", clienteId);
-            
-            // Filtra a lista para remover o documento
-            const novosDocumentos = (clientBeforeUpdate.documentos || []).filter(doc => doc.nome !== docName);
-            
-            await updateDoc(docRef, { documentos: novosDocumentos });
-            showToast("Documento removido da lista!");
-            
-            // Atualiza a variável global e a modal
-            currentClienteData.documentos = novosDocumentos;
-            renderDocumentos(currentClienteData);
+            ${createDocumentLinks(cliente.documentos)} 
+        </div>
+        <div class="card-actions">
+            <button onclick="window.openDocumentModal('${cliente.id}', '${cliente.nome}')">
+                <img src="https://img.icons8.com/material-outlined/24/000000/document.png" alt="Documentos"/>
+            </button>
+            <button onclick="window.ligarManual('${cliente.numeros || ''}')"><img src="https://img.icons8.com/ios-glyphs/30/000000/phone.png"/></button>
+            <button onclick="window.whatsapp('${cliente.numeros || ''}')"><img src="https://img.icons8.com/ios-glyphs/30/000000/whatsapp.png"/></button>
+        </div>`;
+        col.appendChild(card);
+    });
 
-        } catch (error) {
-            console.error("Erro ao remover documento: ", error);
-            showToast("Erro ao remover documento.");
-        }
-    }
-    
-    // Listener para o upload de documentos
-    btnUploadDoc.onclick = async () => {
-        const file = docFile.files[0];
-        const nome = docName.value.trim();
-        
-        if (!currentClienteDocId) { showToast("Cliente não selecionado."); return; }
-        if (!file) { showToast("Selecione um arquivo."); return; }
-        if (!nome) { showToast("Informe o nome do documento."); return; }
+    addDragAndDrop();
+}
 
-        await uploadFile(currentClienteDocId, file, nome);
-        
-        // Limpa os inputs após o upload
-        docFile.value = '';
-        docName.value = '';
-    };
-    // ========= FIM LÓGICA DE DOCUMENTOS =========
+// Drag and Drop
+function addDragAndDrop(){
+    const cards = document.querySelectorAll('.card');
+    const columns = document.querySelectorAll('.column');
 
-    clientForm.onsubmit = async function(e){
-        e.preventDefault();
-        const nome = inputNome.value.trim();
-        if(!nome){ showToast("Nome obrigatório"); return; }
+    cards.forEach(card=>{
+        card.addEventListener('dragstart', e=>{
+            e.dataTransfer.setData('text/plain', card.dataset.id);
+            card.classList.add('dragging'); 
+        });
 
-        const processos = Array.from(document.querySelectorAll('.inputProcesso'))
-                        .map(i=>i.value.trim())
-                        .filter(v=>v);
+        card.addEventListener('dragend', e=>{
+            card.classList.remove('dragging'); 
+        });
+    });
 
-        const novo = {
-            nome, cpf: inputCPF.value.trim(),
-            obs: inputObs.value.trim().substring(0,300),
-            status: inputStatus.value,
-            numeros: inputNumeros.value,
-            processo: processos.join(', '),
-            classe: inputClasse.value,
-            valor: inputValor.value, 
-            andamento: inputAndamento.value.trim()
-        };
+    columns.forEach(col=>{
+        col.addEventListener('dragover', e=> {
+            e.preventDefault(); 
+            col.classList.add('drag-over'); 
+        });
 
-        if(clientForm.dataset.editId){
-            novo.id = clientForm.dataset.editId;
-            await saveCliente(novo);
-            showToast("Cliente atualizado!");
-        } else {
-            await saveCliente(novo);
-            showToast("Cliente adicionado!");
-        }
+        col.addEventListener('dragleave', e=> {
+            col.classList.remove('drag-over'); 
+        });
 
-        closeModal();
-        render();
-    };
+        col.addEventListener('drop', async e=>{
+            e.preventDefault();
+            col.classList.remove('drag-over'); 
+            const id = e.dataTransfer.getData('text/plain');
+            const card = document.querySelector(`.card[data-id='${id}']`);
+            if (!card) return; 
 
-    btnAdd.onclick=()=>openModal();
-    btnCancel.onclick=()=>closeModal();
-    document.getElementById('btnCancelDoc').onclick=()=>closeDocumentModal();
+            const oldStatus = card.parentElement.id; 
+            const newStatus = col.id; 
 
-    let draggedCard=null;
-    function addDragEvents(card){
-        card.addEventListener('dragstart',()=>{ draggedCard=card; card.style.opacity='.5'; });
-        card.addEventListener('dragend',()=>{ draggedCard=null; card.style.opacity='1'; });
-    }
-    document.querySelectorAll('.column').forEach(col=>{
-        col.addEventListener('dragover', e=>e.preventDefault());
-        col.addEventListener('drop', async ()=>{
-            if(!draggedCard) return;
-            const id = draggedCard.dataset.id;
-            const status = col.id;
-            const docRef = doc(db,"clientes",id);
-            await updateDoc(docRef,{status});
-            if(status === "fechado"){ 
-                coinSound.currentTime = 0;
-                coinSound.play();
-            }
-            render(); 
-            showToast("Status atualizado");
-        });
-    });
+            if (oldStatus !== newStatus) {
+                card.classList.remove(oldStatus);
+                card.classList.add(newStatus);
+                col.appendChild(card);
 
-    function filtragemAplicada(){
-        const q = searchInput.value.toLowerCase();
-        const filterS = filterStatus.value;
-        Object.values(cardsMap).forEach(card=>{
-            const matchSearch = card.dataset.nome.includes(q);
-            const matchStatus = !filterS || card.dataset.status===filterS;
-            card.style.display=(matchSearch && matchStatus)?'flex':'none';
-        });
-    }
-    searchInput.oninput=filtragemAplicada;
-    filterStatus.onchange=filtragemAplicada;
+                const clienteRef = doc(db,'clientes',id);
+                try {
+                    await updateDoc(clienteRef, { status: newStatus });
+                    clientes = clientes.map(c => c.id===id ? {...c, status: newStatus} : c);
+                    showToast(`Cliente movido para ${newStatus.toUpperCase().replace('-', ' ')}!`);
+                } catch (error) {
+                    console.error("Erro ao atualizar status do cliente:", error);
+                    showToast("Erro ao atualizar status.");
+                    document.getElementById(oldStatus).appendChild(card); 
+                    card.classList.remove(newStatus); 
+                    card.classList.add(oldStatus); 
+                }
+            }
+        });
+    });
+}
 
-    // ======= Controle de login =======
-    onAuthStateChanged(auth, user=>{
-        if(user){
-            currentUser = user;
-            render();
-        } else {
-            window.location.href = "login.html"; // redireciona se não estiver logado
-        }
-    });
+// === Funções do Modal de Documentos ===
+
+window.openDocumentModal = (clientId, clientName) => {
+    currentClientForDocuments = clientId;
+    documentModalTitle.innerText = `Documentos de ${clientName}`;
+    documentNameInput.value = '';
+    documentFileInput.value = ''; // Limpa o input de arquivo
+    loadAttachedDocuments(clientId); // Carrega e exibe os documentos existentes
+    documentModalOverlay.classList.add('active');
+};
+
+closeDocumentModalButton.addEventListener('click', () => {
+    documentModalOverlay.classList.remove('active');
+    currentClientForDocuments = null;
+    carregarClientes(); // Recarrega os clientes para atualizar os cards no Kanban
 });
+
+async function loadAttachedDocuments(clientId) {
+    const cliente = clientes.find(c => c.id === clientId);
+    const documentos = cliente ? cliente.documentos : [];
+    
+    attachedDocumentsList.innerHTML = ''; // Limpa a lista antes de adicionar
+    
+    if (!documentos || documentos.length === 0) {
+        attachedDocumentsList.innerHTML = '<p>Nenhum documento anexado.</p>';
+        return;
+    }
+
+    documentos.forEach(doc => {
+        const docItem = document.createElement('div');
+        docItem.className = 'modal-document-item';
+        docItem.innerHTML = `
+            <a href="${doc.url}" target="_blank">${doc.nome}</a>
+            <button onclick="window.deleteDocument('${clientId}', '${doc.nome}', '${doc.url}')">
+                <img src="https://img.icons8.com/ios-glyphs/30/000000/trash.png" alt="Excluir"/>
+            </button>
+        `;
+        attachedDocumentsList.appendChild(docItem);
+    });
+}
+
+uploadDocumentButton.addEventListener('click', async () => {
+    if (!currentClientForDocuments) {
+        showToast("Nenhum cliente selecionado para anexar documentos.");
+        return;
+    }
+    const documentName = documentNameInput.value.trim();
+    const file = documentFileInput.files[0];
+
+    if (!documentName || !file) {
+        showToast("Por favor, preencha o nome do documento e selecione um arquivo.");
+        return;
+    }
+
+    showToast("Iniciando upload do documento...");
+    uploadDocumentButton.disabled = true;
+
+    try {
+        const storageRef = ref(storage, `clientes/${currentClientForDocuments}/documentos/${file.name}`);
+        const uploadTask = uploadBytesResumable(storageRef, file);
+
+        uploadTask.on('state_changed', 
+            (snapshot) => {
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                showToast(`Upload: ${progress.toFixed(0)}%`);
+            }, 
+            (error) => {
+                console.error("Erro no upload:", error);
+                showToast("Erro no upload do documento.");
+            }, 
+            async () => {
+                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                const clientRef = doc(db, 'clientes', currentClientForDocuments);
+                
+                await updateDoc(clientRef, {
+                    documentos: arrayUnion({ nome: documentName, url: downloadURL, path: storageRef.fullPath })
+                });
+                
+                showToast("Documento enviado e salvo!");
+                documentNameInput.value = '';
+                documentFileInput.value = '';
+                loadAttachedDocuments(currentClientForDocuments); // Atualiza a lista no modal
+                uploadDocumentButton.disabled = false;
+            }
+        );
+    } catch (error) {
+        console.error("Erro ao subir documento:", error);
+        showToast("Erro ao subir documento.");
+        uploadDocumentButton.disabled = false;
+    }
+});
+
+window.deleteDocument = async (clientId, docName, docUrl) => {
+    if (!confirm(`Tem certeza que deseja excluir o documento "${docName}"?`)) {
+        return;
+    }
+
+    showToast("Excluindo documento...");
+    try {
+        const clientRef = doc(db, 'clientes', clientId);
+        const cliente = clientes.find(c => c.id === clientId);
+        const docToDelete = cliente.documentos.find(d => d.nome === docName && d.url === docUrl);
+
+        if (docToDelete && docToDelete.path) { // O 'path' é crucial para deletar do Storage
+            const fileRef = ref(storage, docToDelete.path);
+            await deleteObject(fileRef); // Deleta do Firebase Storage
+        }
+
+        await updateDoc(clientRef, {
+            documentos: arrayRemove({ nome: docName, url: docUrl, path: docToDelete.path })
+        });
+        
+        showToast("Documento excluído com sucesso!");
+        loadAttachedDocuments(clientId); // Atualiza a lista no modal
+    } catch (error) {
+        console.error("Erro ao excluir documento:", error);
+        showToast("Erro ao excluir documento.");
+    }
+};
+
+
+// === Funções de Ligação/WhatsApp (Se você tiver a integração Twilio via Firebase Functions) ===
+// Estas funções são placeholders. Se você tem as funções Twilio no Firebase Functions,
+// importe getFunctions e httpsCallable e implemente-as aqui.
+// Por exemplo:
+// import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-functions.js";
+// const functions = getFunctions(app);
+// const makeCallFunction = httpsCallable(functions, 'makeCall');
+// window.ligarManual = async (numero) => { /* ... sua lógica de chamada ... */ };
+// window.whatsapp = async (numero) => { /* ... sua lógica de whatsapp ... */ };
+
+// Placeholder para ligarManual e whatsapp, caso não use Firebase Functions ou Twilio aqui
+window.ligarManual = (numeros) => {
+    if (!numeros) { showToast("Número não informado."); return; }
+    alert(`Simulando ligação para: ${numeros.split(',')[0].trim()}. (Integre com Twilio via Firebase Functions)`);
+    console.log("Chamada simulada para:", numeros);
+};
+window.whatsapp = (numeros) => {
+    if (!numeros) { showToast("Número não informado."); return; }
+    // Abrir WhatsApp Web/App
+    window.open(`https://wa.me/${numeros.split(',')[0].trim().replace(/\D/g,'')}`, '_blank');
+    showToast("Abrindo WhatsApp...");
+    console.log("WhatsApp aberto para:", numeros);
+};
+
+
+// Busca e filtro
+document.getElementById('searchInput').addEventListener('input', renderKanban);
+document.getElementById('filterStatus').addEventListener('change', renderKanban);
+
+// Autenticação Firebase
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        currentUser = user;
+        console.log("Usuário logado:", user.uid);
+        carregarClientes();
+    } else {
+        console.log("Nenhum usuário logado. Redirecionando para login.html");
+        window.location.href = 'login.html';
+    }
+});
+
 </script>
-</head>
-<body>
-<div class="sidebar">
-    <h2 onclick="window.location.href='dashboard.html'">AMR ADV</h2>
-    <button onclick="window.location.href='crm.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/dashboard.png"/><span>CRM</span></button>
-    <button onclick="window.location.href='relatorios.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/combo-chart.png"/><span>Relatórios</span></button>
-    <button onclick="window.location.href='agenda.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/calendar.png"/><span>Agenda</span></button>
-    <button onclick="window.location.href='discador.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/contacts.png"/><span>Contatos</span></button>
-    <button onclick="window.location.href='clientes.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/user-group-man-man.png"/><span>Clientes</span></button>
-    <button onclick="window.location.href='processos.html'"><img src="https://img.icons8.com/ios-filled/50/ffffff/file.png"/><span>Processos</span></button>
-    <button><img src="https://img.icons8.com/ios-filled/50/ffffff/settings.png"/><span>Configurações</span></button>
-</div>
 
-<div class="main">
-<header>
-<h1>CRM</h1>
-<button id="btnAdd" class="btn primary">Adicionar Cliente</button>
-</header>
-
-<div class="search-bar">
-<input id="searchInput" placeholder="Buscar cliente..." />
-<select id="filterStatus">
-<option value="">Todos os status</option>
-<option value="lista-fria">Lista Fria</option>
-<option value="negociacao">Negociação</option>
-<option value="contrato-assinado">Contrato Assinado</option>
-<option value="fechado">Fechado</option>
-</select>
-</div>
-
-<div class="kanban-container">
-<main class="kanban" id="kanban">
-<div class="column" id="lista-fria"><h2>LISTA FRIA</h2></div>
-<div class="column" id="negociacao"><h2>NEGOCIAÇÃO</h2></div>
-<div class="column" id="contrato-assinado"><h2>CONTRATO ASSINADO</h2></div>
-<div class="column" id="fechado"><h2>FECHADO</h2></div>
-</main>
-</div>
-</div>
-
-<div class="modal-backdrop" id="modalBackdrop">
-<div class="modal">
-<h3 id="modalTitle">Novo Cliente</h3>
-<form id="clientForm">
-<div class="row"><input id="inputNome" placeholder="Nome do cliente" required /></div>
-<div class="row"><input id="inputCPF" placeholder="CPF/CNPJ" /></div>
-<div class="row"><input id="inputNumeros" placeholder="Telefone/WhatsApp" /></div>
-<div class="row"><select id="inputClasse"><option value="Outros">Outros</option><option value="Busca e Apreensão">Busca e Apreensão</option><option value="Execução">Execução</option><option value="Renegociação">Renegociação</option></select></div>
-
-<div class="row"><input id="inputValor" type="text" placeholder="Valor da Causa (R$)" /></div>
-
-<div class="row">
-    <textarea id="inputAndamento" placeholder="Andamento Processual do Cliente" rows="3"></textarea>
-</div>
-<div id="processosContainer"></div>
-<div class="row"><textarea id="inputObs" maxlength="300" placeholder="Observações (máx. 300 caracteres)"></textarea></div>
-<div class="row"><select id="inputStatus"><option value="lista-fria">Lista Fria</option><option value="negociacao">Negociação</option><option value="contrato-assinado">Contrato Assinado</option><option value="fechado">Fechado</option></select></div>
-<div class="actions">
-    <button type="button" class="btn danger" id="btnDelete" style="display:none;">Excluir Cliente</button>
-    <div class="form-actions-right">
-        <button type="submit" class="btn primary">Salvar</button>
-        <button type="button" class="btn ghost" id="btnCancel">Cancelar</button>
-    </div>
-</div>
-</form>
-</div>
-</div>
-
-<div class="modal-backdrop" id="documentModalBackdrop">
-<div class="modal" id="documentModal">
-<h3 id="documentModalTitle">Documentos do Cliente</h3>
-<div>
-    <h4>Anexar Novo Documento</h4>
-    <div class="row"><input type="text" id="docName" placeholder="Nome do Documento (Ex: RG, Contrato)" /></div>
-    <div class="row"><input type="file" id="docFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" /></div>
-    <div class="row"><button type="button" class="btn primary" id="btnUploadDoc" style="width: 100%;">Upload e Salvar Documento</button></div>
-</div>
-
-<hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
-
-<div>
-    <h4>Documentos Anexados</h4>
-    <div id="documentList">
-            </div>
-</div>
-
-<div class="actions" style="justify-content: flex-end; margin-top: 20px;">
-    <button type="button" class="btn ghost" id="btnCancelDoc">Fechar</button>
-</div>
-
-</div>
-</div>
-
-
-<div class="toast" id="toast"></div>
-<audio id="coinSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-notification-2018.mp3" preload="auto"></audio>
 </body>
 </html>

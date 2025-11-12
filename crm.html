@@ -47,23 +47,23 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 }
 .card:hover { transform:scale(1.03); }
 .card .color-bar { width:8px; height:100%; border-radius:15px 0 0 15px; }
-.card-content { 
-    padding:20px; 
-    flex:1; 
-    display:flex; 
-    flex-direction:column; 
-    justify-content:center; 
-    /* GARANTIA DE ESPAÇO PARA O TEXTO */
-    min-width: 0; 
-    overflow: hidden;
+.card-content { 
+    padding:20px; 
+    flex:1; 
+    display:flex; 
+    flex-direction:column; 
+    justify-content:center; 
+    /* GARANTIA DE ESPAÇO PARA O TEXTO */
+    min-width: 0; 
+    overflow: hidden;
 }
-.card h3 { 
-    font-size:20px; 
-    margin-bottom:6px; 
-    color:#333; 
-    /* PERMITE QUEBRA DE LINHA para exibir o nome completo */
-    white-space: normal; 
-    word-break: break-word; 
+.card h3 { 
+    font-size:20px; 
+    margin-bottom:6px; 
+    color:#333; 
+    /* PERMITE QUEBRA DE LINHA para exibir o nome completo */
+    white-space: normal; 
+    word-break: break-word; 
     /* Garante que o h3 não tenha limite de altura */
     line-height: 1.2;
 }
@@ -102,7 +102,8 @@ header button { padding:8px 16px; background:#1e1e2f; color:#fff; border:none; b
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc, query, where, deleteDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+// Adicionado getDoc para recarregar um único cliente
+import { getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc, updateDoc, query, where, deleteDoc } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-auth.js";
 // NOVAS IMPORTAÇÕES PARA FIREBASE STORAGE
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-storage.js";
@@ -161,6 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const documentList=document.getElementById('documentList');
     const documentModalTitle=document.getElementById('documentModalTitle');
     let currentClienteDocId = null; // Para saber qual cliente estamos anexando documentos
+    let currentClienteData = null; // Para armazenar os dados atuais do cliente para o modal de documentos
 
     let currentUser=null;
 
@@ -172,6 +174,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const snapshot = await getDocs(q);
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     }
+    
+    // NOVO: Função para obter um único cliente (corrigida)
+    async function getSingleCliente(id) {
+        if (!id) return null;
+        const docRef = doc(db, "clientes", id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() };
+        }
+        return null;
+    }
 
     async function saveCliente(cliente){
         if(!currentUser) return;
@@ -236,6 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Limpar inputs da modal de doc
         docFile.value = '';
         docName.value = '';
+        currentClienteData = null; // Limpa os dados do cliente
     }
 
     function addProcessoField(value=""){
@@ -284,6 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const actionsDiv=document.createElement('div'); actionsDiv.className='card-actions';
         const btnDoc=document.createElement('button'); // NOVO BOTÃO DE DOCUMENTOS
+        // Correção 1: Garante que a função openDocumentModal receba o objeto cliente
         btnDoc.onclick=(e)=>{ e.stopPropagation(); openDocumentModal(cliente); };
         btnDoc.innerHTML='<img src="https://img.icons8.com/ios-filled/30/000000/document.png"/>';
         
@@ -337,16 +352,20 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Abre a modal de documentos e preenche a lista
     function openDocumentModal(clienteData){
+        // Armazena a ID e os dados do cliente
         currentClienteDocId = clienteData.id;
+        currentClienteData = clienteData; 
         documentModalTitle.innerText = `Documentos de: ${clienteData.nome}`;
-        renderDocumentos(clienteData);
+        // Correção 2: Renderiza documentos usando os dados passados (que serão atualizados nas funções de upload/delete)
+        renderDocumentos(currentClienteData); 
         documentModalBackdrop.style.display='flex';
     }
     
     // Renderiza a lista de documentos na modal
     function renderDocumentos(clienteData){
         documentList.innerHTML = '';
-        const documentos = clienteData.documentos || [];
+        // Correção 3: Usa o objeto clienteData diretamente
+        const documentos = clienteData.documentos || []; 
         
         if(documentos.length === 0){
             documentList.innerHTML = '<p style="text-align:center; color:#777;">Nenhum documento anexado.</p>';
@@ -367,7 +386,8 @@ document.addEventListener('DOMContentLoaded', () => {
             btnDeleteDoc.innerHTML = '&times;';
             btnDeleteDoc.onclick = (e) => {
                 e.stopPropagation();
-                deleteDocumento(clienteData.id, doc.nome, clienteData);
+                // Correção 4: Passa apenas o ID e o nome do documento para deleteDocumento
+                deleteDocumento(clienteData.id, doc.nome);
             };
 
             item.appendChild(link);
@@ -387,21 +407,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const snapshot = await uploadBytes(storageRef, file);
             const downloadURL = await getDownloadURL(snapshot.ref);
 
-            // Atualiza o Firestore com o metadado do documento
-            const docRef = doc(db, "clientes", clienteId);
+            // CORREÇÃO PRINCIPAL: Recarrega o cliente do banco para obter a lista de documentos mais recente
+            const clientBeforeUpdate = await getSingleCliente(clienteId);
+            if (!clientBeforeUpdate) {
+                showToast("Erro: Cliente não encontrado para atualização.");
+                return;
+            }
+
+            // Prepara a nova lista de documentos
+            const novosDocumentos = [...(clientBeforeUpdate.documentos || []), { nome: nomeDoc, url: downloadURL, fileRef: snapshot.ref.fullPath }];
             
-            // Recupera o cliente atual para pegar a lista de documentos e evitar sobrescrever
-            const allClients = await getClientes();
-            const currentClientData = allClients.find(c => c.id === clienteId);
-            
-            const novosDocumentos = [...(currentClientData.documentos || []), { nome: nomeDoc, url: downloadURL, fileRef: snapshot.ref.fullPath }];
-            
+            // Salva a nova lista no Firestore
+            const docRef = doc(db, "clientes", clienteId);
             await updateDoc(docRef, { documentos: novosDocumentos });
             showToast("Documento enviado e salvo!");
             
-            // Atualiza a modal
-            currentClientData.documentos = novosDocumentos;
-            renderDocumentos(currentClientData);
+            // Atualiza a variável global e a modal para exibição imediata
+            currentClienteData.documentos = novosDocumentos; 
+            renderDocumentos(currentClienteData);
             
         } catch (error) {
             console.error("Erro ao fazer upload: ", error);
@@ -410,21 +433,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Lógica para remover o documento
-    async function deleteDocumento(clienteId, docName, clienteData){
+    async function deleteDocumento(clienteId, docName){
         if(!confirm(`Tem certeza que deseja remover o documento "${docName}"?`)) return;
 
         try {
-            const docRef = doc(db, "clientes", clienteId);
+            // Recarrega os dados mais recentes do cliente
+            const clientBeforeUpdate = await getSingleCliente(clienteId);
+            if (!clientBeforeUpdate) {
+                showToast("Erro: Cliente não encontrado.");
+                return;
+            }
+            
+            const docRef = doc(db, "clientes", clienteId);
             
             // Filtra a lista para remover o documento
-            const novosDocumentos = (clienteData.documentos || []).filter(doc => doc.nome !== docName);
+            const novosDocumentos = (clientBeforeUpdate.documentos || []).filter(doc => doc.nome !== docName);
             
             await updateDoc(docRef, { documentos: novosDocumentos });
             showToast("Documento removido da lista!");
             
-            // Atualiza a modal (opcional: o ideal seria também deletar do Storage, mas é mais complexo)
-            clienteData.documentos = novosDocumentos;
-            renderDocumentos(clienteData);
+            // Atualiza a variável global e a modal
+            currentClienteData.documentos = novosDocumentos;
+            renderDocumentos(currentClienteData);
 
         } catch (error) {
             console.error("Erro ao remover documento: ", error);
